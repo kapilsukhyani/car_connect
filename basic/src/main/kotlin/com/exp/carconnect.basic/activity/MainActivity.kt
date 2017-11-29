@@ -1,4 +1,4 @@
-package com.exp.carconnect.basic
+package com.exp.carconnect.basic.activity
 
 import android.app.Activity
 import android.bluetooth.BluetoothAdapter
@@ -9,6 +9,8 @@ import android.util.Log
 import android.widget.TextView
 import android.widget.Toast
 import com.exp.carconnect.OBDMultiRequest
+import com.exp.carconnect.basic.OBDEngine
+import com.exp.carconnect.basic.R
 import com.exp.carconnect.basic.obdmessage.*
 import io.reactivex.android.schedulers.AndroidSchedulers
 import java.io.IOException

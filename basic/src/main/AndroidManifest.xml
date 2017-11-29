@@ -4,7 +4,7 @@
 
     <uses-permission android:name="android.permission.BLUETOOTH"></uses-permission>
     <application>
-        <activity android:name=".MainActivity">
+        <activity android:name=".activity.SampleViewActivity">
             <intent-filter android:order="1">
                 <action android:name="android.intent.action.VIEW" />
 

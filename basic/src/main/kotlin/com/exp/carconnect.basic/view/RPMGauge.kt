@@ -14,6 +14,7 @@ internal class RPMGauge(private val context: Context,
 ) : LeftGauge(onlineColor, offlineColor) {
 
     companion object {
+        private val RPM_TEXT = "RPM x 1000"
         private val TOTAL_NO_OF_TICKS = 25
         private val BIG_TICK_MULTIPLE = 3
         private val TICK_MARKER_START = 0
@@ -26,6 +27,8 @@ internal class RPMGauge(private val context: Context,
         private val TICK_MARKER_MARGIN_PERCENTAGE = .03f
         private val INDICATOR_CENTER_PERCENTAGE = .15f
         private val INDICATOR_LENGTH_PERCENTAGE = .5f
+        private val RPM_TEXT_SIZE_PERCENTAGE = .06f
+        private val RPM_TEXT_MARGIN = .04f
 
         private val CRITICAL_ANGLE_SWEEP = 45f
 
@@ -36,8 +39,10 @@ internal class RPMGauge(private val context: Context,
 
     private val indicatorCenterPaint = Paint(Paint.ANTI_ALIAS_FLAG)
     private val indicatorPaint = Paint(Paint.ANTI_ALIAS_FLAG)
+    private val indicatorThinLinePaint = Paint(Paint.ANTI_ALIAS_FLAG)
     private val tickPaint: Paint = Paint(Paint.ANTI_ALIAS_FLAG)
     private val tickMarkerPaint: Paint = TextPaint(Paint.ANTI_ALIAS_FLAG)
+    private val rpmTextPaint: Paint = TextPaint(Paint.ANTI_ALIAS_FLAG)
     private val onlineGradientColor: Int = getDarkerColor(onlineColor)
     private val offlineGradientColor: Int = getDarkerColor(offlineColor)
 
@@ -50,18 +55,29 @@ internal class RPMGauge(private val context: Context,
         tickMarkerPaint.typeface = Typeface.create(Typeface.DEFAULT, Typeface.BOLD)
         tickMarkerPaint.textAlign = Paint.Align.CENTER
 
+        rpmTextPaint.textLocale = Locale.US
+        rpmTextPaint.typeface = Typeface.create(Typeface.DEFAULT, Typeface.BOLD)
+        rpmTextPaint.textAlign = Paint.Align.CENTER
+
         indicatorCenterPaint.style = Paint.Style.STROKE
         indicatorCenterPaint.strokeWidth = INDICATOR_CIRCLE_STROKE_WIDTH.toFloat()
-        indicatorCenterPaint.pathEffect = DashPathEffect(floatArrayOf(100f, 15f), 0f)
+        indicatorCenterPaint.pathEffect = DashPathEffect(floatArrayOf(30f, 15f), 0f)
 
         indicatorPaint.style = Paint.Style.STROKE
         indicatorPaint.strokeWidth = INDICATOR_STROKE_WIDTH.toFloat()
+
+        indicatorThinLinePaint.style = Paint.Style.STROKE
+        indicatorThinLinePaint.strokeWidth = INDICATOR_STROKE_WIDTH.toFloat() * .2f
+        indicatorThinLinePaint.color = criticalZoneColor
+        indicatorThinLinePaint.shader = LinearGradient(0f, 0f, 100f, 100f, criticalZoneColor, getDarkerColor(criticalZoneColor), Shader.TileMode.MIRROR)
     }
 
     override fun onConnected() {
         super.onConnected()
         tickPaint.color = onlineColor
         tickMarkerPaint.color = onlineColor
+
+        rpmTextPaint.color = onlineColor
 
         indicatorCenterPaint.color = onlineColor
         indicatorCenterPaint.setShadowLayer(20f, 0f, 0f, onlineColor)
@@ -76,6 +92,7 @@ internal class RPMGauge(private val context: Context,
         tickPaint.color = offlineColor
         tickMarkerPaint.color = offlineColor
 
+        rpmTextPaint.color = offlineColor
 
         indicatorCenterPaint.color = offlineColor
         indicatorCenterPaint.setShadowLayer(20f, 0f, 0f, offlineColor)
@@ -120,19 +137,33 @@ internal class RPMGauge(private val context: Context,
                 true, CRITICAL_ANGLE_SWEEP, criticalZoneColor)
 
 
-        val indicatorCenterRadius = bounds.width() * INDICATOR_CENTER_PERCENTAGE / 2
-        canvas.drawCircle(bounds.centerX(), bounds.centerY(), indicatorCenterRadius, indicatorCenterPaint)
+        drawIndicator(canvas, bounds)
+
+
+    }
+
+    private fun drawIndicator(canvas: Canvas, parentBounds: RectF) {
+        val indicatorCenterRadius = parentBounds.width() * INDICATOR_CENTER_PERCENTAGE / 2
+        canvas.drawCircle(parentBounds.centerX(), parentBounds.centerY(), indicatorCenterRadius, indicatorCenterPaint)
+
+        val rpmTextSize = parentBounds.width() * RPM_TEXT_SIZE_PERCENTAGE
+        val rpmTextTopMargin = parentBounds.width() * RPM_TEXT_MARGIN
+        rpmTextPaint.textSize = rpmTextSize
+        val textSize = Rect()
+        rpmTextPaint.getTextBounds(RPM_TEXT, 0, RPM_TEXT.length, textSize)
+        canvas.drawText(RPM_TEXT, parentBounds.centerX(), parentBounds.centerY() + indicatorCenterRadius + textSize.height() + rpmTextTopMargin, rpmTextPaint)
 
         canvas.save()
-        canvas.rotate(getDegreesForCurrentRPM(), bounds.centerX(), bounds.centerY())
+        canvas.rotate(getDegreesForCurrentRPM(), parentBounds.centerX(), parentBounds.centerY())
 
-        val indicatorLength = bounds.width() * INDICATOR_LENGTH_PERCENTAGE
-        val x1 = (bounds.centerX() - indicatorLength * .4).toFloat()
-        val y1 = bounds.centerY()
-        val x2 = (bounds.centerX() + indicatorLength * .6).toFloat()
-        val y2 = bounds.centerY()
+        val indicatorLength = parentBounds.width() * INDICATOR_LENGTH_PERCENTAGE
+        val x1 = (parentBounds.centerX() - indicatorLength * .35).toFloat()
+        val y1 = parentBounds.centerY()
+        val x2 = (parentBounds.centerX() + indicatorLength * .65).toFloat()
+        val y2 = parentBounds.centerY()
 
         canvas.drawLine(x1, y1, x2, y2, indicatorPaint)
+        canvas.drawLine(x1, y1, x2, y2, indicatorThinLinePaint)
 
         canvas.restore()
     }

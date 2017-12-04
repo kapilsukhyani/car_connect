@@ -108,8 +108,6 @@ internal class FuelAndCompassGauge(private val context: Context,
                 (bounds.bottom - (fuelIndicatorDimen + fuelIndicatorMarginFromGauge)).toInt(),
                 (bounds.centerX() + fuelIndicatorDimen / 2).toInt(),
                 (bounds.bottom - fuelIndicatorMarginFromGauge).toInt())
-        //todo figure out why tinting in ondisconnected is nto working
-        fuelIcon.setTint(context.getColor(android.R.color.holo_red_dark))
         fuelIcon.bounds = rect
         fuelIcon.draw(canvas)
 

@@ -15,23 +15,23 @@ internal class SpeedometerGauge(private val context: Context,
                                 offlineColor: Int) : MiddleGauge(onlineColor, offlineColor) {
 
     companion object {
-        private val MIDDLE_GAUGE_BIG_TICK_LENGTH_PERCENTAGE = .08f
-        private val MIDDLE_GAUGE_BIG_TICK_WIDTH_PERCENTAGE = .009f
-        private val MIDDLE_GAUGE_SMALL_TICK_LENGTH_PERCENTAGE = .06f
-        private val MIDDLE_GAUGE_SMALL_TICK_WIDTH_PERCENTAGE = .007f
-        private val MIDDLE_GAUGE_TICK_MARKER_TEXT_SIZE_PERCENTAGE = .05f
-        private val MIDDLE_GAUGE_TICK_MARKER_MARGIN_PERCENTAGE = .025f
-        private val MIDDLE_GAUGE_INNER_CIRCLE_WIDTH_PERCENTAGE = .45f
-        private val MIDDLE_GAUGE_INDICATOR_DIMEN_PERCENTAGE = .1f
-        private val MIDDLE_GAUGE_CHECK_ENGINE_LIGHT_DIMEN_PERCENTAGE = .08f
-        private val MIDDLE_GAUGE_IGNITION_DIMEN_PERCENTAGE = .08f
+        private val BIG_TICK_LENGTH_PERCENTAGE = .08f
+        private val BIG_TICK_WIDTH_PERCENTAGE = .009f
+        private val SMALL_TICK_LENGTH_PERCENTAGE = .06f
+        private val SMALL_TICK_WIDTH_PERCENTAGE = .007f
+        private val TICK_MARKER_TEXT_SIZE_PERCENTAGE = .05f
+        private val TICK_MARKER_MARGIN_PERCENTAGE = .025f
+        private val INNER_CIRCLE_WIDTH_PERCENTAGE = .45f
+        private val INDICATOR_DIMEN_PERCENTAGE = .1f
+        private val CHECK_ENGINE_LIGHT_DIMEN_PERCENTAGE = .08f
+        private val IGNITION_DIMEN_PERCENTAGE = .08f
 
-        private val MIDDLE_GAUGE_INNER_CIRCLE_STROKE_WIDTH = 10
-        private val MIDDLE_GAUGE_TOTAL_NO_OF_TICKS = 33
-        private val MIDDLE_GAUGE_BIG_TICK_MULTIPLE = 2
-        private val MIDDLE_GAUGE_TICK_MARKER_START = 0
-        private val MIDDLE_GAUGE_TICK_MARKER_DIFF = 20
-        private val MIDDLE_GAUGE_CURRENT_SPEED_TEXT_SIZE_PERCENTAGE = .05f
+        private val INNER_CIRCLE_STROKE_WIDTH = 10
+        private val TOTAL_NO_OF_TICKS = 33
+        private val BIG_TICK_MULTIPLE = 2
+        private val TICK_MARKER_START = 0
+        private val TICK_MARKER_DIFF = 20
+        private val CURRENT_SPEED_TEXT_SIZE_PERCENTAGE = .05f
         private val DEFAULT_SPEED_UNIT = "km/h"
     }
 
@@ -53,11 +53,11 @@ internal class SpeedometerGauge(private val context: Context,
 
     init {
         innerCirclePaint.style = Paint.Style.STROKE
-        innerCirclePaint.strokeWidth = MIDDLE_GAUGE_INNER_CIRCLE_STROKE_WIDTH.toFloat()
+        innerCirclePaint.strokeWidth = INNER_CIRCLE_STROKE_WIDTH.toFloat()
         innerCirclePaint.pathEffect = DashPathEffect(floatArrayOf(100f, 15f), 0f)
 
 
-        speedTextPaint.color = context.resources.getColor(android.R.color.black)
+        speedTextPaint.color = context.getColor(android.R.color.black)
         speedTextPaint.textLocale = Locale.US
         speedTextPaint.typeface = Typeface.create(Typeface.SANS_SERIF, Typeface.BOLD)
         speedTextPaint.textAlign = Paint.Align.CENTER
@@ -70,8 +70,8 @@ internal class SpeedometerGauge(private val context: Context,
         tickMarkerPaint.textAlign = Paint.Align.CENTER
 
 
-        checkEngineLightIcon.setTint(context.resources.getColor(android.R.color.darker_gray))
-        ignitionIcon.setTint(context.resources.getColor(android.R.color.darker_gray))
+        checkEngineLightIcon.setTint(context.getColor(android.R.color.darker_gray))
+        ignitionIcon.setTint(context.getColor(android.R.color.darker_gray))
     }
 
     override fun onDisconnected() {
@@ -102,20 +102,20 @@ internal class SpeedometerGauge(private val context: Context,
         val gaugeCircumference = (2.0 * Math.PI * (bounds.width() / 2).toDouble()).toFloat()
 
         //draw ticks
-        val bigTickLength = bounds.width() * MIDDLE_GAUGE_BIG_TICK_LENGTH_PERCENTAGE
-        val bigTickWidth = gaugeCircumference * MIDDLE_GAUGE_BIG_TICK_WIDTH_PERCENTAGE
+        val bigTickLength = bounds.width() * BIG_TICK_LENGTH_PERCENTAGE
+        val bigTickWidth = gaugeCircumference * BIG_TICK_WIDTH_PERCENTAGE
 
-        val smallTickLength = bounds.width() * MIDDLE_GAUGE_SMALL_TICK_LENGTH_PERCENTAGE
-        val smallTickWidth = gaugeCircumference * MIDDLE_GAUGE_SMALL_TICK_WIDTH_PERCENTAGE
+        val smallTickLength = bounds.width() * SMALL_TICK_LENGTH_PERCENTAGE
+        val smallTickWidth = gaugeCircumference * SMALL_TICK_WIDTH_PERCENTAGE
 
-        val textSize = bounds.width() * MIDDLE_GAUGE_TICK_MARKER_TEXT_SIZE_PERCENTAGE
-        val testSizeMargin = bounds.width() * MIDDLE_GAUGE_TICK_MARKER_MARGIN_PERCENTAGE
+        val textSize = bounds.width() * TICK_MARKER_TEXT_SIZE_PERCENTAGE
+        val testSizeMargin = bounds.width() * TICK_MARKER_MARGIN_PERCENTAGE
 
         drawTicks(canvas, bounds, startAngle,
-                sweep / (MIDDLE_GAUGE_TOTAL_NO_OF_TICKS - 1),
-                MIDDLE_GAUGE_TOTAL_NO_OF_TICKS, MIDDLE_GAUGE_BIG_TICK_MULTIPLE,
+                sweep / (TOTAL_NO_OF_TICKS - 1),
+                TOTAL_NO_OF_TICKS, BIG_TICK_MULTIPLE,
                 bigTickLength, bigTickWidth, smallTickLength, smallTickWidth,
-                MIDDLE_GAUGE_TICK_MARKER_START, MIDDLE_GAUGE_TICK_MARKER_DIFF,
+                TICK_MARKER_START, TICK_MARKER_DIFF,
                 textSize, testSizeMargin, tickMarkerPaint, tickPaint)
 
 
@@ -126,7 +126,7 @@ internal class SpeedometerGauge(private val context: Context,
     private fun drawMiddleGaugeInnerCircle(canvas: Canvas, bounds: RectF) {
 
         //draw inner circle
-        val reduceWidthAndHeightBy = bounds.width() * (1 - MIDDLE_GAUGE_INNER_CIRCLE_WIDTH_PERCENTAGE) / 2
+        val reduceWidthAndHeightBy = bounds.width() * (1 - INNER_CIRCLE_WIDTH_PERCENTAGE) / 2
         val innerCircleBound = RectF(bounds)
         innerCircleBound.inset(reduceWidthAndHeightBy, reduceWidthAndHeightBy)
         canvas.drawCircle(innerCircleBound.centerX(), innerCircleBound.centerY(),
@@ -139,7 +139,7 @@ internal class SpeedometerGauge(private val context: Context,
         //calculate Text Bounds
         val currentSpeedText = currentSpeed.toString() + " " + DEFAULT_SPEED_UNIT
         val textBound = Rect()
-        speedTextPaint.textSize = bounds.width() * MIDDLE_GAUGE_CURRENT_SPEED_TEXT_SIZE_PERCENTAGE
+        speedTextPaint.textSize = bounds.width() * CURRENT_SPEED_TEXT_SIZE_PERCENTAGE
         speedTextPaint.getTextBounds(currentSpeedText, 0, currentSpeedText.length, textBound)
 
 
@@ -161,48 +161,58 @@ internal class SpeedometerGauge(private val context: Context,
 
 
         //draw check engine light
-        val ignitionIconDimen = bounds.width() * MIDDLE_GAUGE_IGNITION_DIMEN_PERCENTAGE
+        val ignitionIconDimen = bounds.width() * IGNITION_DIMEN_PERCENTAGE
         val ignitionIconBounds = Rect((innerCircleBound.centerX() - innerCircleRadius / 2 - ignitionIconDimen / 2).toInt(),
                 (innerCircleBound.centerY() - innerCircleRadius / 2 - ignitionIconDimen / 2).toInt(),
                 (innerCircleBound.centerX() - innerCircleRadius / 2 + ignitionIconDimen / 2).toInt(),
                 (innerCircleBound.centerY() - innerCircleRadius / 2 + ignitionIconDimen / 2).toInt())
-        ignitionIcon.bounds = ignitionIconBounds
-        if (showIgnitionIcon) {
-            ignitionIcon.setTint(context.resources.getColor(android.R.color.holo_orange_dark))
-        } else {
-            ignitionIcon.setTint(context.resources.getColor(android.R.color.darker_gray))
-        }
-        ignitionIcon.draw(canvas)
+        drawIgnitionIcon(canvas, ignitionIconBounds)
 
 
         //draw check engine light
-        val checkEngineLightDimen = bounds.width() * MIDDLE_GAUGE_CHECK_ENGINE_LIGHT_DIMEN_PERCENTAGE
+        val checkEngineLightDimen = bounds.width() * CHECK_ENGINE_LIGHT_DIMEN_PERCENTAGE
         val checkEngineLightBounds = Rect((innerCircleBound.centerX() + innerCircleRadius / 2 - checkEngineLightDimen / 2).toInt(),
                 (innerCircleBound.centerY() - innerCircleRadius / 2 - checkEngineLightDimen / 2).toInt(),
                 (innerCircleBound.centerX() + innerCircleRadius / 2 + checkEngineLightDimen / 2).toInt(),
                 (innerCircleBound.centerY() - innerCircleRadius / 2 + checkEngineLightDimen / 2).toInt())
-        checkEngineLightIcon.bounds = checkEngineLightBounds
-        if (showCheckEngineLight) {
-            checkEngineLightIcon.setTint(context.resources.getColor(android.R.color.holo_orange_dark))
-        } else {
-            checkEngineLightIcon.setTint(context.resources.getColor(android.R.color.darker_gray))
-        }
-        checkEngineLightIcon.draw(canvas)
+        drawCheckEngineLightIcon(canvas, checkEngineLightBounds)
 
 
         //draw indicator
         canvas.save()
         canvas.rotate(getDegreeForCurrentSpeed(), innerCircleBound.centerX(), innerCircleBound.centerY())
-        val indicatorDimen = bounds.width() * MIDDLE_GAUGE_INDICATOR_DIMEN_PERCENTAGE
+        val indicatorDimen = bounds.width() * INDICATOR_DIMEN_PERCENTAGE
         val indicatorBound = Rect((innerCircleBound.centerX() + innerCircleBound.width() / 2).toInt(),
                 (innerCircleBound.centerY() - indicatorDimen / 2).toInt(),
                 (innerCircleBound.centerX() + innerCircleBound.width() / 2 + indicatorDimen).toInt(),
                 (innerCircleBound.centerY() + indicatorDimen / 2).toInt())
-        //todo remove this line and see why indicator tinting is not working in onConnected
-        indicatorIcon.setTint(context.getColor(android.R.color.holo_red_dark))
+        drawIndicator(canvas, indicatorBound)
+        canvas.restore()
+    }
+
+    private fun drawIndicator(canvas: Canvas, indicatorBound: Rect) {
         indicatorIcon.bounds = indicatorBound
         indicatorIcon.draw(canvas)
-        canvas.restore()
+    }
+
+    private fun drawCheckEngineLightIcon(canvas: Canvas, checkEngineLightBounds: Rect) {
+        checkEngineLightIcon.bounds = checkEngineLightBounds
+        if (showCheckEngineLight) {
+            checkEngineLightIcon.setTint(context.getColor(android.R.color.holo_orange_dark))
+        } else {
+            checkEngineLightIcon.setTint(context.getColor(android.R.color.darker_gray))
+        }
+        checkEngineLightIcon.draw(canvas)
+    }
+
+    private fun drawIgnitionIcon(canvas: Canvas, ignitionIconBounds: Rect) {
+        ignitionIcon.bounds = ignitionIconBounds
+        if (showIgnitionIcon) {
+            ignitionIcon.setTint(context.getColor(android.R.color.holo_orange_dark))
+        } else {
+            ignitionIcon.setTint(context.getColor(android.R.color.darker_gray))
+        }
+        ignitionIcon.draw(canvas)
     }
 
 

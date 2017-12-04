@@ -6,7 +6,7 @@ import android.graphics.*
 internal abstract class Gauge(val onlineColor: Int,
                               val offlineColor: Int) {
     companion object {
-         val GAUGE_STROKE_WIDTH = 20f
+        val GAUGE_STROKE_WIDTH = 20f
     }
 
     protected val gaugePaint: Paint = Paint(Paint.ANTI_ALIAS_FLAG);
@@ -53,7 +53,12 @@ internal abstract class Gauge(val onlineColor: Int,
                            tickMarkerStart: Int, tickMarkerDiff: Int,
                            textSize: Float, textMarkerMargin: Float,
                            tickTextPaint: Paint,
-                           tickPaint: Paint) {
+                           tickPaint: Paint,
+                           drawCriticalZone: Boolean = false,
+                           criticalZoneDegreesAtEnd: Float = 0f,
+                           criticalZoneColor: Int = -1) {
+        val endDegree = startDegree + (totalNoOfTicks - 1) * tickGapInDegrees
+
         tickTextPaint.textSize = textSize
         canvas.save()
         var tickLength: Float
@@ -64,10 +69,11 @@ internal abstract class Gauge(val onlineColor: Int,
         val textBounds = Rect()
         val textDrawingBounds = Rect()
         val lineBounds = RectF()
-
+        var lineYBound = 0F
         canvas.rotate(startDegree, bounds.centerX(), bounds.centerY())
 
         for (i in 0 until totalNoOfTicks) {
+
             if (i % bigTickMultiple == 0) {
                 tickLength = bigTickLength
                 tickPaint.strokeWidth = bigTickWidth
@@ -75,7 +81,18 @@ internal abstract class Gauge(val onlineColor: Int,
                 tickLength = smallTickLength
                 tickPaint.strokeWidth = smallTickWidth
             }
-            lineBounds.set(bounds.right - tickLength, bounds.centerY(), bounds.right, bounds.centerY())
+
+            //make tick displayed inside the gauge completely
+            lineYBound = bounds.centerY()
+            if (i == 0) {
+                lineYBound += tickPaint.strokeWidth / 2
+            }
+            if (i == totalNoOfTicks - 1) {
+                lineYBound -= tickPaint.strokeWidth / 2
+            }
+
+
+            lineBounds.set(bounds.right - tickLength, lineYBound, bounds.right, lineYBound)
             canvas.drawLine(lineBounds.left, lineBounds.top, lineBounds.right, lineBounds.bottom, tickPaint)
 
             if (i % bigTickMultiple == 0) {
@@ -95,9 +112,22 @@ internal abstract class Gauge(val onlineColor: Int,
             canvas.rotate(tickGapInDegrees, bounds.centerX(), bounds.centerY())
             totalRotationSoFar += tickGapInDegrees
 
+            if (drawCriticalZone && (endDegree - totalRotationSoFar <= criticalZoneDegreesAtEnd)) {
+                tickPaint.color = criticalZoneColor
+                tickTextPaint.color = criticalZoneColor
+            }
+
 
         }
         canvas.restore()
+    }
+
+
+    internal fun getDarkerColor(originalColor: Int): Int {
+        val hsv = FloatArray(3)
+        Color.colorToHSV(originalColor, hsv)
+        hsv[2] *= 0.6f // value component
+        return Color.HSVToColor(hsv)
     }
 }
 

@@ -33,7 +33,7 @@ internal class FuelAndCompassGauge(private val context: Context,
     private val fuelIcon = VectorDrawableCompat.create(context.resources, R.drawable.ic_local_gas_station_black_24dp, null)!!
     private val compassIcon = VectorDrawableCompat.create(context.resources, R.drawable.ic_compass, null)!!
 
-    private val fuelPercentage = .5f
+    internal var fuelPercentage = .5f
 
 
     init {

@@ -5,12 +5,17 @@ import android.content.Context
 import android.graphics.*
 import android.graphics.drawable.BitmapDrawable
 import android.os.Build
+import android.os.Parcelable
 import android.support.annotation.RequiresApi
 import android.support.v4.graphics.drawable.RoundedBitmapDrawableFactory
 import android.text.TextPaint
 import android.util.AttributeSet
 import android.view.View
 import com.exp.carconnect.basic.R
+import com.exp.carconnect.basic.view.RPMGauge.Companion.MAX_RPM
+import com.exp.carconnect.basic.view.RPMGauge.Companion.MIN_RPM
+import com.exp.carconnect.basic.view.SpeedometerGauge.Companion.MAX_SPEED
+import com.exp.carconnect.basic.view.SpeedometerGauge.Companion.MIN_SPEED
 import java.util.*
 
 
@@ -18,6 +23,15 @@ import java.util.*
 class Dashboard @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0, defStyleRes: Int = -1) : View(context, attrs, defStyleAttr, defStyleRes) {
 
     companion object {
+
+        private val FUEL_PERCENTAGE_KEY = "fuel_percentage"
+        private val CURRENT_SPEED_KEY = "current_speed"
+        private val SHOW_CHECK_ENGINE_LIGHT_KEY = "check_engine_light"
+        private val SHOW_IGNITION_ICON_KEY = "show_ignition_icon"
+        private val CURRENT_RPM_KEY = "current_rpm"
+        private val ONLINE_KEY = "online"
+        private val VIN_KEY = "vin"
+
         private val MIDDLE_GAUGE_START_ANGLE = 135
         private val MIDDLE_GAUGE_SWEEP_ANGLE = 270
         private val LEFT_GAUGE_START_ANGLE = 55
@@ -40,13 +54,61 @@ class Dashboard @JvmOverloads constructor(context: Context, attrs: AttributeSet?
     private var viewCenter: PointF? = null
     private var middleGaugeRadius: Float = 0.toFloat()
     private var sideGaugeRadius: Float = 0.toFloat()
-    private var fuelPercentage = .5f
-    private var currentSpeed = 0f
-    private var currentRPM = 0f
-    private var showCheckEngineLight = false
-    private var showIgnitionIcon = false
-    private var online = true
-    private var vin = "ABCD1234EFGHLOMN2"
+
+
+    var fuelPercentage = .5f
+        set(value) {
+            if (value in 0.0..1.0 && value != field) {
+                fuelAndCompassGauge.fuelPercentage = value
+                field = value
+            }
+        }
+
+    var currentSpeed = 0f
+        set(value) {
+            if (value in MIN_SPEED..MAX_SPEED && value != field) {
+                speedometerGauge.currentSpeed = value
+                field = value
+            }
+        }
+
+    var showCheckEngineLight = false
+        set(value) {
+            if (value != field) {
+                speedometerGauge.showCheckEngineLight = value
+                field = value
+            }
+        }
+
+    var showIgnitionIcon = false
+        set(value) {
+            if (value != field) {
+                speedometerGauge.showIgnitionIcon = value
+                field = value
+            }
+        }
+
+    var currentRPM = 0
+        set(value) {
+            if (value in MIN_RPM..MAX_RPM && value != field) {
+                rpmGauge.currentRPM = value
+                field = value
+            }
+        }
+
+    var online = true
+        set(value) {
+            if (value != field) {
+                field = value
+            }
+        }
+
+    var vin = "-------VIN-------"
+        set(value) {
+            if (value.length == 17 && value != field) {
+                field = value
+            }
+        }
 
 
     private val onlineColor = getContext().getColor(android.R.color.holo_blue_bright)
@@ -167,5 +229,13 @@ class Dashboard @JvmOverloads constructor(context: Context, attrs: AttributeSet?
 
     }
 
+
+    override fun onSaveInstanceState(): Parcelable {
+        return super.onSaveInstanceState()
+    }
+
+    override fun onRestoreInstanceState(state: Parcelable?) {
+        super.onRestoreInstanceState(state)
+    }
 
 }

@@ -15,6 +15,9 @@ internal class SpeedometerGauge(private val context: Context,
                                 offlineColor: Int) : MiddleGauge(onlineColor, offlineColor) {
 
     companion object {
+        internal val MAX_SPEED = 320
+        internal val MIN_SPEED = 0
+
         private val BIG_TICK_LENGTH_PERCENTAGE = .08f
         private val BIG_TICK_WIDTH_PERCENTAGE = .009f
         private val SMALL_TICK_LENGTH_PERCENTAGE = .06f
@@ -36,9 +39,9 @@ internal class SpeedometerGauge(private val context: Context,
     }
 
 
-    var currentSpeed: Float = 0.0f
-    var showIgnitionIcon: Boolean = false
-    var showCheckEngineLight: Boolean = false
+    internal var currentSpeed: Float = 0.0f
+    internal var showIgnitionIcon: Boolean = false
+    internal var showCheckEngineLight: Boolean = false
 
     private val innerCirclePaint: Paint = Paint(Paint.ANTI_ALIAS_FLAG)
     private val speedTextPaint: Paint = TextPaint(Paint.ANTI_ALIAS_FLAG)

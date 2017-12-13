@@ -14,6 +14,10 @@ internal class RPMGauge(private val context: Context,
 ) : LeftGauge(onlineColor, offlineColor) {
 
     companion object {
+
+        internal val MIN_RPM = 0
+        internal val MAX_RPM = 8
+
         private val RPM_TEXT = "RPM x 1000"
         private val TOTAL_NO_OF_TICKS = 25
         private val BIG_TICK_MULTIPLE = 3
@@ -47,6 +51,8 @@ internal class RPMGauge(private val context: Context,
     private val offlineGradientColor: Int = getDarkerColor(offlineColor)
 
     private var criticalZoneColor = context.getColor(android.R.color.holo_red_dark)
+
+    internal var currentRPM = 0
 
 
     init {

@@ -54,9 +54,10 @@ class Dashboard @JvmOverloads constructor(context: Context, attrs: AttributeSet?
     private var viewCenter: PointF? = null
     private var middleGaugeRadius: Float = 0.toFloat()
     private var sideGaugeRadius: Float = 0.toFloat()
+    var onOnlineChangedListener: ((Boolean) -> Unit)? = null
+    var onVINChangedListener: ((String) -> Unit)? = null
 
-
-    var fuelPercentage = .5f
+    var fuelPercentage = 0.0f
         set(value) {
             if (value in 0.0..1.0 && value != field) {
                 fuelAndCompassGauge.updateFuel(value)
@@ -101,6 +102,7 @@ class Dashboard @JvmOverloads constructor(context: Context, attrs: AttributeSet?
             if (value != field) {
                 field = value
                 invalidate()
+                onOnlineChangedListener?.invoke(field)
             }
         }
 
@@ -109,6 +111,7 @@ class Dashboard @JvmOverloads constructor(context: Context, attrs: AttributeSet?
             if (value.length == 17 && value != field) {
                 field = value
                 invalidate()
+                onVINChangedListener?.invoke(field)
             }
         }
 
@@ -238,6 +241,26 @@ class Dashboard @JvmOverloads constructor(context: Context, attrs: AttributeSet?
 
     override fun onRestoreInstanceState(state: Parcelable?) {
         super.onRestoreInstanceState(state)
+    }
+
+    public fun setOnRPMChangedListener(listener: (Float) -> Unit) {
+        rpmGauge.rpmChangedListener = listener
+    }
+
+    public fun setOnSpeedChangedListener(listener: (Float) -> Unit) {
+        speedometerGauge.speedChangedListener = listener
+    }
+
+    public fun setOnFuelPercentageChangedListener(listener: (Float) -> Unit) {
+        fuelAndCompassGauge.fuelPercentageChangedListener = listener
+    }
+
+    public fun setOnCheckEngineLightChangedListener(listener: (Boolean) -> Unit) {
+        speedometerGauge.checkEngineLightChangedListener = listener
+    }
+
+    public fun setOnIgnitionChangedListener(listener: (Boolean) -> Unit) {
+        speedometerGauge.ignitionIconChangedListener = listener
     }
 
 }

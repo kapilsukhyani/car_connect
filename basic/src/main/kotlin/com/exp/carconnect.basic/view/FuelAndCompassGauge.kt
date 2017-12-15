@@ -36,10 +36,12 @@ internal class FuelAndCompassGauge(private val context: Context,
     private val fuelIcon = VectorDrawableCompat.create(context.resources, R.drawable.ic_local_gas_station_black_24dp, null)!!
     private val compassIcon = VectorDrawableCompat.create(context.resources, R.drawable.ic_compass, null)!!
 
-    private var currentFuelPercentage = .5f
+    internal var fuelPercentageChangedListener: ((Float) -> Unit)? = null
+    private var currentFuelPercentage = 0.01f
         set(value) {
             field = value
             dashboard.invalidate()
+            fuelPercentageChangedListener?.invoke(field)
         }
     private var currentFuelAnimator: ObjectAnimator? = null
 

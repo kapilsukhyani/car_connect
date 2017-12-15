@@ -42,13 +42,28 @@ internal class SpeedometerGauge(private val context: Context,
     }
 
 
+    internal var speedChangedListener: ((Float) -> Unit)? = null
+    internal var ignitionIconChangedListener: ((Boolean) -> Unit)? = null
+    internal var checkEngineLightChangedListener: ((Boolean) -> Unit)? = null
     private var currentSpeed: Float = 0.0f
         set(value) {
             field = value
             dashboard.invalidate()
+            speedChangedListener?.invoke(field)
         }
     internal var showIgnitionIcon: Boolean = false
+        set(value) {
+            field = value
+            dashboard.invalidate()
+            ignitionIconChangedListener?.invoke(field)
+        }
     internal var showCheckEngineLight: Boolean = false
+        set(value) {
+            field = value
+            dashboard.invalidate()
+            checkEngineLightChangedListener?.invoke(field)
+        }
+
     private var degreesPerDataPoint = sweep / MAX_SPEED
     private var currentSpeedAnimator: ObjectAnimator? = null
 

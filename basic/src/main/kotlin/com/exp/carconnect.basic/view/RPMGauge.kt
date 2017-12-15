@@ -56,10 +56,12 @@ internal class RPMGauge(private val context: Context,
 
     private var criticalZoneColor = context.getColor(android.R.color.holo_red_dark)
 
+    internal var rpmChangedListener: ((Float) -> Unit)? = null
     private var currentRPM = 0.0f
         set(value) {
             field = value
             dashboard.invalidate()
+            rpmChangedListener?.invoke(field)
         }
     private var currentRPMAnimator: ObjectAnimator? = null
 

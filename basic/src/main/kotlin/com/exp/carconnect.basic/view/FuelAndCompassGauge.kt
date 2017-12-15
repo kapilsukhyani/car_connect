@@ -158,7 +158,11 @@ internal class FuelAndCompassGauge(private val context: Context,
     @SuppressLint("ObjectAnimatorBinding")
     internal fun updateFuel(fuel: Float) {
         currentFuelAnimator?.cancel()
-        currentFuelAnimator = ObjectAnimator.ofFloat(this, "currentFuelPercentage", currentFuelPercentage, fuel)
+        var fuelVar = fuel
+        if (fuelVar <= 0f) {
+            fuelVar = .01f
+        }
+        currentFuelAnimator = ObjectAnimator.ofFloat(this, "currentFuelPercentage", currentFuelPercentage, fuelVar)
         currentFuelAnimator?.start()
     }
 }

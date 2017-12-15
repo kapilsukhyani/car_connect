@@ -119,8 +119,8 @@ class Dashboard @JvmOverloads constructor(context: Context, attrs: AttributeSet?
     private val vinOnlineColor = context.getColor(android.R.color.holo_orange_dark)
     private val vinOfflineColor = context.getColor(android.R.color.holo_orange_light)
     private val vinPaint: Paint = TextPaint(Paint.ANTI_ALIAS_FLAG)
-    private val backgroundDrawable = RoundedBitmapDrawableFactory.create(resources,
-            (getContext().getDrawable(R.drawable.background2) as BitmapDrawable).bitmap)
+    private val gaugeBackgroundDrawable = RoundedBitmapDrawableFactory.create(resources,
+            (getContext().getDrawable(R.drawable.gauge_bg) as BitmapDrawable).bitmap)
 
 
     private val speedometerGauge = SpeedometerGauge(getContext(), MIDDLE_GAUGE_START_ANGLE.toFloat(), MIDDLE_GAUGE_SWEEP_ANGLE.toFloat(), this, onlineColor, offlineColor)
@@ -132,7 +132,8 @@ class Dashboard @JvmOverloads constructor(context: Context, attrs: AttributeSet?
     }
 
     private fun init() {
-        backgroundDrawable.isCircular = true
+        gaugeBackgroundDrawable.isCircular = true
+        background = context.getDrawable(R.drawable.dashboard_bg)
 
         vinPaint.textLocale = Locale.US
         vinPaint.typeface = Typeface.create(Typeface.DEFAULT, Typeface.BOLD)
@@ -152,9 +153,6 @@ class Dashboard @JvmOverloads constructor(context: Context, attrs: AttributeSet?
 
         }
 
-//        background = backgroundDrawable
-        setBackgroundColor(context.getColor(android.R.color.black))
-
     }
 
     //todo improve this and avoid allocation in onDraw
@@ -164,6 +162,7 @@ class Dashboard @JvmOverloads constructor(context: Context, attrs: AttributeSet?
         val height = height.toFloat()
         val remainingWidthAfterPadding = width - paddingLeft.toFloat() - paddingRight.toFloat()
         val remainingHeihtAfterPadding = height - paddingTop.toFloat() - paddingBottom.toFloat()
+        //todo view's height should be at least 45% of width, which is middle gauge diameter requirement or I should consider height into consideration before finalizing gauges diameter
         viewCenter = PointF(width / 2, height / 2)
 
         middleGaugeRadius = remainingWidthAfterPadding * MIDDLE_GAUGE_WIDTH_PERCENTAGE / 2
@@ -172,16 +171,16 @@ class Dashboard @JvmOverloads constructor(context: Context, attrs: AttributeSet?
         val middleGaugeBounds = RectF(viewCenter!!.x - middleGaugeRadius, viewCenter!!.y - middleGaugeRadius,
                 viewCenter!!.x + middleGaugeRadius, viewCenter!!.y + middleGaugeRadius)
 
-        val leftSideGaugeStartPoint = Math.ceil(middleGaugeBounds.left - sideGaugeRadius * Math.sqrt(2.0)).toInt()
-        val leftSideGaugeBounds = RectF(leftSideGaugeStartPoint.toFloat(), viewCenter!!.y - sideGaugeRadius,
-                leftSideGaugeStartPoint + 2 * sideGaugeRadius, viewCenter!!.y + sideGaugeRadius)
+        val leftGaugeStartPoint = Math.ceil(middleGaugeBounds.left - sideGaugeRadius * Math.sqrt(2.0)).toInt()
+        val leftGaugeBounds = RectF(leftGaugeStartPoint.toFloat(), viewCenter!!.y - sideGaugeRadius,
+                leftGaugeStartPoint + 2 * sideGaugeRadius, viewCenter!!.y + sideGaugeRadius)
 
-        val rightSideGaudeEndpoint = Math.ceil(middleGaugeBounds.right + sideGaugeRadius * Math.sqrt(2.0)).toInt()
-        val rightSideGaugeBounds = RectF(rightSideGaudeEndpoint - 2 * sideGaugeRadius, viewCenter!!.y - sideGaugeRadius,
-                rightSideGaudeEndpoint.toFloat(), viewCenter!!.y + sideGaugeRadius)
+        val rightGaugeEndpoint = Math.ceil(middleGaugeBounds.right + sideGaugeRadius * Math.sqrt(2.0)).toInt()
+        val rightGaugeBounds = RectF(rightGaugeEndpoint - 2 * sideGaugeRadius, viewCenter!!.y - sideGaugeRadius,
+                rightGaugeEndpoint.toFloat(), viewCenter!!.y + sideGaugeRadius)
 
-        drawGaugeBackgrounds(canvas, middleGaugeBounds, leftSideGaugeBounds, rightSideGaugeBounds)
-        drawGauges(canvas, middleGaugeBounds, leftSideGaugeBounds, rightSideGaugeBounds)
+        drawGaugeBackgrounds(canvas, middleGaugeBounds, leftGaugeBounds, rightGaugeBounds)
+        drawGauges(canvas, middleGaugeBounds, leftGaugeBounds, rightGaugeBounds)
         drawVin(canvas, middleGaugeBounds)
 
     }
@@ -193,14 +192,15 @@ class Dashboard @JvmOverloads constructor(context: Context, attrs: AttributeSet?
     }
 
     private fun drawGaugeBackgrounds(canvas: Canvas, middleGaugeBounds: RectF, leftSideGaugeBounds: RectF, rightSideGaugeBounds: RectF) {
-        backgroundDrawable.setBounds(middleGaugeBounds.left.toInt(), middleGaugeBounds.top.toInt(), middleGaugeBounds.right.toInt(), middleGaugeBounds.bottom.toInt())
-        backgroundDrawable.draw(canvas)
+        gaugeBackgroundDrawable.setBounds(leftSideGaugeBounds.left.toInt(), leftSideGaugeBounds.top.toInt(), leftSideGaugeBounds.right.toInt(), leftSideGaugeBounds.bottom.toInt())
+        gaugeBackgroundDrawable.draw(canvas)
 
-        backgroundDrawable.setBounds(leftSideGaugeBounds.left.toInt(), leftSideGaugeBounds.top.toInt(), leftSideGaugeBounds.right.toInt(), leftSideGaugeBounds.bottom.toInt())
-        backgroundDrawable.draw(canvas)
+        gaugeBackgroundDrawable.setBounds(rightSideGaugeBounds.left.toInt(), rightSideGaugeBounds.top.toInt(), rightSideGaugeBounds.right.toInt(), rightSideGaugeBounds.bottom.toInt())
+        gaugeBackgroundDrawable.draw(canvas)
 
-        backgroundDrawable.setBounds(rightSideGaugeBounds.left.toInt(), rightSideGaugeBounds.top.toInt(), rightSideGaugeBounds.right.toInt(), rightSideGaugeBounds.bottom.toInt())
-        backgroundDrawable.draw(canvas)
+        //drawing middle gauge bg at end, otherwise left and right gauge bgs overwrite the middle gauge bg a little bit
+        gaugeBackgroundDrawable.setBounds(middleGaugeBounds.left.toInt(), middleGaugeBounds.top.toInt(), middleGaugeBounds.right.toInt(), middleGaugeBounds.bottom.toInt())
+        gaugeBackgroundDrawable.draw(canvas)
     }
 
     private fun drawVin(canvas: Canvas, middleGaugeBounds: RectF) {

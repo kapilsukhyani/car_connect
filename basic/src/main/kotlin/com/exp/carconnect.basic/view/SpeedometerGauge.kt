@@ -1,5 +1,7 @@
 package com.exp.carconnect.basic.view
 
+import android.animation.ObjectAnimator
+import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.*
 import android.support.graphics.drawable.VectorDrawableCompat
@@ -11,8 +13,9 @@ import java.util.*
 internal class SpeedometerGauge(private val context: Context,
                                 private val startAngle: Float,
                                 private val sweep: Float,
+                                dashboard: Dashboard,
                                 onlineColor: Int,
-                                offlineColor: Int) : MiddleGauge(onlineColor, offlineColor) {
+                                offlineColor: Int) : MiddleGauge(dashboard, onlineColor, offlineColor) {
 
     companion object {
         internal val MAX_SPEED = 320
@@ -39,9 +42,16 @@ internal class SpeedometerGauge(private val context: Context,
     }
 
 
-    internal var currentSpeed: Float = 0.0f
+    private var currentSpeed: Float = 0.0f
+        set(value) {
+            field = value
+            dashboard.invalidate()
+        }
     internal var showIgnitionIcon: Boolean = false
     internal var showCheckEngineLight: Boolean = false
+    private var degreesPerDataPoint = sweep / MAX_SPEED
+    private var currentSpeedAnimator: ObjectAnimator? = null
+
 
     private val innerCirclePaint: Paint = Paint(Paint.ANTI_ALIAS_FLAG)
     private val speedTextPaint: Paint = TextPaint(Paint.ANTI_ALIAS_FLAG)
@@ -140,7 +150,7 @@ internal class SpeedometerGauge(private val context: Context,
         val innerCircleRadius = innerCircleBound.width() / 2
 
         //calculate Text Bounds
-        val currentSpeedText = currentSpeed.toString() + " " + DEFAULT_SPEED_UNIT
+        val currentSpeedText = String.format("%.2f", currentSpeed) + " " + DEFAULT_SPEED_UNIT
         val textBound = Rect()
         speedTextPaint.textSize = bounds.width() * CURRENT_SPEED_TEXT_SIZE_PERCENTAGE
         speedTextPaint.getTextBounds(currentSpeedText, 0, currentSpeedText.length, textBound)
@@ -220,6 +230,13 @@ internal class SpeedometerGauge(private val context: Context,
 
 
     private fun getDegreeForCurrentSpeed(): Float {
-        return 135f
+        return startAngle + degreesPerDataPoint * currentSpeed
+    }
+
+    @SuppressLint("ObjectAnimatorBinding")
+    internal fun updateSpeed(speed: Float) {
+        currentSpeedAnimator?.cancel()
+        currentSpeedAnimator = ObjectAnimator.ofFloat(this, "currentSpeed", currentSpeed, speed)
+        currentSpeedAnimator?.start()
     }
 }

@@ -3,7 +3,8 @@ package com.exp.carconnect.basic.view
 import android.graphics.*
 
 
-internal abstract class Gauge(val onlineColor: Int,
+internal abstract class Gauge(val dashboard: Dashboard,
+                              val onlineColor: Int,
                               val offlineColor: Int) {
     companion object {
         val GAUGE_STROKE_WIDTH = 20f
@@ -72,6 +73,8 @@ internal abstract class Gauge(val onlineColor: Int,
         var lineYBound = 0F
         canvas.rotate(startDegree, bounds.centerX(), bounds.centerY())
 
+        val originalTickColor = tickPaint.color
+        val originalTickTextColor = tickTextPaint.color
         for (i in 0 until totalNoOfTicks) {
 
             if (i % bigTickMultiple == 0) {
@@ -119,6 +122,9 @@ internal abstract class Gauge(val onlineColor: Int,
 
 
         }
+        tickPaint.color = originalTickColor
+        tickTextPaint.color = originalTickTextColor
+
         canvas.restore()
     }
 
@@ -131,8 +137,8 @@ internal abstract class Gauge(val onlineColor: Int,
     }
 }
 
-internal abstract class MiddleGauge(onlineColor: Int, offlineColor: Int) : Gauge(onlineColor, offlineColor)
+internal abstract class MiddleGauge(dashboard: Dashboard, onlineColor: Int, offlineColor: Int) : Gauge(dashboard, onlineColor, offlineColor)
 
-internal abstract class LeftGauge(onlineColor: Int, offlineColor: Int) : Gauge(onlineColor, offlineColor)
+internal abstract class LeftGauge(dashboard: Dashboard, onlineColor: Int, offlineColor: Int) : Gauge(dashboard, onlineColor, offlineColor)
 
-internal abstract class RightGauge(onlineColor: Int, offlineColor: Int) : Gauge(onlineColor, offlineColor)
+internal abstract class RightGauge(dashboard: Dashboard, onlineColor: Int, offlineColor: Int) : Gauge(dashboard, onlineColor, offlineColor)

@@ -11,8 +11,9 @@ import java.util.*
 internal class FuelAndCompassGauge(private val context: Context,
                                    private val startAngle: Float,
                                    private val sweep: Float,
+                                   dashboard: Dashboard,
                                    onlineColor: Int,
-                                   offlineColor: Int) : RightGauge(onlineColor, offlineColor) {
+                                   offlineColor: Int) : RightGauge(dashboard, onlineColor, offlineColor) {
     companion object {
         private val COMPASS_STRIKE_WIDTH = 10f
         private val FUEL_GAUGE_START_ANGLE = 70

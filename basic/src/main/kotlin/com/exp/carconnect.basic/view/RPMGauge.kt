@@ -1,5 +1,7 @@
 package com.exp.carconnect.basic.view
 
+import android.animation.ObjectAnimator
+import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.*
 import android.text.TextPaint
@@ -9,14 +11,16 @@ import java.util.*
 internal class RPMGauge(private val context: Context,
                         private val startAngle: Float,
                         private val sweep: Float,
+                        dashboard: Dashboard,
                         onlineColor: Int,
-                        offlineColor: Int
-) : LeftGauge(onlineColor, offlineColor) {
+                        offlineColor: Int) : LeftGauge(dashboard, onlineColor, offlineColor) {
 
     companion object {
 
         internal val MIN_RPM = 0
         internal val MAX_RPM = 8
+
+        internal val TOTAL_NO_OF_DATA_POINTS = MAX_RPM
 
         private val RPM_TEXT = "RPM x 1000"
         private val TOTAL_NO_OF_TICKS = 25
@@ -52,7 +56,14 @@ internal class RPMGauge(private val context: Context,
 
     private var criticalZoneColor = context.getColor(android.R.color.holo_red_dark)
 
-    internal var currentRPM = 0
+    private var currentRPM = 0.0f
+        set(value) {
+            field = value
+            dashboard.invalidate()
+        }
+    private var currentRPMAnimator: ObjectAnimator? = null
+
+    private val degreesPerDataPoint = sweep / TOTAL_NO_OF_DATA_POINTS
 
 
     init {
@@ -175,8 +186,15 @@ internal class RPMGauge(private val context: Context,
     }
 
 
+    @SuppressLint("ObjectAnimatorBinding")
+    internal fun updateRPM(rpm: Float) {
+        currentRPMAnimator?.cancel()
+        currentRPMAnimator = ObjectAnimator.ofFloat(this, "currentRPM", currentRPM, rpm)
+        currentRPMAnimator?.start()
+    }
+
     private fun getDegreesForCurrentRPM(): Float {
-        return startAngle
+        return startAngle + degreesPerDataPoint * currentRPM
     }
 
 

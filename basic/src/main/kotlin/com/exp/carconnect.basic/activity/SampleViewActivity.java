@@ -10,6 +10,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 
 import com.exp.carconnect.basic.R;
+import com.exp.carconnect.basic.view.Dashboard;
 import com.exp.carconnect.basic.view.SampleView;
 
 import java.util.Random;
@@ -70,5 +71,19 @@ public class SampleViewActivity extends AppCompatActivity {
     private void initDashboard() {
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE);
         setContentView(R.layout.activity_sample_dashboard);
+        final Dashboard dashboard = findViewById(R.id.dashboard);
+        findViewById(R.id.updateRPM).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (dashboard.getCurrentRPM() <= 0) {
+                    dashboard.setCurrentRPM(8);
+                    dashboard.setCurrentSpeed(320);
+                } else {
+                    dashboard.setCurrentRPM(0);
+                    dashboard.setCurrentSpeed(0);
+
+                }
+            }
+        });
     }
 }

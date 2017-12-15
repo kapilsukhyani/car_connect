@@ -7,6 +7,7 @@ import android.graphics.drawable.BitmapDrawable
 import android.os.Build
 import android.os.Parcelable
 import android.support.annotation.RequiresApi
+import android.support.v4.content.res.ResourcesCompat
 import android.support.v4.graphics.drawable.RoundedBitmapDrawableFactory
 import android.text.TextPaint
 import android.util.AttributeSet
@@ -23,7 +24,6 @@ import java.util.*
 class Dashboard @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0, defStyleRes: Int = -1) : View(context, attrs, defStyleAttr, defStyleRes) {
 
     companion object {
-
         private val FUEL_PERCENTAGE_KEY = "fuel_percentage"
         private val CURRENT_SPEED_KEY = "current_speed"
         private val SHOW_CHECK_ENGINE_LIGHT_KEY = "check_engine_light"
@@ -31,6 +31,9 @@ class Dashboard @JvmOverloads constructor(context: Context, attrs: AttributeSet?
         private val CURRENT_RPM_KEY = "current_rpm"
         private val ONLINE_KEY = "online"
         private val VIN_KEY = "vin"
+
+        private val LABEL_TEXT = "Car Connect"
+        private val LABEL_REFERENCE_TEXT_SIZE = 50f
 
         private val MIDDLE_GAUGE_START_ANGLE = 135
         private val MIDDLE_GAUGE_SWEEP_ANGLE = 270
@@ -45,6 +48,7 @@ class Dashboard @JvmOverloads constructor(context: Context, attrs: AttributeSet?
 
         private val MIDDLE_GAUGE_WIDTH_PERCENTAGE = 0.4f
         private val LEFT_GAUGE_WIDTH_PERCENTAGE = 0.3f
+        private val DASHBOARD_LABEL_MARGIN_PERCENTAGE_OF_AVAILABLE_HEIGHT = 0.05f
         private val RIGHT_GAUGE_WIDTH_PERCENTAGE = LEFT_GAUGE_WIDTH_PERCENTAGE
         private val MINIMUM_WIDTH = 800
         private val MINIMUM_HEIGHT = 400 // fifty percent of height
@@ -97,10 +101,11 @@ class Dashboard @JvmOverloads constructor(context: Context, attrs: AttributeSet?
             }
         }
 
-    var online = true
+    var online = false
         set(value) {
             if (value != field) {
                 field = value
+                adoptOnlineStatus()
                 invalidate()
                 onOnlineChangedListener?.invoke(field)
             }
@@ -120,8 +125,11 @@ class Dashboard @JvmOverloads constructor(context: Context, attrs: AttributeSet?
     private val offlineColor = getContext().getColor(android.R.color.darker_gray)
 
     private val vinOnlineColor = context.getColor(android.R.color.holo_orange_dark)
-    private val vinOfflineColor = context.getColor(android.R.color.holo_orange_light)
-    private val vinPaint: Paint = TextPaint(Paint.ANTI_ALIAS_FLAG)
+    private val vinOfflineColor = context.getColor(android.R.color.white)
+    private val labelColor = context.getColor(android.R.color.holo_blue_dark)
+    private val vinPaint = TextPaint(Paint.ANTI_ALIAS_FLAG)
+    private val labelPaint = TextPaint(Paint.ANTI_ALIAS_FLAG)
+    private val labelBound: Rect = Rect()
     private val gaugeBackgroundDrawable = RoundedBitmapDrawableFactory.create(resources,
             (getContext().getDrawable(R.drawable.gauge_bg) as BitmapDrawable).bitmap)
 
@@ -130,11 +138,13 @@ class Dashboard @JvmOverloads constructor(context: Context, attrs: AttributeSet?
     private val rpmGauge = RPMGauge(getContext(), LEFT_GAUGE_START_ANGLE.toFloat(), LEFT_GAUGE_SWEEP_ANGLE.toFloat(), this, onlineColor, offlineColor)
     private val fuelAndCompassGauge = FuelAndCompassGauge(getContext(), RIGHT_GAUGE_START_ANGLE.toFloat(), RIGHT_GAUGE_SWEEP_ANGLE.toFloat(), this, onlineColor, offlineColor)
 
+
     init {
         init()
     }
 
     private fun init() {
+
         gaugeBackgroundDrawable.isCircular = true
         background = context.getDrawable(R.drawable.dashboard_bg)
 
@@ -142,21 +152,17 @@ class Dashboard @JvmOverloads constructor(context: Context, attrs: AttributeSet?
         vinPaint.typeface = Typeface.create(Typeface.DEFAULT, Typeface.BOLD)
         vinPaint.textAlign = Paint.Align.CENTER
 
-        if (online) {
-            vinPaint.color = vinOnlineColor
-            speedometerGauge.onConnected()
-            rpmGauge.onConnected()
-            fuelAndCompassGauge.onConnected()
+        labelPaint.textLocale = Locale.US
+        labelPaint.typeface = Typeface.create(ResourcesCompat.getFont(context, R.font.atomic_age), Typeface.BOLD)
+        labelPaint.color = labelColor
+//        val direction = floatArrayOf(0.0f, -1.0f, 0.5f)
+//        labelPaint.maskFilter = EmbossMaskFilter(direction, 0.8f, 15f, 1f)
+        labelPaint.textSize = LABEL_REFERENCE_TEXT_SIZE
+        labelPaint.getTextBounds(LABEL_TEXT, 0, LABEL_TEXT.length, labelBound)
 
-        } else {
-            vinPaint.color = vinOfflineColor
-            speedometerGauge.onDisconnected()
-            rpmGauge.onDisconnected()
-            fuelAndCompassGauge.onDisconnected()
-
-        }
-
+        adoptOnlineStatus()
     }
+
 
     //todo improve this and avoid allocation in onDraw
     @SuppressLint("DrawAllocation")
@@ -186,6 +192,20 @@ class Dashboard @JvmOverloads constructor(context: Context, attrs: AttributeSet?
         drawGauges(canvas, middleGaugeBounds, leftGaugeBounds, rightGaugeBounds)
         drawVin(canvas, middleGaugeBounds)
 
+        val availableHeight = (remainingHeihtAfterPadding - (2 * sideGaugeRadius)) / 2
+        val margin = availableHeight * DASHBOARD_LABEL_MARGIN_PERCENTAGE_OF_AVAILABLE_HEIGHT
+        val labelBoundsOnCanvas = RectF(margin, viewCenter!!.y + sideGaugeRadius + margin,
+                labelBound.width().toFloat(), viewCenter!!.y + sideGaugeRadius + availableHeight - margin)
+        drawLabel(canvas, labelBoundsOnCanvas)
+    }
+
+    private fun drawLabel(canvas: Canvas, labelBoundsOnCanvas: RectF) {
+        //change textsize only if we cannot achieve the height we need
+        if (labelBoundsOnCanvas.height() < labelBound.height()) {
+            labelPaint.textSize = (LABEL_REFERENCE_TEXT_SIZE * labelBoundsOnCanvas.height()) / labelBound.height()
+            labelPaint.getTextBounds(LABEL_TEXT, 0, LABEL_TEXT.length, labelBound)
+        }
+        canvas.drawText(LABEL_TEXT, labelBoundsOnCanvas.left, labelBoundsOnCanvas.bottom, labelPaint)
     }
 
     private fun drawGauges(canvas: Canvas, middleGaugeBounds: RectF, leftSideGaugeBounds: RectF, rightSideGaugeBounds: RectF) {
@@ -234,6 +254,21 @@ class Dashboard @JvmOverloads constructor(context: Context, attrs: AttributeSet?
 
     }
 
+    private fun adoptOnlineStatus() {
+        if (online) {
+            vinPaint.color = vinOnlineColor
+            speedometerGauge.onConnected()
+            rpmGauge.onConnected()
+            fuelAndCompassGauge.onConnected()
+
+        } else {
+            vinPaint.color = vinOfflineColor
+            speedometerGauge.onDisconnected()
+            rpmGauge.onDisconnected()
+            fuelAndCompassGauge.onDisconnected()
+
+        }
+    }
 
     override fun onSaveInstanceState(): Parcelable {
         return super.onSaveInstanceState()
@@ -243,23 +278,23 @@ class Dashboard @JvmOverloads constructor(context: Context, attrs: AttributeSet?
         super.onRestoreInstanceState(state)
     }
 
-    public fun setOnRPMChangedListener(listener: (Float) -> Unit) {
+    fun setOnRPMChangedListener(listener: (Float) -> Unit) {
         rpmGauge.rpmChangedListener = listener
     }
 
-    public fun setOnSpeedChangedListener(listener: (Float) -> Unit) {
+    fun setOnSpeedChangedListener(listener: (Float) -> Unit) {
         speedometerGauge.speedChangedListener = listener
     }
 
-    public fun setOnFuelPercentageChangedListener(listener: (Float) -> Unit) {
+    fun setOnFuelPercentageChangedListener(listener: (Float) -> Unit) {
         fuelAndCompassGauge.fuelPercentageChangedListener = listener
     }
 
-    public fun setOnCheckEngineLightChangedListener(listener: (Boolean) -> Unit) {
+    fun setOnCheckEngineLightChangedListener(listener: (Boolean) -> Unit) {
         speedometerGauge.checkEngineLightChangedListener = listener
     }
 
-    public fun setOnIgnitionChangedListener(listener: (Boolean) -> Unit) {
+    fun setOnIgnitionChangedListener(listener: (Boolean) -> Unit) {
         speedometerGauge.ignitionIconChangedListener = listener
     }
 

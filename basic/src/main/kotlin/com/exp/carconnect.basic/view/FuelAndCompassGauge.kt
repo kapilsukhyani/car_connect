@@ -1,5 +1,7 @@
 package com.exp.carconnect.basic.view
 
+import android.animation.ObjectAnimator
+import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.*
 import android.support.graphics.drawable.VectorDrawableCompat
@@ -34,8 +36,12 @@ internal class FuelAndCompassGauge(private val context: Context,
     private val fuelIcon = VectorDrawableCompat.create(context.resources, R.drawable.ic_local_gas_station_black_24dp, null)!!
     private val compassIcon = VectorDrawableCompat.create(context.resources, R.drawable.ic_compass, null)!!
 
-    internal var fuelPercentage = .5f
-
+    private var currentFuelPercentage = .5f
+        set(value) {
+            field = value
+            dashboard.invalidate()
+        }
+    private var currentFuelAnimator: ObjectAnimator? = null
 
     init {
         compassPaint.style = Paint.Style.STROKE
@@ -99,7 +105,7 @@ internal class FuelAndCompassGauge(private val context: Context,
         fuelGaugePaint.strokeWidth = fuelGaugeWidth
         fuelGaugeOuterBound.inset(fuelGaugeWidth / 2, fuelGaugeWidth / 2)
 
-        val sweepAngle = Math.abs(FUEL_GAUGE_SWEEP_ANGLE) * fuelPercentage
+        val sweepAngle = Math.abs(FUEL_GAUGE_SWEEP_ANGLE) * currentFuelPercentage
         canvas.drawArc(fuelGaugeOuterBound, FUEL_GAUGE_START_ANGLE.toFloat(), -sweepAngle, false, fuelGaugePaint)
 
 
@@ -147,5 +153,12 @@ internal class FuelAndCompassGauge(private val context: Context,
         compassIcon.bounds = compassBounds
         compassIcon.draw(canvas)
 
+    }
+
+    @SuppressLint("ObjectAnimatorBinding")
+    internal fun updateFuel(fuel: Float) {
+        currentFuelAnimator?.cancel()
+        currentFuelAnimator = ObjectAnimator.ofFloat(this, "currentFuelPercentage", currentFuelPercentage, fuel)
+        currentFuelAnimator?.start()
     }
 }

@@ -59,7 +59,7 @@ class Dashboard @JvmOverloads constructor(context: Context, attrs: AttributeSet?
     var fuelPercentage = .5f
         set(value) {
             if (value in 0.0..1.0 && value != field) {
-                fuelAndCompassGauge.fuelPercentage = value
+                fuelAndCompassGauge.updateFuel(value)
                 field = value
             }
         }

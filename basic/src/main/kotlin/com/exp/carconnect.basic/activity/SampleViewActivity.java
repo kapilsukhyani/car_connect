@@ -78,9 +78,12 @@ public class SampleViewActivity extends AppCompatActivity {
                 if (dashboard.getCurrentRPM() <= 0) {
                     dashboard.setCurrentRPM(8);
                     dashboard.setCurrentSpeed(320);
+                    dashboard.setFuelPercentage(1);
                 } else {
                     dashboard.setCurrentRPM(0);
                     dashboard.setCurrentSpeed(0);
+                    dashboard.setFuelPercentage(0);
+
 
                 }
             }

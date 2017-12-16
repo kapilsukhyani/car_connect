@@ -1,5 +1,6 @@
 package com.exp.carconnect.basic.view
 
+import android.animation.Animator
 import android.animation.ObjectAnimator
 import android.annotation.SuppressLint
 import android.content.Context
@@ -39,6 +40,9 @@ internal class SpeedometerGauge(private val context: Context,
         private val TICK_MARKER_DIFF = 20
         private val CURRENT_SPEED_TEXT_SIZE_PERCENTAGE = .05f
         private val DEFAULT_SPEED_UNIT = "km/h"
+
+        private val DRIBBLE_RANGE = 5.0f
+        private val DRIBBLE_RANDOM = Random()
     }
 
 
@@ -66,6 +70,7 @@ internal class SpeedometerGauge(private val context: Context,
 
     private var degreesPerDataPoint = sweep / MAX_SPEED
     private var currentSpeedAnimator: ObjectAnimator? = null
+    private var dribbleRPMAnimator: ObjectAnimator? = null
 
 
     private val innerCirclePaint: Paint = Paint(Paint.ANTI_ALIAS_FLAG)
@@ -248,10 +253,50 @@ internal class SpeedometerGauge(private val context: Context,
         return startAngle + degreesPerDataPoint * currentSpeed
     }
 
+    private fun dribble() {
+        val dribbleTo = DRIBBLE_RANDOM.nextFloat() * (DRIBBLE_RANGE - 0.0f) + 0.0f
+        dribbleRPMAnimator = ObjectAnimator.ofFloat(this, "currentSpeed", currentSpeed, dashboard.currentSpeed + dribbleTo,
+                dashboard.currentSpeed, dashboard.currentSpeed - dribbleTo, currentSpeed)
+        dribbleRPMAnimator?.addListener(object : Animator.AnimatorListener {
+            override fun onAnimationRepeat(animation: Animator?) {
+            }
+
+            override fun onAnimationEnd(animation: Animator?) {
+                if (dashboard.currentSpeed > MIN_SPEED) {
+                    dribble()
+                }
+            }
+
+            override fun onAnimationCancel(animation: Animator?) {
+            }
+
+            override fun onAnimationStart(animation: Animator?) {
+            }
+        })
+        dribbleRPMAnimator?.start()
+    }
+
     @SuppressLint("ObjectAnimatorBinding")
     internal fun updateSpeed(speed: Float) {
+        dribbleRPMAnimator?.cancel()
         currentSpeedAnimator?.cancel()
         currentSpeedAnimator = ObjectAnimator.ofFloat(this, "currentSpeed", currentSpeed, speed)
+        currentSpeedAnimator?.addListener(object : Animator.AnimatorListener {
+            override fun onAnimationRepeat(animation: Animator?) {
+            }
+
+            override fun onAnimationEnd(animation: Animator?) {
+                if (dashboard.currentSpeed > MIN_SPEED) {
+                    dribble()
+                }
+            }
+
+            override fun onAnimationCancel(animation: Animator?) {
+            }
+
+            override fun onAnimationStart(animation: Animator?) {
+            }
+        })
         currentSpeedAnimator?.start()
     }
 }

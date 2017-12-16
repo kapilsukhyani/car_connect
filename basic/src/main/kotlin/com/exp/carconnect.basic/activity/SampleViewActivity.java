@@ -28,8 +28,6 @@ public class SampleViewActivity extends AppCompatActivity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         initDashboard();
-
-
     }
 
 

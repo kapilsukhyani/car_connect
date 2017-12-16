@@ -1,5 +1,6 @@
 package com.exp.carconnect.basic.view
 
+import android.animation.Animator
 import android.animation.ObjectAnimator
 import android.annotation.SuppressLint
 import android.content.Context
@@ -42,6 +43,9 @@ internal class RPMGauge(private val context: Context,
 
         private val INDICATOR_CIRCLE_STROKE_WIDTH = 10
         private val INDICATOR_STROKE_WIDTH = 25
+
+        private val DRIBBLE_RANGE = .2f
+        private val DRIBBLE_RANDOM = Random()
     }
 
 
@@ -63,7 +67,9 @@ internal class RPMGauge(private val context: Context,
             dashboard.invalidate()
             rpmChangedListener?.invoke(field)
         }
+
     private var currentRPMAnimator: ObjectAnimator? = null
+    private var dribbleRPMAnimator: ObjectAnimator? = null
 
     private val degreesPerDataPoint = sweep / TOTAL_NO_OF_DATA_POINTS
 
@@ -188,10 +194,50 @@ internal class RPMGauge(private val context: Context,
     }
 
 
+    private fun dribble() {
+        val dribbleTo = DRIBBLE_RANDOM.nextFloat() * (DRIBBLE_RANGE - 0.0f) + 0.0f
+        dribbleRPMAnimator = ObjectAnimator.ofFloat(this, "currentRPM", currentRPM, dashboard.currentRPM + dribbleTo,
+                dashboard.currentRPM, dashboard.currentRPM - dribbleTo, currentRPM)
+        dribbleRPMAnimator?.addListener(object : Animator.AnimatorListener {
+            override fun onAnimationRepeat(animation: Animator?) {
+            }
+
+            override fun onAnimationEnd(animation: Animator?) {
+                if (dashboard.currentRPM > MIN_RPM) {
+                    dribble()
+                }
+            }
+
+            override fun onAnimationCancel(animation: Animator?) {
+            }
+
+            override fun onAnimationStart(animation: Animator?) {
+            }
+        })
+        dribbleRPMAnimator?.start()
+    }
+
     @SuppressLint("ObjectAnimatorBinding")
     internal fun updateRPM(rpm: Float) {
+        dribbleRPMAnimator?.cancel()
         currentRPMAnimator?.cancel()
         currentRPMAnimator = ObjectAnimator.ofFloat(this, "currentRPM", currentRPM, rpm)
+        currentRPMAnimator?.addListener(object : Animator.AnimatorListener {
+            override fun onAnimationRepeat(animation: Animator?) {
+            }
+
+            override fun onAnimationEnd(animation: Animator?) {
+                if (dashboard.currentRPM > MIN_RPM) {
+                    dribble()
+                }
+            }
+
+            override fun onAnimationCancel(animation: Animator?) {
+            }
+
+            override fun onAnimationStart(animation: Animator?) {
+            }
+        })
         currentRPMAnimator?.start()
     }
 

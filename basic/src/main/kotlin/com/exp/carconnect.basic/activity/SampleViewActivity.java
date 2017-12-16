@@ -75,6 +75,7 @@ public class SampleViewActivity extends AppCompatActivity {
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE);
         setContentView(R.layout.activity_sample_dashboard);
         final Dashboard dashboard = findViewById(R.id.dashboard);
+        final Random a = new Random();
         dashboard.setOnVINChangedListener(new Function1<String, Unit>() {
             @Override
             public Unit invoke(String s) {
@@ -136,9 +137,9 @@ public class SampleViewActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 if (dashboard.getCurrentRPM() <= 0) {
-                    dashboard.setCurrentRPM(8);
-                    dashboard.setCurrentSpeed(320);
-                    dashboard.setFuelPercentage(1);
+                    dashboard.setCurrentRPM(a.nextInt(8));
+                    dashboard.setCurrentSpeed(a.nextInt(320));
+                    dashboard.setFuelPercentage(a.nextFloat());
                     dashboard.setShowCheckEngineLight(true);
                     dashboard.setShowIgnitionIcon(true);
                     dashboard.setOnline(true);

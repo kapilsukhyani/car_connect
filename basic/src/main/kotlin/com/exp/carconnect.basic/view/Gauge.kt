@@ -104,9 +104,9 @@ internal abstract class Gauge(val dashboard: Dashboard,
                 tickTextPaint.getTextBounds(tickMarkerText, 0, tickMarkerText.length, textBounds)
 
                 textDrawingBounds.set((lineBounds.left - textBounds.width().toFloat() - textMarkerMargin).toInt(), (bounds.centerY() - textBounds.height() / 2).toInt(),
-                        (lineBounds.left - textMarkerMargin).toInt(), bounds.centerY().toInt())
+                        (lineBounds.left - textMarkerMargin).toInt(), bounds.centerY().toInt() + textBounds.height() / 2)
                 canvas.rotate(-totalRotationSoFar, textDrawingBounds.centerX().toFloat(), textDrawingBounds.centerY().toFloat())
-                canvas.drawText(tickMarkerText, textDrawingBounds.centerX().toFloat(), textDrawingBounds.centerY().toFloat(), tickTextPaint)
+                canvas.drawText(tickMarkerText, textDrawingBounds.centerX().toFloat(), textDrawingBounds.bottom.toFloat(), tickTextPaint)
                 tickMarker += tickMarkerDiff
                 canvas.restore()
 

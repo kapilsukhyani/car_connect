@@ -2,7 +2,6 @@ package com.exp.carconnect.basic.view
 
 import android.animation.ObjectAnimator
 import android.annotation.SuppressLint
-import android.content.Context
 import android.graphics.*
 import android.support.graphics.drawable.VectorDrawableCompat
 import android.text.TextPaint
@@ -10,10 +9,10 @@ import com.exp.carconnect.basic.R
 import java.util.*
 
 
-internal class FuelAndCompassGauge(private val context: Context,
+internal class FuelAndCompassGauge(dashboard: Dashboard,
                                    private val startAngle: Float,
                                    private val sweep: Float,
-                                   dashboard: Dashboard,
+                                   currentFuelPercentage: Float,
                                    onlineColor: Int,
                                    offlineColor: Int) : RightGauge(dashboard, onlineColor, offlineColor) {
     companion object {
@@ -33,13 +32,17 @@ internal class FuelAndCompassGauge(private val context: Context,
     private val compassTextPaint = TextPaint(Paint.ANTI_ALIAS_FLAG)
 
 
-    private val fuelIcon = VectorDrawableCompat.create(context.resources, R.drawable.ic_local_gas_station_black_24dp, null)!!
-    private val compassIcon = VectorDrawableCompat.create(context.resources, R.drawable.ic_compass, null)!!
+    private val fuelIcon = VectorDrawableCompat.create(dashboard.context.resources, R.drawable.ic_local_gas_station_black_24dp, null)!!
+    private val compassIcon = VectorDrawableCompat.create(dashboard.context.resources, R.drawable.ic_compass, null)!!
 
     internal var fuelPercentageChangedListener: ((Float) -> Unit)? = null
-    private var currentFuelPercentage = 0.01f
+    private var currentFuelPercentage = currentFuelPercentage
         set(value) {
-            field = value
+            field = if (value == 0.0f) {
+                .01f
+            } else {
+                value
+            }
             dashboard.invalidate()
             fuelPercentageChangedListener?.invoke(field)
         }

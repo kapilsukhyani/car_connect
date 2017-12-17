@@ -7,6 +7,8 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.annotation.RequiresApi;
 import android.support.v7.app.AppCompatActivity;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 
 import com.exp.carconnect.basic.R;
@@ -30,6 +32,8 @@ public class SampleViewActivity extends AppCompatActivity {
         initDashboard();
     }
 
+    private Dashboard dashboard = null;
+    final Random a = new Random();
 
     private void initSampleView() {
         setContentView(R.layout.activity_sample_view);
@@ -72,8 +76,7 @@ public class SampleViewActivity extends AppCompatActivity {
     private void initDashboard() {
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE);
         setContentView(R.layout.activity_sample_dashboard);
-        final Dashboard dashboard = findViewById(R.id.dashboard);
-        final Random a = new Random();
+        dashboard = findViewById(R.id.dashboard);
         dashboard.setOnVINChangedListener(new Function1<String, Unit>() {
             @Override
             public Unit invoke(String s) {
@@ -131,27 +134,57 @@ public class SampleViewActivity extends AppCompatActivity {
                 return null;
             }
         });
-        findViewById(R.id.updateRPM).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (dashboard.getCurrentRPM() <= 0) {
-                    dashboard.setCurrentRPM(a.nextInt(8));
-                    dashboard.setCurrentSpeed(a.nextInt(320));
-                    dashboard.setFuelPercentage(a.nextFloat());
-                    dashboard.setShowCheckEngineLight(true);
-                    dashboard.setShowIgnitionIcon(true);
-                    dashboard.setOnline(true);
-                    dashboard.setVin("ABCD123454321ABCD");
-                } else {
-                    dashboard.setCurrentRPM(0);
-                    dashboard.setCurrentSpeed(0);
-                    dashboard.setFuelPercentage(0);
-                    dashboard.setShowCheckEngineLight(false);
-                    dashboard.setShowIgnitionIcon(false);
-                    dashboard.setOnline(false);
-                    dashboard.setVin("EFGH123454321HGFE");
-                }
+
+    }
+
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        super.onCreateOptionsMenu(menu);
+        getMenuInflater().inflate(R.menu.sample_activity_menu, menu);
+        return true;
+    }
+
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        super.onOptionsItemSelected(item);
+
+        int i = item.getItemId();
+        if (i == R.id.enableDisableTest) {
+            if (dashboard.getCurrentRPM() <= 0) {
+                dashboard.setCurrentRPM(a.nextInt(8));
+                dashboard.setCurrentSpeed(a.nextInt(320));
+                dashboard.setFuelPercentage(a.nextFloat());
+                dashboard.setShowCheckEngineLight(true);
+                dashboard.setShowIgnitionIcon(true);
+                dashboard.setOnline(true);
+                dashboard.setVin("ABCD123454321ABCD");
+            } else {
+                dashboard.setCurrentRPM(0);
+                dashboard.setCurrentSpeed(0);
+                dashboard.setFuelPercentage(0);
+                dashboard.setShowCheckEngineLight(false);
+                dashboard.setShowIgnitionIcon(false);
+                dashboard.setOnline(false);
+                dashboard.setVin("EFGH123454321HGFE");
             }
-        });
+        } else if (i == R.id.enableDisableDribble) {
+            dashboard.setRpmDribbleEnabled(!dashboard.getRpmDribbleEnabled());
+            dashboard.setSpeedDribbleEnabled(!dashboard.getSpeedDribbleEnabled());
+        } else if (i == R.id.onlineOffline) {
+            dashboard.setOnline(!dashboard.getOnline());
+        } else if (i == R.id.updateRPM) {
+            dashboard.setCurrentRPM(a.nextInt(8));
+
+        } else if (i == R.id.updateSPEED) {
+            dashboard.setCurrentSpeed(a.nextInt(320));
+        } else if (i == R.id.updateFuel) {
+            dashboard.setFuelPercentage(a.nextFloat());
+        } else {
+            return false;
+        }
+
+        return true;
     }
 }

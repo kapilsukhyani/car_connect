@@ -3,16 +3,16 @@ package com.exp.carconnect.basic.view
 import android.animation.Animator
 import android.animation.ObjectAnimator
 import android.annotation.SuppressLint
-import android.content.Context
 import android.graphics.*
 import android.text.TextPaint
 import java.util.*
 
 
-internal class RPMGauge(private val context: Context,
+internal class RPMGauge(dashboard: Dashboard,
                         private val startAngle: Float,
                         private val sweep: Float,
-                        dashboard: Dashboard,
+                        rpmDribbleEnabled: Boolean,
+                        currentRPM: Float,
                         onlineColor: Int,
                         offlineColor: Int) : LeftGauge(dashboard, onlineColor, offlineColor) {
 
@@ -57,19 +57,32 @@ internal class RPMGauge(private val context: Context,
     private val rpmTextPaint: Paint = TextPaint(Paint.ANTI_ALIAS_FLAG)
     private val onlineGradientColor: Int = getDarkerColor(onlineColor)
     private val offlineGradientColor: Int = getDarkerColor(offlineColor)
+    private var criticalZoneColor = dashboard.context.getColor(android.R.color.holo_red_dark)
 
-    private var criticalZoneColor = context.getColor(android.R.color.holo_red_dark)
+    internal var rpmDribbleEnabled: Boolean = rpmDribbleEnabled
+        set(value) {
+            field = value
+            if (value) {
+                dribble()
+            } else {
+                dribbleRPMAnimator?.cancel()
+                dribbleRPMAnimator = null
+            }
+        }
 
-    internal var rpmChangedListener: ((Float) -> Unit)? = null
-    private var currentRPM = 0.0f
+
+    private var currentRPM = currentRPM
         set(value) {
             field = value
             dashboard.invalidate()
             rpmChangedListener?.invoke(field)
         }
 
+
     private var currentRPMAnimator: ObjectAnimator? = null
     private var dribbleRPMAnimator: ObjectAnimator? = null
+    internal var rpmChangedListener: ((Float) -> Unit)? = null
+
 
     private val degreesPerDataPoint = sweep / TOTAL_NO_OF_DATA_POINTS
 
@@ -194,32 +207,32 @@ internal class RPMGauge(private val context: Context,
     }
 
 
-    private fun dribble() {
-        val dribbleTo = DRIBBLE_RANDOM.nextFloat() * (DRIBBLE_RANGE - 0.0f) + 0.0f
-        dribbleRPMAnimator = ObjectAnimator.ofFloat(this, "currentRPM", currentRPM, dashboard.currentRPM + dribbleTo,
-                dashboard.currentRPM, dashboard.currentRPM - dribbleTo, currentRPM)
-        dribbleRPMAnimator?.addListener(object : Animator.AnimatorListener {
-            override fun onAnimationRepeat(animation: Animator?) {
-            }
+    internal fun dribble() {
+        if (rpmDribbleEnabled && dashboard.currentRPM > MIN_RPM && dashboard.online) {
+            val dribbleBy = DRIBBLE_RANDOM.nextFloat() * (DRIBBLE_RANGE - 0.0f) + 0.0f
+            dribbleRPMAnimator = ObjectAnimator.ofFloat(this, "currentRPM", currentRPM, dashboard.currentRPM + dribbleBy,
+                    dashboard.currentRPM, dashboard.currentRPM - dribbleBy, currentRPM)
+            dribbleRPMAnimator?.addListener(object : Animator.AnimatorListener {
+                override fun onAnimationRepeat(animation: Animator?) {
+                }
 
-            override fun onAnimationEnd(animation: Animator?) {
-                if (dashboard.currentRPM > MIN_RPM) {
+                override fun onAnimationEnd(animation: Animator?) {
                     dribble()
                 }
-            }
 
-            override fun onAnimationCancel(animation: Animator?) {
-            }
+                override fun onAnimationCancel(animation: Animator?) {
+                }
 
-            override fun onAnimationStart(animation: Animator?) {
-            }
-        })
-        dribbleRPMAnimator?.start()
+                override fun onAnimationStart(animation: Animator?) {
+                }
+            })
+            dribbleRPMAnimator?.start()
+        }
     }
 
     @SuppressLint("ObjectAnimatorBinding")
     internal fun updateRPM(rpm: Float) {
-        dribbleRPMAnimator?.cancel()
+        rpmDribbleEnabled = false
         currentRPMAnimator?.cancel()
         currentRPMAnimator = ObjectAnimator.ofFloat(this, "currentRPM", currentRPM, rpm)
         currentRPMAnimator?.addListener(object : Animator.AnimatorListener {
@@ -227,8 +240,8 @@ internal class RPMGauge(private val context: Context,
             }
 
             override fun onAnimationEnd(animation: Animator?) {
-                if (dashboard.currentRPM > MIN_RPM) {
-                    dribble()
+                if (dashboard.rpmDribbleEnabled) {
+                    rpmDribbleEnabled = true
                 }
             }
 

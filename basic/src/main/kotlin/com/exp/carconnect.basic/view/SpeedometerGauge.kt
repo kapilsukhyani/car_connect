@@ -3,7 +3,6 @@ package com.exp.carconnect.basic.view
 import android.animation.Animator
 import android.animation.ObjectAnimator
 import android.annotation.SuppressLint
-import android.content.Context
 import android.graphics.*
 import android.support.graphics.drawable.VectorDrawableCompat
 import android.text.TextPaint
@@ -11,10 +10,13 @@ import com.exp.carconnect.basic.R
 import java.util.*
 
 
-internal class SpeedometerGauge(private val context: Context,
+internal class SpeedometerGauge(dashboard: Dashboard,
                                 private val startAngle: Float,
                                 private val sweep: Float,
-                                dashboard: Dashboard,
+                                currentSpeed: Float,
+                                showIgnitionIcon: Boolean,
+                                showCheckEngineLight: Boolean,
+                                speedDribbleEnabled: Boolean,
                                 onlineColor: Int,
                                 offlineColor: Int) : MiddleGauge(dashboard, onlineColor, offlineColor) {
 
@@ -49,28 +51,39 @@ internal class SpeedometerGauge(private val context: Context,
     internal var speedChangedListener: ((Float) -> Unit)? = null
     internal var ignitionIconChangedListener: ((Boolean) -> Unit)? = null
     internal var checkEngineLightChangedListener: ((Boolean) -> Unit)? = null
-    private var currentSpeed: Float = 0.0f
+    private var currentSpeed: Float = currentSpeed
         set(value) {
             field = value
             dashboard.invalidate()
             speedChangedListener?.invoke(field)
         }
-    internal var showIgnitionIcon: Boolean = false
+    internal var showIgnitionIcon: Boolean = showIgnitionIcon
         set(value) {
             field = value
             dashboard.invalidate()
             ignitionIconChangedListener?.invoke(field)
         }
-    internal var showCheckEngineLight: Boolean = false
+    internal var showCheckEngineLight: Boolean = showCheckEngineLight
         set(value) {
             field = value
             dashboard.invalidate()
             checkEngineLightChangedListener?.invoke(field)
         }
 
+    internal var speedDribbleEnabled: Boolean = speedDribbleEnabled
+        set(value) {
+            field = value
+            if (value) {
+                dribble()
+            } else {
+                dribbleSpeedAnimator?.cancel()
+                dribbleSpeedAnimator = null
+            }
+        }
+
     private var degreesPerDataPoint = sweep / MAX_SPEED
     private var currentSpeedAnimator: ObjectAnimator? = null
-    private var dribbleRPMAnimator: ObjectAnimator? = null
+    private var dribbleSpeedAnimator: ObjectAnimator? = null
 
 
     private val innerCirclePaint: Paint = Paint(Paint.ANTI_ALIAS_FLAG)
@@ -80,9 +93,13 @@ internal class SpeedometerGauge(private val context: Context,
     private val tickMarkerPaint: Paint = TextPaint(Paint.ANTI_ALIAS_FLAG)
 
 
-    private val indicatorIcon = VectorDrawableCompat.create(context.resources, R.drawable.ic_arrow_right_24dp, null)!!
-    private val checkEngineLightIcon = VectorDrawableCompat.create(context.resources, R.drawable.ic_check_engine_light, null)!!
-    private val ignitionIcon = VectorDrawableCompat.create(context.resources, R.drawable.ic_ignition, null)!!
+    private val indicatorIcon = VectorDrawableCompat.create(dashboard.context.resources, R.drawable.ic_arrow_right_24dp, null)!!
+    private val checkEngineLightIcon = VectorDrawableCompat.create(dashboard.context.resources, R.drawable.ic_check_engine_light, null)!!
+    private val ignitionIcon = VectorDrawableCompat.create(dashboard.context.resources, R.drawable.ic_ignition, null)!!
+
+    private val activeIconColor = dashboard.context.getColor(android.R.color.holo_orange_dark)
+    private val inActiveIconColor = dashboard.context.getColor(android.R.color.darker_gray)
+    private val speedTextColor = dashboard.context.getColor(android.R.color.black)
 
     init {
         innerCirclePaint.style = Paint.Style.STROKE
@@ -90,7 +107,7 @@ internal class SpeedometerGauge(private val context: Context,
         innerCirclePaint.pathEffect = DashPathEffect(floatArrayOf(100f, 15f), 0f)
 
 
-        speedTextPaint.color = context.getColor(android.R.color.black)
+        speedTextPaint.color = speedTextColor
         speedTextPaint.textLocale = Locale.US
         speedTextPaint.typeface = Typeface.create(Typeface.SANS_SERIF, Typeface.BOLD)
         speedTextPaint.textAlign = Paint.Align.CENTER
@@ -103,8 +120,8 @@ internal class SpeedometerGauge(private val context: Context,
         tickMarkerPaint.textAlign = Paint.Align.CENTER
 
 
-        checkEngineLightIcon.setTint(context.getColor(android.R.color.darker_gray))
-        ignitionIcon.setTint(context.getColor(android.R.color.darker_gray))
+        checkEngineLightIcon.setTint(inActiveIconColor)
+        ignitionIcon.setTint(inActiveIconColor)
     }
 
     override fun onDisconnected() {
@@ -231,9 +248,9 @@ internal class SpeedometerGauge(private val context: Context,
     private fun drawCheckEngineLightIcon(canvas: Canvas, checkEngineLightBounds: Rect) {
         checkEngineLightIcon.bounds = checkEngineLightBounds
         if (showCheckEngineLight) {
-            checkEngineLightIcon.setTint(context.getColor(android.R.color.holo_orange_dark))
+            checkEngineLightIcon.setTint(activeIconColor)
         } else {
-            checkEngineLightIcon.setTint(context.getColor(android.R.color.darker_gray))
+            checkEngineLightIcon.setTint(inActiveIconColor)
         }
         checkEngineLightIcon.draw(canvas)
     }
@@ -241,9 +258,9 @@ internal class SpeedometerGauge(private val context: Context,
     private fun drawIgnitionIcon(canvas: Canvas, ignitionIconBounds: Rect) {
         ignitionIcon.bounds = ignitionIconBounds
         if (showIgnitionIcon) {
-            ignitionIcon.setTint(context.getColor(android.R.color.holo_orange_dark))
+            ignitionIcon.setTint(activeIconColor)
         } else {
-            ignitionIcon.setTint(context.getColor(android.R.color.darker_gray))
+            ignitionIcon.setTint(inActiveIconColor)
         }
         ignitionIcon.draw(canvas)
     }
@@ -253,32 +270,32 @@ internal class SpeedometerGauge(private val context: Context,
         return startAngle + degreesPerDataPoint * currentSpeed
     }
 
-    private fun dribble() {
-        val dribbleTo = DRIBBLE_RANDOM.nextFloat() * (DRIBBLE_RANGE - 0.0f) + 0.0f
-        dribbleRPMAnimator = ObjectAnimator.ofFloat(this, "currentSpeed", currentSpeed, dashboard.currentSpeed + dribbleTo,
-                dashboard.currentSpeed, dashboard.currentSpeed - dribbleTo, currentSpeed)
-        dribbleRPMAnimator?.addListener(object : Animator.AnimatorListener {
-            override fun onAnimationRepeat(animation: Animator?) {
-            }
+    internal fun dribble() {
+        if (speedDribbleEnabled && dashboard.currentSpeed > MIN_SPEED && dashboard.online) {
+            val dribbleBy = DRIBBLE_RANDOM.nextFloat() * (DRIBBLE_RANGE - 0.0f) + 0.0f
+            dribbleSpeedAnimator = ObjectAnimator.ofFloat(this, "currentSpeed", currentSpeed, dashboard.currentSpeed + dribbleBy,
+                    dashboard.currentSpeed, dashboard.currentSpeed - dribbleBy, currentSpeed)
+            dribbleSpeedAnimator?.addListener(object : Animator.AnimatorListener {
+                override fun onAnimationRepeat(animation: Animator?) {
+                }
 
-            override fun onAnimationEnd(animation: Animator?) {
-                if (dashboard.currentSpeed > MIN_SPEED) {
+                override fun onAnimationEnd(animation: Animator?) {
                     dribble()
                 }
-            }
 
-            override fun onAnimationCancel(animation: Animator?) {
-            }
+                override fun onAnimationCancel(animation: Animator?) {
+                }
 
-            override fun onAnimationStart(animation: Animator?) {
-            }
-        })
-        dribbleRPMAnimator?.start()
+                override fun onAnimationStart(animation: Animator?) {
+                }
+            })
+            dribbleSpeedAnimator?.start()
+        }
     }
 
     @SuppressLint("ObjectAnimatorBinding")
     internal fun updateSpeed(speed: Float) {
-        dribbleRPMAnimator?.cancel()
+        speedDribbleEnabled = false
         currentSpeedAnimator?.cancel()
         currentSpeedAnimator = ObjectAnimator.ofFloat(this, "currentSpeed", currentSpeed, speed)
         currentSpeedAnimator?.addListener(object : Animator.AnimatorListener {
@@ -286,8 +303,8 @@ internal class SpeedometerGauge(private val context: Context,
             }
 
             override fun onAnimationEnd(animation: Animator?) {
-                if (dashboard.currentSpeed > MIN_SPEED) {
-                    dribble()
+                if (dashboard.speedDribbleEnabled) {
+                    speedDribbleEnabled = true
                 }
             }
 

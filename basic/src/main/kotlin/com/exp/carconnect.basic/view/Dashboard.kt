@@ -107,6 +107,14 @@ class Dashboard @JvmOverloads constructor(context: Context, attrs: AttributeSet?
                 field = value
                 adoptOnlineStatus()
                 invalidate()
+                if (value) {
+                    if (rpmDribbleEnabled) {
+                        rpmGauge.dribble()
+                    }
+                    if (speedDribbleEnabled) {
+                        speedometerGauge.dribble()
+                    }
+                }
                 onOnlineChangedListener?.invoke(field)
             }
         }
@@ -117,6 +125,22 @@ class Dashboard @JvmOverloads constructor(context: Context, attrs: AttributeSet?
                 field = value
                 invalidate()
                 onVINChangedListener?.invoke(field)
+            }
+        }
+
+    var rpmDribbleEnabled = true
+        set(value) {
+            if (value != field) {
+                rpmGauge.rpmDribbleEnabled = value
+                field = value
+            }
+        }
+
+    var speedDribbleEnabled = true
+        set(value) {
+            if (value != field) {
+                speedometerGauge.speedDribbleEnabled = value
+                field = value
             }
         }
 
@@ -134,9 +158,12 @@ class Dashboard @JvmOverloads constructor(context: Context, attrs: AttributeSet?
             (getContext().getDrawable(R.drawable.gauge_bg) as BitmapDrawable).bitmap)
 
 
-    private val speedometerGauge = SpeedometerGauge(getContext(), MIDDLE_GAUGE_START_ANGLE.toFloat(), MIDDLE_GAUGE_SWEEP_ANGLE.toFloat(), this, onlineColor, offlineColor)
-    private val rpmGauge = RPMGauge(getContext(), LEFT_GAUGE_START_ANGLE.toFloat(), LEFT_GAUGE_SWEEP_ANGLE.toFloat(), this, onlineColor, offlineColor)
-    private val fuelAndCompassGauge = FuelAndCompassGauge(getContext(), RIGHT_GAUGE_START_ANGLE.toFloat(), RIGHT_GAUGE_SWEEP_ANGLE.toFloat(), this, onlineColor, offlineColor)
+    private val speedometerGauge = SpeedometerGauge(this, MIDDLE_GAUGE_START_ANGLE.toFloat(), MIDDLE_GAUGE_SWEEP_ANGLE.toFloat(),
+            currentSpeed, showIgnitionIcon, showCheckEngineLight, speedDribbleEnabled, onlineColor, offlineColor)
+    private val rpmGauge = RPMGauge(this, LEFT_GAUGE_START_ANGLE.toFloat(), LEFT_GAUGE_SWEEP_ANGLE.toFloat(),
+            rpmDribbleEnabled, currentRPM, onlineColor, offlineColor)
+    private val fuelAndCompassGauge = FuelAndCompassGauge(this, RIGHT_GAUGE_START_ANGLE.toFloat(), RIGHT_GAUGE_SWEEP_ANGLE.toFloat(),
+            .01f, onlineColor, offlineColor)
 
 
     init {

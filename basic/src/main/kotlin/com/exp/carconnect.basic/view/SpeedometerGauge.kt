@@ -316,4 +316,8 @@ internal class SpeedometerGauge(dashboard: Dashboard,
         })
         currentSpeedAnimator?.start()
     }
+
+    internal fun stopDribble() {
+        dribbleSpeedAnimator?.cancel()
+    }
 }

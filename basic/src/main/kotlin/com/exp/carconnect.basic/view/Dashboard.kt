@@ -147,7 +147,7 @@ class Dashboard @JvmOverloads constructor(context: Context, attrs: AttributeSet?
     var currentAzimuth = 0.0f
         set(value) {
             if (value != field) {
-                fuelAndCompassGauge.updateAzimuth(value)
+                fuelAndCompassGauge.currentAzimuth = value
                 field = value
             }
         }
@@ -196,6 +196,16 @@ class Dashboard @JvmOverloads constructor(context: Context, attrs: AttributeSet?
         labelPaint.getTextBounds(LABEL_TEXT, 0, LABEL_TEXT.length, labelBound)
 
         adoptOnlineStatus()
+
+        addOnAttachStateChangeListener(object : OnAttachStateChangeListener {
+            override fun onViewDetachedFromWindow(v: View?) {
+                rpmGauge.stopDribble()
+                speedometerGauge.stopDribble()
+            }
+
+            override fun onViewAttachedToWindow(v: View?) {
+            }
+        })
     }
 
 

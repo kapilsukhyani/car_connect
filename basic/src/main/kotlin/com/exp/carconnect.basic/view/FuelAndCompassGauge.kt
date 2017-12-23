@@ -48,7 +48,7 @@ internal class FuelAndCompassGauge(dashboard: Dashboard,
             fuelPercentageChangedListener?.invoke(field)
         }
 
-    private var currentAzimuth = currentAzimuth
+    internal var currentAzimuth = currentAzimuth
         set(value) {
             field = value
             dashboard.invalidate()
@@ -74,6 +74,7 @@ internal class FuelAndCompassGauge(dashboard: Dashboard,
         fuelGaugeBoundary.strokeWidth = FUEL_GAUGE_BOUNDARY_STROKE_WIDTH.toFloat()
 
         compassIcon.setTint(onlineColor)
+
     }
 
     override fun onConnected() {
@@ -166,7 +167,7 @@ internal class FuelAndCompassGauge(dashboard: Dashboard,
                 (bounds.centerX() + compassRadius).toInt(), (bounds.centerY() + compassRadius).toInt())
         compassIcon.bounds = compassBounds
         canvas.save()
-        canvas.rotate(currentAzimuth, bounds.centerX(), bounds.centerY())
+        canvas.rotate(-currentAzimuth, bounds.centerX(), bounds.centerY())
         compassIcon.draw(canvas)
         canvas.restore()
 
@@ -183,10 +184,4 @@ internal class FuelAndCompassGauge(dashboard: Dashboard,
         currentFuelAnimator?.start()
     }
 
-    @SuppressLint("ObjectAnimatorBinding")
-    internal fun updateAzimuth(azimuth: Float) {
-        currentAzimuthAnimator?.cancel()
-        currentAzimuthAnimator = ObjectAnimator.ofFloat(this, "currentAzimuth", currentAzimuth, -azimuth)
-        currentAzimuthAnimator?.start()
-    }
 }

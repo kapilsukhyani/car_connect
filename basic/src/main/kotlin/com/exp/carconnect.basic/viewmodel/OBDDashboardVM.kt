@@ -2,12 +2,15 @@ package com.exp.carconnect.basic.viewmodel
 
 import android.app.Application
 import android.arch.lifecycle.AndroidViewModel
-import android.arch.lifecycle.LiveData
+import android.arch.lifecycle.MediatorLiveData
 import android.arch.lifecycle.MutableLiveData
+import android.arch.lifecycle.Transformations
 import com.exp.carconnect.Logger
 import com.exp.carconnect.OBDMultiRequest
 import com.exp.carconnect.basic.CarConnectApp
 import com.exp.carconnect.basic.OBDEngine
+import com.exp.carconnect.basic.compass.CompassEvent
+import com.exp.carconnect.basic.compass.CompassLiveData
 import com.exp.carconnect.basic.di.Main
 import com.exp.carconnect.basic.obdmessage.*
 import io.reactivex.Scheduler
@@ -33,7 +36,9 @@ class OBDDashboardVM(app: Application) : AndroidViewModel(app) {
     }
 
     private val mutableDashboardLiveData: MutableLiveData<OBDDashboard> = MutableLiveData()
-    val dashboardLiveData: LiveData<OBDDashboard> = mutableDashboardLiveData
+    private val compassLiveData = Transformations.map<CompassEvent, OBDDashboard>(CompassLiveData(app),
+            { compassEvent -> mutableDashboardLiveData.value?.copy(currentAzimuth = compassEvent.azimuth) })
+    val dashboardLiveData: MediatorLiveData<OBDDashboard> = MediatorLiveData()
 
 
     private val subscriptions = CompositeDisposable()
@@ -47,6 +52,8 @@ class OBDDashboardVM(app: Application) : AndroidViewModel(app) {
 
     init {
         (app as CarConnectApp).newConnectionComponent!!.inject(this)
+        dashboardLiveData.addSource(compassLiveData, { dashboardLiveData.value = it })
+        dashboardLiveData.addSource(dashboardLiveData, { dashboardLiveData.value = it })
         mutableDashboardLiveData.value = OBDDashboard()
         startListeningToData()
     }
@@ -99,4 +106,5 @@ class OBDDashboardVM(app: Application) : AndroidViewModel(app) {
 
 data class OBDDashboard(val online: Boolean = false, val vin: String = "", val rpm: Float = 0.0f,
                         val speed: Float = 0.0f, val fuel: Float = 0.0f,
-                        val ignition: Boolean = false, val checkEngineLight: Boolean = false)
+                        val ignition: Boolean = false, val checkEngineLight: Boolean = false,
+                        val currentAzimuth: Float = 0.0f)

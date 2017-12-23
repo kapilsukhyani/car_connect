@@ -1,19 +1,24 @@
 package com.exp.carconnect.basic.activity;
 
 import android.annotation.SuppressLint;
+import android.arch.lifecycle.Observer;
+import android.arch.lifecycle.ViewModelProviders;
 import android.content.pm.ActivityInfo;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.annotation.RequiresApi;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 
 import com.exp.carconnect.basic.R;
+import com.exp.carconnect.basic.compass.CompassEvent;
 import com.exp.carconnect.basic.view.Dashboard;
 import com.exp.carconnect.basic.view.SampleView;
+import com.exp.carconnect.basic.viewmodel.CompassVM;
 
 import java.util.Random;
 import java.util.Timer;
@@ -135,6 +140,15 @@ public class SampleViewActivity extends AppCompatActivity {
             }
         });
 
+        CompassVM vm = ViewModelProviders.of(this).get(CompassVM.class);
+        vm.getCompassLiveData().observe(this, new Observer<CompassEvent>() {
+            @Override
+            public void onChanged(@Nullable CompassEvent compassEvent) {
+                Log.d("SampleViewActivity", "Current azimuth " + compassEvent.getAzimuth());
+                dashboard.setCurrentAzimuth(compassEvent.getAzimuth());
+            }
+        });
+
     }
 
 
@@ -160,7 +174,6 @@ public class SampleViewActivity extends AppCompatActivity {
                 dashboard.setShowIgnitionIcon(true);
                 dashboard.setOnline(true);
                 dashboard.setVin("ABCD123454321ABCD");
-                dashboard.setCurrentAzimuth(a.nextInt(320));
             } else {
                 dashboard.setCurrentRPM(0);
                 dashboard.setCurrentSpeed(0);
@@ -169,7 +182,6 @@ public class SampleViewActivity extends AppCompatActivity {
                 dashboard.setShowIgnitionIcon(false);
                 dashboard.setOnline(false);
                 dashboard.setVin("EFGH123454321HGFE");
-                dashboard.setCurrentAzimuth(0);
 
             }
         } else if (i == R.id.enableDisableDribble) {

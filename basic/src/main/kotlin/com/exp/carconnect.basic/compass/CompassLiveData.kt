@@ -9,7 +9,7 @@ import android.hardware.SensorManager
 import android.widget.ImageView
 
 
-class LifeCycleAwareCompass : LiveData<CompassEvent>, SensorEventListener {
+class CompassLiveData : LiveData<CompassEvent>, SensorEventListener {
     companion object {
         private val TAG = "Compass"
     }

@@ -24,7 +24,4 @@ android {
 
 dependencies {
     implementation project(':basic')
-    implementation project(':base')
-    wearApp project(':wear')
-    implementation 'com.google.android.gms:play-services-wearable:+'
 }

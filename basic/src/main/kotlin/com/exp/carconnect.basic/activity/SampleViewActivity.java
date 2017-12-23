@@ -75,7 +75,7 @@ public class SampleViewActivity extends AppCompatActivity {
 
     private void initDashboard() {
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE);
-        setContentView(R.layout.activity_sample_dashboard);
+        setContentView(R.layout.activity_dashboard);
         dashboard = findViewById(R.id.dashboard);
         dashboard.setOnVINChangedListener(new Function1<String, Unit>() {
             @Override

@@ -132,7 +132,7 @@ internal abstract class Gauge(val dashboard: Dashboard,
     internal fun getDarkerColor(originalColor: Int): Int {
         val hsv = FloatArray(3)
         Color.colorToHSV(originalColor, hsv)
-        hsv[2] *= 0.6f // value component
+        hsv[2] *= 0.6f // value globalComponent
         return Color.HSVToColor(hsv)
     }
 }

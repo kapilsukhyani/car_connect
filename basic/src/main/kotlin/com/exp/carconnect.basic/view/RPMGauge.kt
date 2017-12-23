@@ -44,7 +44,7 @@ internal class RPMGauge(dashboard: Dashboard,
         private val INDICATOR_CIRCLE_STROKE_WIDTH = 10
         private val INDICATOR_STROKE_WIDTH = 25
 
-        private val DRIBBLE_RANGE = .2f
+        private val DRIBBLE_RANGE = .1f
         private val DRIBBLE_RANDOM = Random()
     }
 

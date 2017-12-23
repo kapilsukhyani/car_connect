@@ -1,1 +1,6 @@
-<resources></resources>
+<resources>
+    <string name="connect">Connect</string>
+    <string name="connection_status">Connection Status</string>
+    <string name="connection_failed">Connection Failed</string>
+    <string name="show_dashboard">Show Dashboard</string>
+</resources>

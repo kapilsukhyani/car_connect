@@ -1,4 +1,8 @@
 apply plugin: 'com.android.application'
+apply plugin: 'kotlin-android'
+apply plugin: 'kotlin-kapt'
+
+apply plugin: 'kotlin-android-extensions'
 
 android {
     compileSdkVersion 26
@@ -24,7 +28,4 @@ android {
 
 dependencies {
     implementation project(':basic')
-    implementation project(':base')
-    wearApp project(':wear')
-    implementation 'com.google.android.gms:play-services-wearable:+'
 }

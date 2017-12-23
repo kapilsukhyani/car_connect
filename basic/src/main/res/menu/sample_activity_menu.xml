@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/enableDisableTest"
+        android:enabled="true"
+        android:title="Enable/Disable Test"></item>
+    <item
+        android:id="@+id/onlineOffline"
+        android:enabled="true"
+        android:title="Online/Offline"></item>
+    <item
+        android:id="@+id/enableDisableDribble"
+        android:enabled="true"
+        android:title="Enable/Disable Dribble"></item>
+    <item
+        android:id="@+id/updateRPM"
+        android:enabled="true"
+        android:title="Update RPM"></item>
+    <item
+        android:id="@+id/updateSPEED"
+        android:enabled="true"
+        android:title="Update Speed"></item>
+    <item
+        android:id="@+id/updateFuel"
+        android:enabled="true"
+        android:title="Update Fuel"></item>
+</menu>

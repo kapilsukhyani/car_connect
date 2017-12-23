@@ -40,13 +40,12 @@ class SetupScreenVM(app: Application) : AndroidViewModel(app) {
     @Inject
     @field:Main
     lateinit var mainScheduler: Scheduler
-    
+
 
     fun initConnection() {
         mutableSetupStatusLiveData.value = SetupStatus.InProgress("Connecting to device")
         connect()?.let {
             socket = it
-            mutableSetupStatusLiveData.value = SetupStatus.InProgress("Setting up OBD subsystem")
             setupNewOBDConnectionComponent(it)
             startOBDInitialization()
         } ?: connectionFailed()
@@ -62,6 +61,7 @@ class SetupScreenVM(app: Application) : AndroidViewModel(app) {
         mutableSetupStatusLiveData.value = SetupStatus.InProgress("Sending init requests")
         subscriptions.add(
                 obdEngine.submit<OBDResponse>(SetupScreenVM.resetCommand)
+                        .observeOn(mainScheduler)
                         .doOnNext {
                             Log.d(DashboardActivity.TAG, "Got response ${it::class.java.simpleName}[${it.getFormattedResult()}]")
                             mutableSetupStatusLiveData.value = SetupStatus.InProgress(it.getFormattedResult())
@@ -70,8 +70,8 @@ class SetupScreenVM(app: Application) : AndroidViewModel(app) {
                             obdEngine
                                     .submit<OBDResponse>(SetupScreenVM.setupRequest)
                                     .delaySubscription(500, TimeUnit.MILLISECONDS)
+                                    .observeOn(mainScheduler)
                         }
-                        .observeOn(mainScheduler)
                         .subscribe(
                                 {
                                     Logger.log(SetupScreenVM.TAG, "Got response ${it::class.java.simpleName}[${it.getFormattedResult()}]")

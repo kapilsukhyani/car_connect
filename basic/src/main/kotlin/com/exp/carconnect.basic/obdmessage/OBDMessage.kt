@@ -27,6 +27,7 @@ abstract class OBDRequest(val tag: String,
                         is StoppedException,
                         is UnableToConnectException,
                         is BusInitException,
+                        is NoDataException,
                         is UnknownErrorException -> {
                             Logger.log("[$tag]", "caught retriable exception [$e], retrying")
                             true

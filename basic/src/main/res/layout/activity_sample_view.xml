@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:id="@+id/sampleViewContainer"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:orientation="horizontal">
+
+        <com.exp.carconnect.basic.view.SampleView
+            android:id="@+id/sampleView"
+            android:layout_width="200dp"
+            android:layout_height="200dp" />
+
+        <com.exp.carconnect.basic.view.SampleView
+            android:id="@+id/sampleView1"
+            android:layout_width="200dp"
+            android:layout_height="200dp" />
+    </LinearLayout>
+
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/sampleViewContainer"
+        android:layout_centerHorizontal="true"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/startAnimation"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Start View1 Animation" />
+
+        <Button
+            android:id="@+id/startAnimation1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Start View2 Animation" />
+    </LinearLayout>
+
+</RelativeLayout>

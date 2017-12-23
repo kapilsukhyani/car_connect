@@ -13,6 +13,7 @@ internal class FuelAndCompassGauge(dashboard: Dashboard,
                                    private val startAngle: Float,
                                    private val sweep: Float,
                                    currentFuelPercentage: Float,
+                                   currentAzimuth: Float,
                                    onlineColor: Int,
                                    offlineColor: Int) : RightGauge(dashboard, onlineColor, offlineColor) {
     companion object {
@@ -46,7 +47,15 @@ internal class FuelAndCompassGauge(dashboard: Dashboard,
             dashboard.invalidate()
             fuelPercentageChangedListener?.invoke(field)
         }
+
+    private var currentAzimuth = currentAzimuth
+        set(value) {
+            field = value
+            dashboard.invalidate()
+        }
+
     private var currentFuelAnimator: ObjectAnimator? = null
+    private var currentAzimuthAnimator: ObjectAnimator? = null
 
     init {
         compassPaint.style = Paint.Style.STROKE
@@ -63,6 +72,8 @@ internal class FuelAndCompassGauge(dashboard: Dashboard,
 
         fuelGaugeBoundary.style = Paint.Style.STROKE
         fuelGaugeBoundary.strokeWidth = FUEL_GAUGE_BOUNDARY_STROKE_WIDTH.toFloat()
+
+        compassIcon.setTint(onlineColor)
     }
 
     override fun onConnected() {
@@ -72,7 +83,6 @@ internal class FuelAndCompassGauge(dashboard: Dashboard,
         fuelGaugePaint.color = onlineColor
         compassTextPaint.color = onlineColor
         compassPaint.color = onlineColor
-
         fuelIcon.setTint(onlineColor)
 
     }
@@ -84,7 +94,6 @@ internal class FuelAndCompassGauge(dashboard: Dashboard,
         fuelGaugePaint.color = offlineColor
         compassTextPaint.color = offlineColor
         compassPaint.color = offlineColor
-
         fuelIcon.setTint(offlineColor)
     }
 
@@ -156,7 +165,10 @@ internal class FuelAndCompassGauge(dashboard: Dashboard,
         val compassBounds = Rect((bounds.centerX() - compassRadius).toInt(), (bounds.centerY() - compassRadius).toInt(),
                 (bounds.centerX() + compassRadius).toInt(), (bounds.centerY() + compassRadius).toInt())
         compassIcon.bounds = compassBounds
+        canvas.save()
+        canvas.rotate(currentAzimuth, bounds.centerX(), bounds.centerY())
         compassIcon.draw(canvas)
+        canvas.restore()
 
     }
 
@@ -169,5 +181,12 @@ internal class FuelAndCompassGauge(dashboard: Dashboard,
         }
         currentFuelAnimator = ObjectAnimator.ofFloat(this, "currentFuelPercentage", currentFuelPercentage, fuelVar)
         currentFuelAnimator?.start()
+    }
+
+    @SuppressLint("ObjectAnimatorBinding")
+    internal fun updateAzimuth(azimuth: Float) {
+        currentAzimuthAnimator?.cancel()
+        currentAzimuthAnimator = ObjectAnimator.ofFloat(this, "currentAzimuth", currentAzimuth, -azimuth)
+        currentAzimuthAnimator?.start()
     }
 }

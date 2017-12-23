@@ -144,6 +144,14 @@ class Dashboard @JvmOverloads constructor(context: Context, attrs: AttributeSet?
             }
         }
 
+    var currentAzimuth = 0.0f
+        set(value) {
+            if (value != field) {
+                fuelAndCompassGauge.updateAzimuth(value)
+                field = value
+            }
+        }
+
 
     private val onlineColor = getContext().getColor(android.R.color.holo_blue_bright)
     private val offlineColor = getContext().getColor(android.R.color.darker_gray)
@@ -163,7 +171,7 @@ class Dashboard @JvmOverloads constructor(context: Context, attrs: AttributeSet?
     private val rpmGauge = RPMGauge(this, LEFT_GAUGE_START_ANGLE.toFloat(), LEFT_GAUGE_SWEEP_ANGLE.toFloat(),
             rpmDribbleEnabled, currentRPM, onlineColor, offlineColor)
     private val fuelAndCompassGauge = FuelAndCompassGauge(this, RIGHT_GAUGE_START_ANGLE.toFloat(), RIGHT_GAUGE_SWEEP_ANGLE.toFloat(),
-            .01f, onlineColor, offlineColor)
+            .01f, currentAzimuth, onlineColor, offlineColor)
 
 
     init {

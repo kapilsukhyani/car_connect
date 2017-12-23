@@ -160,6 +160,7 @@ public class SampleViewActivity extends AppCompatActivity {
                 dashboard.setShowIgnitionIcon(true);
                 dashboard.setOnline(true);
                 dashboard.setVin("ABCD123454321ABCD");
+                dashboard.setCurrentAzimuth(a.nextInt(320));
             } else {
                 dashboard.setCurrentRPM(0);
                 dashboard.setCurrentSpeed(0);
@@ -168,6 +169,8 @@ public class SampleViewActivity extends AppCompatActivity {
                 dashboard.setShowIgnitionIcon(false);
                 dashboard.setOnline(false);
                 dashboard.setVin("EFGH123454321HGFE");
+                dashboard.setCurrentAzimuth(0);
+
             }
         } else if (i == R.id.enableDisableDribble) {
             dashboard.setRpmDribbleEnabled(!dashboard.getRpmDribbleEnabled());

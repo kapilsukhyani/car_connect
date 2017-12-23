@@ -40,23 +40,28 @@ class SetupScreenVM(app: Application) : AndroidViewModel(app) {
     @Inject
     @field:Main
     lateinit var mainScheduler: Scheduler
-
-    init {
-        (app as CarConnectApp).newConnectionComponent!!.inject(this)
-    }
-
+    
 
     fun initConnection() {
+        mutableSetupStatusLiveData.value = SetupStatus.InProgress("Connecting to device")
+        connect()?.let {
+            socket = it
+            mutableSetupStatusLiveData.value = SetupStatus.InProgress("Setting up OBD subsystem")
+            setupNewOBDConnectionComponent(it)
+            startOBDInitialization()
+        } ?: connectionFailed()
+
+
+    }
+
+    private fun connectionFailed() {
+        mutableSetupStatusLiveData.value = SetupStatus.InProgress("Could not connect")
+    }
+
+    private fun startOBDInitialization() {
+        mutableSetupStatusLiveData.value = SetupStatus.InProgress("Sending init requests")
         subscriptions.add(
                 obdEngine.submit<OBDResponse>(SetupScreenVM.resetCommand)
-                        .doOnSubscribe {
-                            mutableSetupStatusLiveData.value = SetupStatus.InProgress("Connecting to device")
-                            connect()?.let {
-                                socket = it
-                                mutableSetupStatusLiveData.value = SetupStatus.InProgress("Setting up OBD subsystem")
-                                setupNewOBDConnectionComponent(it)
-                            } ?: throw Exception("Could not connect to device")
-                        }
                         .doOnNext {
                             Log.d(DashboardActivity.TAG, "Got response ${it::class.java.simpleName}[${it.getFormattedResult()}]")
                             mutableSetupStatusLiveData.value = SetupStatus.InProgress(it.getFormattedResult())
@@ -95,6 +100,7 @@ class SetupScreenVM(app: Application) : AndroidViewModel(app) {
 
     private fun setupNewOBDConnectionComponent(socket: BluetoothSocket) {
         getApplication<CarConnectApp>().buildNewConnectionComponent(socket.inputStream, socket.outputStream)
+        getApplication<CarConnectApp>().newConnectionComponent!!.inject(this)
     }
 
     override fun onCleared() {

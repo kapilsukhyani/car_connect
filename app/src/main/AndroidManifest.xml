@@ -1,2 +1,5 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.exp.carconnect.app" />
+    package="com.exp.carconnect.app">
+
+    <application android:label="CarConnect"></application>
+</manifest>

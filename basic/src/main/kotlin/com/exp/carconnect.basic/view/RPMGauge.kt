@@ -258,9 +258,7 @@ internal class RPMGauge(dashboard: Dashboard,
         return startAngle + degreesPerDataPoint * currentRPM
     }
 
-    internal fun stopDribble() {
-        dribbleRPMAnimator?.cancel()
-    }
+
 
 
 }

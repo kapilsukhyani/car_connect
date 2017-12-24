@@ -199,8 +199,9 @@ class Dashboard @JvmOverloads constructor(context: Context, attrs: AttributeSet?
 
         addOnAttachStateChangeListener(object : OnAttachStateChangeListener {
             override fun onViewDetachedFromWindow(v: View?) {
-                rpmGauge.stopDribble()
-                speedometerGauge.stopDribble()
+                //todo this logic needs to be updated to stop dribble
+                currentRPM = 0.0f
+                currentSpeed = 0.0f
             }
 
             override fun onViewAttachedToWindow(v: View?) {

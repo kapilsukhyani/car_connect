@@ -35,9 +35,9 @@ class OBDDashboardVM(app: Application) : AndroidViewModel(app) {
                 IsRepeatable.Yes(50, TimeUnit.MILLISECONDS))
     }
 
-    private val mutableDashboardLiveData: MutableLiveData<OBDDashboard> = MutableLiveData()
+    private val obdResponseLiveData: MutableLiveData<OBDDashboard> = MutableLiveData()
     private val compassLiveData = Transformations.map<CompassEvent, OBDDashboard>(CompassLiveData(app),
-            { compassEvent -> mutableDashboardLiveData.value?.copy(currentAzimuth = compassEvent.azimuth) })
+            { compassEvent -> obdResponseLiveData.value?.copy(currentAzimuth = compassEvent.azimuth) })
     val dashboardLiveData: MediatorLiveData<OBDDashboard> = MediatorLiveData()
 
 
@@ -51,23 +51,29 @@ class OBDDashboardVM(app: Application) : AndroidViewModel(app) {
 
 
     init {
+        val initialSnapshot = OBDDashboard()
+
         (app as CarConnectApp).newConnectionComponent!!.inject(this)
         dashboardLiveData.addSource(compassLiveData, { dashboardLiveData.value = it })
-        dashboardLiveData.addSource(dashboardLiveData, { dashboardLiveData.value = it })
-        mutableDashboardLiveData.value = OBDDashboard()
+        dashboardLiveData.addSource(obdResponseLiveData, {
+            dashboardLiveData.value = it?.copy(currentAzimuth =
+            dashboardLiveData.value!!.currentAzimuth)
+        })
+        obdResponseLiveData.value = initialSnapshot
+        dashboardLiveData.value = initialSnapshot
         startListeningToData()
     }
 
     private fun startListeningToData() {
         subscriptions.add(obdEngine.submit<VinResponse>(vinRequest)
                 .observeOn(mainScheduler)
-                .subscribe({ it -> mutableDashboardLiveData.value = mutableDashboardLiveData.value?.copy(vin = it.vin) },
+                .subscribe({ it -> obdResponseLiveData.value = obdResponseLiveData.value?.copy(vin = it.vin) },
                         { it -> Logger.log(TAG, "exception while loading vin", it) },
                         { Logger.log(TAG, "Vin loader completed") }))
 
         subscriptions.add(obdEngine.submit<FuelLevelResponse>(fuelLevelRequest)
                 .observeOn(mainScheduler)
-                .subscribe({ it -> mutableDashboardLiveData.value = mutableDashboardLiveData.value?.copy(fuel = it.fuelLevel / FUEL_FACTOR) },
+                .subscribe({ it -> obdResponseLiveData.value = obdResponseLiveData.value?.copy(fuel = it.fuelLevel / FUEL_FACTOR) },
                         { it -> Logger.log(TAG, "exception while loading fuel", it) },
                         { Logger.log(TAG, "Fuel loader completed") }))
 
@@ -76,19 +82,19 @@ class OBDDashboardVM(app: Application) : AndroidViewModel(app) {
                 .subscribe({ response ->
                     when (response) {
                         is SpeedResponse -> {
-                            mutableDashboardLiveData.value = mutableDashboardLiveData.value?.copy(speed = response.metricSpeed.toFloat())
+                            obdResponseLiveData.value = obdResponseLiveData.value?.copy(speed = response.metricSpeed.toFloat())
                         }
 
                         is RPMResponse -> {
-                            mutableDashboardLiveData.value = mutableDashboardLiveData.value?.copy(rpm = response.rpm / RPM_FACTOR)
+                            obdResponseLiveData.value = obdResponseLiveData.value?.copy(rpm = response.rpm / RPM_FACTOR)
                         }
 
                         is IgnitionMonitorResponse -> {
-                            mutableDashboardLiveData.value = mutableDashboardLiveData.value?.copy(ignition = response.ignitionOn)
+                            obdResponseLiveData.value = obdResponseLiveData.value?.copy(ignition = response.ignitionOn)
                         }
 
                         is DTCNumberResponse -> {
-                            mutableDashboardLiveData.value = mutableDashboardLiveData.value?.copy(checkEngineLight = response.milOn)
+                            obdResponseLiveData.value = obdResponseLiveData.value?.copy(checkEngineLight = response.milOn)
                         }
 
                     }

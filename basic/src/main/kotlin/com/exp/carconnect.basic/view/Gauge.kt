@@ -10,7 +10,7 @@ internal abstract class Gauge(val dashboard: Dashboard,
         val GAUGE_STROKE_WIDTH = 20f
     }
 
-    protected val gaugePaint: Paint = Paint(Paint.ANTI_ALIAS_FLAG);
+    protected val gaugePaint: Paint = Paint(Paint.ANTI_ALIAS_FLAG)
 
     var connected: Boolean = false
         set(value) {
@@ -22,16 +22,10 @@ internal abstract class Gauge(val dashboard: Dashboard,
         }
 
     init {
-//        if (connected) {
-//            onConnected()
-//        } else {
-//            onDisconnected()
-//        }
-
-
         gaugePaint.style = Paint.Style.STROKE
         gaugePaint.strokeWidth = GAUGE_STROKE_WIDTH
-        gaugePaint.maskFilter = BlurMaskFilter(.5f, BlurMaskFilter.Blur.OUTER)
+//        gaugePaint.maskFilter = BlurMaskFilter(30f, BlurMaskFilter.Blur.OUTER)
+        gaugePaint.maskFilter = EmbossMaskFilter(floatArrayOf(1f, 5f, 1f), 0.8f, 6.0f, 20.0f)
     }
 
     open fun onConnected() {

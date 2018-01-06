@@ -4,12 +4,28 @@
 
     <uses-permission android:name="android.permission.BLUETOOTH" />
     <application android:name=".CarConnectApp">
-        <activity
-            android:name=".activity.DashboardActivity"
-            android:screenOrientation="landscape"
-            android:theme="@style/Theme.AppCompat.DayNight">
 
+
+        <activity
+            android:name=".activity.TestActivity"
+            android:hardwareAccelerated="true"
+            android:theme="@style/Theme.AppCompat.DayNight" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
         </activity>
+        <activity
+            android:name=".activity.DashboardSimulatorActivity"
+            android:theme="@style/Theme.AppCompat.DayNight">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
         <activity
             android:name=".activity.SetupActivity"
             android:theme="@style/Theme.AppCompat.DayNight">
@@ -19,16 +35,13 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
         <activity
-            android:name=".activity.SampleViewActivity"
+            android:name=".activity.DashboardActivity"
+            android:screenOrientation="landscape"
             android:theme="@style/Theme.AppCompat.DayNight">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
 
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
         </activity>
+
     </application>
 
 </manifest>

@@ -93,6 +93,8 @@ internal class RPMGauge(dashboard: Dashboard,
         tickMarkerPaint.typeface = Typeface.create(Typeface.DEFAULT, Typeface.BOLD)
         tickMarkerPaint.textAlign = Paint.Align.CENTER
 
+        tickPaint.maskFilter = EmbossMaskFilter(floatArrayOf(1f, 5f, 1f), 0.8f, 6.0f, 20.0f)
+
         rpmTextPaint.textLocale = Locale.US
         rpmTextPaint.typeface = Typeface.create(Typeface.DEFAULT, Typeface.BOLD)
         rpmTextPaint.textAlign = Paint.Align.CENTER
@@ -142,7 +144,6 @@ internal class RPMGauge(dashboard: Dashboard,
 
     override fun drawGauge(canvas: Canvas, bounds: RectF) {
         canvas.drawArc(bounds, startAngle, sweep, false, gaugePaint)
-
 
         val normalZoneStartAngle = startAngle
         val normalZoneSweep = sweep - CRITICAL_ANGLE_SWEEP
@@ -257,8 +258,6 @@ internal class RPMGauge(dashboard: Dashboard,
     private fun getDegreesForCurrentRPM(): Float {
         return startAngle + degreesPerDataPoint * currentRPM
     }
-
-
 
 
 }

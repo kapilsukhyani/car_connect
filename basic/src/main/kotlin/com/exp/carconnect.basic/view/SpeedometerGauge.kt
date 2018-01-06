@@ -119,6 +119,8 @@ internal class SpeedometerGauge(dashboard: Dashboard,
         tickMarkerPaint.typeface = Typeface.create(Typeface.DEFAULT, Typeface.BOLD)
         tickMarkerPaint.textAlign = Paint.Align.CENTER
 
+        tickPaint.maskFilter = EmbossMaskFilter(floatArrayOf(1f, 5f, 1f), 0.8f, 6.0f, 20.0f)
+
 
         checkEngineLightIcon.setTint(inActiveIconColor)
         ignitionIcon.setTint(inActiveIconColor)

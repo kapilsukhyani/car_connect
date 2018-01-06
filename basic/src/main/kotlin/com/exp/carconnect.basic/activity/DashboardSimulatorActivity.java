@@ -1,6 +1,5 @@
 package com.exp.carconnect.basic.activity;
 
-import android.annotation.SuppressLint;
 import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.pm.ActivityInfo;
@@ -12,23 +11,19 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
 
 import com.exp.carconnect.basic.R;
 import com.exp.carconnect.basic.compass.CompassEvent;
 import com.exp.carconnect.basic.view.Dashboard;
-import com.exp.carconnect.basic.view.SampleView;
 import com.exp.carconnect.basic.viewmodel.CompassVM;
 
 import java.util.Random;
-import java.util.Timer;
-import java.util.TimerTask;
 
 import kotlin.Unit;
 import kotlin.jvm.functions.Function1;
 
 
-public class SampleViewActivity extends AppCompatActivity {
+public class DashboardSimulatorActivity extends AppCompatActivity {
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     @Override
@@ -39,43 +34,6 @@ public class SampleViewActivity extends AppCompatActivity {
 
     private Dashboard dashboard = null;
     final Random a = new Random();
-
-    private void initSampleView() {
-        setContentView(R.layout.activity_sample_view);
-        final SampleView sampleView = findViewById(R.id.sampleView);
-        final SampleView sampleView1 = findViewById(R.id.sampleView1);
-        final Random random = new Random();
-        findViewById(R.id.startAnimation).setOnClickListener(new View.OnClickListener() {
-            @SuppressLint("NewApi")
-            @Override
-            public void onClick(View v) {
-                sampleView.setPoint(random.nextInt(100));
-
-            }
-        });
-        findViewById(R.id.startAnimation1).setOnClickListener(new View.OnClickListener() {
-            @SuppressLint("NewApi")
-            @Override
-            public void onClick(View v) {
-                sampleView1.setPoint(random.nextInt(100));
-
-            }
-        });
-        TimerTask timerTask = new TimerTask() {
-            @Override
-            public void run() {
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        sampleView.setPoint(random.nextInt(100));
-                        sampleView1.setPoint(random.nextInt(100));
-                    }
-                });
-            }
-        };
-        Timer timer = new Timer();
-        timer.scheduleAtFixedRate(timerTask, 1000, 100);
-    }
 
 
     private void initDashboard() {

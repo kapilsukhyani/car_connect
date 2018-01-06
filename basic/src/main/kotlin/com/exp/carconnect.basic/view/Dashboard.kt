@@ -55,9 +55,14 @@ class Dashboard @JvmOverloads constructor(context: Context, attrs: AttributeSet?
     }
 
 
-    private var viewCenter: PointF? = null
+    private lateinit var viewCenter: PointF
+    private lateinit var middleGaugeBounds: RectF
+    private lateinit var leftGaugeBounds: RectF
+    private lateinit var rightGaugeBounds: RectF
+    private lateinit var labelBoundsOnCanvas: RectF
     private var middleGaugeRadius: Float = 0.toFloat()
     private var sideGaugeRadius: Float = 0.toFloat()
+
     var onOnlineChangedListener: ((Boolean) -> Unit)? = null
     var onVINChangedListener: ((String) -> Unit)? = null
 
@@ -159,6 +164,7 @@ class Dashboard @JvmOverloads constructor(context: Context, attrs: AttributeSet?
     private val vinOnlineColor = context.getColor(android.R.color.holo_orange_dark)
     private val vinOfflineColor = context.getColor(android.R.color.white)
     private val labelColor = context.getColor(android.R.color.holo_blue_dark)
+    private val gaugeBGPaint = Paint(Paint.ANTI_ALIAS_FLAG)
     private val vinPaint = TextPaint(Paint.ANTI_ALIAS_FLAG)
     private val labelPaint = TextPaint(Paint.ANTI_ALIAS_FLAG)
     private val labelBound: Rect = Rect()
@@ -179,9 +185,13 @@ class Dashboard @JvmOverloads constructor(context: Context, attrs: AttributeSet?
     }
 
     private fun init() {
+//        setLayerType(LAYER_TYPE_SOFTWARE, null)
 
         gaugeBackgroundDrawable.isCircular = true
         background = context.getDrawable(R.drawable.dashboard_bg)
+
+        gaugeBGPaint.shader = BitmapShader((context.getDrawable(R.drawable.gauge_bg) as BitmapDrawable).bitmap, Shader.TileMode.REPEAT, Shader.TileMode.REPEAT)
+        gaugeBGPaint.style = Paint.Style.FILL
 
         vinPaint.textLocale = Locale.US
         vinPaint.typeface = Typeface.create(Typeface.DEFAULT, Typeface.BOLD)
@@ -190,8 +200,7 @@ class Dashboard @JvmOverloads constructor(context: Context, attrs: AttributeSet?
         labelPaint.textLocale = Locale.US
         labelPaint.typeface = Typeface.create(ResourcesCompat.getFont(context, R.font.atomic_age), Typeface.BOLD)
         labelPaint.color = labelColor
-//        val direction = floatArrayOf(0.0f, -1.0f, 0.5f)
-//        labelPaint.maskFilter = EmbossMaskFilter(direction, 0.8f, 15f, 1f)
+
         labelPaint.textSize = LABEL_REFERENCE_TEXT_SIZE
         labelPaint.getTextBounds(LABEL_TEXT, 0, LABEL_TEXT.length, labelBound)
 
@@ -207,14 +216,14 @@ class Dashboard @JvmOverloads constructor(context: Context, attrs: AttributeSet?
             override fun onViewAttachedToWindow(v: View?) {
             }
         })
+
+
     }
 
-
-    //todo improve this and avoid allocation in onDraw
-    @SuppressLint("DrawAllocation")
-    override fun onDraw(canvas: Canvas) {
-        val width = width.toFloat()
-        val height = height.toFloat()
+    override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
+        super.onSizeChanged(w, h, oldw, oldh)
+        val width = w.toFloat()
+        val height = h.toFloat()
         val remainingWidthAfterPadding = width - paddingLeft.toFloat() - paddingRight.toFloat()
         val remainingHeihtAfterPadding = height - paddingTop.toFloat() - paddingBottom.toFloat()
         //todo view's height should be at least 45% of width, which is middle gauge diameter requirement or I should consider height into consideration before finalizing gauges diameter
@@ -223,25 +232,30 @@ class Dashboard @JvmOverloads constructor(context: Context, attrs: AttributeSet?
         middleGaugeRadius = remainingWidthAfterPadding * MIDDLE_GAUGE_WIDTH_PERCENTAGE / 2
         sideGaugeRadius = remainingWidthAfterPadding * LEFT_GAUGE_WIDTH_PERCENTAGE / 2
 
-        val middleGaugeBounds = RectF(viewCenter!!.x - middleGaugeRadius, viewCenter!!.y - middleGaugeRadius,
+        middleGaugeBounds = RectF(viewCenter!!.x - middleGaugeRadius, viewCenter!!.y - middleGaugeRadius,
                 viewCenter!!.x + middleGaugeRadius, viewCenter!!.y + middleGaugeRadius)
 
         val leftGaugeStartPoint = Math.ceil(middleGaugeBounds.left - sideGaugeRadius * Math.sqrt(2.0)).toInt()
-        val leftGaugeBounds = RectF(leftGaugeStartPoint.toFloat(), viewCenter!!.y - sideGaugeRadius,
+        leftGaugeBounds = RectF(leftGaugeStartPoint.toFloat(), viewCenter!!.y - sideGaugeRadius,
                 leftGaugeStartPoint + 2 * sideGaugeRadius, viewCenter!!.y + sideGaugeRadius)
 
         val rightGaugeEndpoint = Math.ceil(middleGaugeBounds.right + sideGaugeRadius * Math.sqrt(2.0)).toInt()
-        val rightGaugeBounds = RectF(rightGaugeEndpoint - 2 * sideGaugeRadius, viewCenter!!.y - sideGaugeRadius,
+        rightGaugeBounds = RectF(rightGaugeEndpoint - 2 * sideGaugeRadius, viewCenter!!.y - sideGaugeRadius,
                 rightGaugeEndpoint.toFloat(), viewCenter!!.y + sideGaugeRadius)
-
-        drawGaugeBackgrounds(canvas, middleGaugeBounds, leftGaugeBounds, rightGaugeBounds)
-        drawGauges(canvas, middleGaugeBounds, leftGaugeBounds, rightGaugeBounds)
-        drawVin(canvas, middleGaugeBounds)
 
         val availableHeight = (remainingHeihtAfterPadding - (2 * sideGaugeRadius)) / 2
         val margin = availableHeight * DASHBOARD_LABEL_MARGIN_PERCENTAGE_OF_AVAILABLE_HEIGHT
-        val labelBoundsOnCanvas = RectF(margin, viewCenter!!.y + sideGaugeRadius + margin,
+        labelBoundsOnCanvas = RectF(margin, viewCenter!!.y + sideGaugeRadius + margin,
                 labelBound.width().toFloat(), viewCenter!!.y + sideGaugeRadius + availableHeight - margin)
+    }
+
+
+    //todo improve this and avoid allocation in onDraw
+    @SuppressLint("DrawAllocation")
+    override fun onDraw(canvas: Canvas) {
+        drawGaugeBackgrounds(canvas, middleGaugeBounds, leftGaugeBounds, rightGaugeBounds)
+        drawGauges(canvas, middleGaugeBounds, leftGaugeBounds, rightGaugeBounds)
+        drawVin(canvas, middleGaugeBounds)
         drawLabel(canvas, labelBoundsOnCanvas)
     }
 

@@ -44,14 +44,14 @@ internal class FuelAndCompassGauge(dashboard: Dashboard,
             } else {
                 value
             }
-            dashboard.invalidate()
+            dashboard.invalidateFuelGauge()
             fuelPercentageChangedListener?.invoke(field)
         }
 
     internal var currentAzimuth = currentAzimuth
         set(value) {
             field = value
-            dashboard.invalidate()
+            dashboard.invalidateFuelGauge()
         }
 
     private lateinit var fuelGaugeInnerBound: RectF

@@ -54,19 +54,19 @@ internal class SpeedometerGauge(dashboard: Dashboard,
     private var currentSpeed: Float = currentSpeed
         set(value) {
             field = value
-            dashboard.invalidate()
+            dashboard.invalidateSpeedometerGauge()
             speedChangedListener?.invoke(field)
         }
     internal var showIgnitionIcon: Boolean = showIgnitionIcon
         set(value) {
             field = value
-            dashboard.invalidate()
+            dashboard.invalidateSpeedometerGauge()
             ignitionIconChangedListener?.invoke(field)
         }
     internal var showCheckEngineLight: Boolean = showCheckEngineLight
         set(value) {
             field = value
-            dashboard.invalidate()
+            dashboard.invalidateSpeedometerGauge()
             checkEngineLightChangedListener?.invoke(field)
         }
 
@@ -76,10 +76,10 @@ internal class SpeedometerGauge(dashboard: Dashboard,
             if (value) {
                 dribble()
             } else {
-                dribbleSpeedAnimator?.cancel()
-                dribbleSpeedAnimator = null
+                cancelDribble()
             }
         }
+
 
     private var degreesPerDataPoint = sweep / MAX_SPEED
     private var currentSpeedAnimator: ObjectAnimator? = null
@@ -151,6 +151,8 @@ internal class SpeedometerGauge(dashboard: Dashboard,
         tickMarkerPaint.color = offlineColor
 
         indicatorIcon.setTint(offlineColor)
+
+        cancelDribble()
     }
 
     override fun onConnected() {
@@ -162,6 +164,8 @@ internal class SpeedometerGauge(dashboard: Dashboard,
         tickMarkerPaint.color = onlineColor
 
         indicatorIcon.setTint(onlineColor)
+
+        dribble()
     }
 
     override fun onBoundChanged(bounds: RectF) {
@@ -295,7 +299,7 @@ internal class SpeedometerGauge(dashboard: Dashboard,
         return startAngle + degreesPerDataPoint * currentSpeed
     }
 
-    internal fun dribble() {
+    private fun dribble() {
         if (speedDribbleEnabled && dashboard.currentSpeed > MIN_SPEED && dashboard.online) {
             val dribbleBy = DRIBBLE_RANDOM.nextFloat() * (DRIBBLE_RANGE - 0.0f) + 0.0f
             dribbleSpeedAnimator = ObjectAnimator.ofFloat(this, "currentSpeed", currentSpeed, dashboard.currentSpeed + dribbleBy,
@@ -304,6 +308,11 @@ internal class SpeedometerGauge(dashboard: Dashboard,
             dribbleSpeedAnimator?.repeatCount = ObjectAnimator.INFINITE
             dribbleSpeedAnimator?.start()
         }
+    }
+
+    private fun cancelDribble() {
+        dribbleSpeedAnimator?.cancel()
+        dribbleSpeedAnimator = null
     }
 
     @SuppressLint("ObjectAnimatorBinding")

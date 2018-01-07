@@ -63,6 +63,8 @@ class Dashboard @JvmOverloads constructor(context: Context, attrs: AttributeSet?
     private var middleGaugeRadius: Float = 0.0f
     private var sideGaugeRadius: Float = 0.0f
     private var vinCharSize: Float = 0.0f
+    private val transientRect = Rect()
+
 
     var onOnlineChangedListener: ((Boolean) -> Unit)? = null
     var onVINChangedListener: ((String) -> Unit)? = null
@@ -113,14 +115,6 @@ class Dashboard @JvmOverloads constructor(context: Context, attrs: AttributeSet?
                 field = value
                 adoptOnlineStatus()
                 invalidate()
-                if (value) {
-                    if (rpmDribbleEnabled) {
-                        rpmGauge.dribble()
-                    }
-                    if (speedDribbleEnabled) {
-                        speedometerGauge.dribble()
-                    }
-                }
                 onOnlineChangedListener?.invoke(field)
             }
         }
@@ -129,7 +123,7 @@ class Dashboard @JvmOverloads constructor(context: Context, attrs: AttributeSet?
         set(value) {
             if (value.length == 17 && value != field) {
                 field = value
-                invalidate()
+                invalidateSpeedometerGauge()
                 onVINChangedListener?.invoke(field)
             }
         }
@@ -335,6 +329,22 @@ class Dashboard @JvmOverloads constructor(context: Context, attrs: AttributeSet?
             fuelAndCompassGauge.onDisconnected()
 
         }
+    }
+
+    internal fun invalidateSpeedometerGauge() {
+        middleGaugeBounds.round(transientRect)
+        invalidate(transientRect)
+    }
+
+    internal fun invalidateRPMGauge() {
+        leftGaugeBounds.round(transientRect)
+        invalidate(transientRect)
+    }
+
+
+    internal fun invalidateFuelGauge() {
+        rightGaugeBounds.round(transientRect)
+        invalidate(transientRect)
     }
 
     override fun onSaveInstanceState(): Parcelable {

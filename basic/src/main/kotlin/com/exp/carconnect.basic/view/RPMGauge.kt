@@ -65,8 +65,7 @@ internal class RPMGauge(dashboard: Dashboard,
             if (value) {
                 dribble()
             } else {
-                dribbleRPMAnimator?.cancel()
-                dribbleRPMAnimator = null
+                cancelDribble()
             }
         }
 
@@ -74,7 +73,7 @@ internal class RPMGauge(dashboard: Dashboard,
     private var currentRPM = currentRPM
         set(value) {
             field = value
-            dashboard.invalidate()
+            dashboard.invalidateRPMGauge()
             rpmChangedListener?.invoke(field)
         }
 
@@ -136,6 +135,7 @@ internal class RPMGauge(dashboard: Dashboard,
         indicatorPaint.color = onlineColor
         indicatorPaint.shader = LinearGradient(0f, 0f, 100f, 100f, onlineColor, onlineGradientColor, Shader.TileMode.MIRROR)
         indicatorPaint.setShadowLayer(20f, 0f, 0f, onlineColor)
+        dribble()
     }
 
     override fun onDisconnected() {
@@ -151,6 +151,7 @@ internal class RPMGauge(dashboard: Dashboard,
         indicatorPaint.color = offlineColor
         indicatorPaint.shader = LinearGradient(0f, 0f, 100f, 100f, offlineColor, offlineGradientColor, Shader.TileMode.MIRROR)
         indicatorPaint.setShadowLayer(20f, 0f, 0f, offlineColor)
+        cancelDribble()
     }
 
 
@@ -220,7 +221,7 @@ internal class RPMGauge(dashboard: Dashboard,
     }
 
 
-    internal fun dribble() {
+    private fun dribble() {
         if (rpmDribbleEnabled && dashboard.currentRPM > MIN_RPM && dashboard.online) {
             val dribbleBy = DRIBBLE_RANDOM.nextFloat() * (DRIBBLE_RANGE - 0.0f) + 0.0f
             dribbleRPMAnimator = ObjectAnimator.ofFloat(this, "currentRPM", currentRPM, dashboard.currentRPM + dribbleBy,
@@ -229,6 +230,11 @@ internal class RPMGauge(dashboard: Dashboard,
             dribbleRPMAnimator?.repeatCount = ObjectAnimator.INFINITE
             dribbleRPMAnimator?.start()
         }
+    }
+
+    private fun cancelDribble() {
+        dribbleRPMAnimator?.cancel()
+        dribbleRPMAnimator = null
     }
 
     @SuppressLint("ObjectAnimatorBinding")

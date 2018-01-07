@@ -38,6 +38,8 @@ internal abstract class Gauge(val dashboard: Dashboard,
 
     }
 
+    abstract fun onBoundChanged(bounds: RectF)
+
     abstract fun drawGauge(canvas: Canvas, bounds: RectF)
 
     internal fun drawTicks(canvas: Canvas, bounds: RectF,

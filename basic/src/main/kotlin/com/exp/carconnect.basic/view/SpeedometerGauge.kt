@@ -101,6 +101,22 @@ internal class SpeedometerGauge(dashboard: Dashboard,
     private val inActiveIconColor = dashboard.context.getColor(android.R.color.darker_gray)
     private val speedTextColor = dashboard.context.getColor(android.R.color.black)
 
+
+    private lateinit var innerCircleBound: RectF
+    private lateinit var speedTextStripPath: Path
+    private var innerCircleRadius: Float = 0.0f
+    private lateinit var ignitionIconBounds: Rect
+    private lateinit var checkEngineLightBounds: Rect
+    private lateinit var indicatorBound: Rect
+    private var bigTickLength: Float = 0.0f
+    private var bigTickWidth: Float = 0.0f
+
+    private var smallTickLength: Float = 0.0f
+    private var smallTickWidth: Float = 0.0f
+
+    private var textSize: Float = 0.0f
+    private var testSizeMargin: Float = 0.0f
+
     init {
         innerCirclePaint.style = Paint.Style.STROKE
         innerCirclePaint.strokeWidth = INNER_CIRCLE_STROKE_WIDTH.toFloat()
@@ -148,20 +164,67 @@ internal class SpeedometerGauge(dashboard: Dashboard,
         indicatorIcon.setTint(onlineColor)
     }
 
-
-    override fun drawGauge(canvas: Canvas, bounds: RectF) {
-        canvas.drawArc(bounds, startAngle, sweep, false, gaugePaint)
+    override fun onBoundChanged(bounds: RectF) {
         val gaugeCircumference = (2.0 * Math.PI * (bounds.width() / 2).toDouble()).toFloat()
 
         //draw ticks
-        val bigTickLength = bounds.width() * BIG_TICK_LENGTH_PERCENTAGE
-        val bigTickWidth = gaugeCircumference * BIG_TICK_WIDTH_PERCENTAGE
+        bigTickLength = bounds.width() * BIG_TICK_LENGTH_PERCENTAGE
+        bigTickWidth = gaugeCircumference * BIG_TICK_WIDTH_PERCENTAGE
 
-        val smallTickLength = bounds.width() * SMALL_TICK_LENGTH_PERCENTAGE
-        val smallTickWidth = gaugeCircumference * SMALL_TICK_WIDTH_PERCENTAGE
+        smallTickLength = bounds.width() * SMALL_TICK_LENGTH_PERCENTAGE
+        smallTickWidth = gaugeCircumference * SMALL_TICK_WIDTH_PERCENTAGE
 
-        val textSize = bounds.width() * TICK_MARKER_TEXT_SIZE_PERCENTAGE
-        val testSizeMargin = bounds.width() * TICK_MARKER_MARGIN_PERCENTAGE
+        textSize = bounds.width() * TICK_MARKER_TEXT_SIZE_PERCENTAGE
+        testSizeMargin = bounds.width() * TICK_MARKER_MARGIN_PERCENTAGE
+
+
+        val reduceWidthAndHeightBy = bounds.width() * (1 - INNER_CIRCLE_WIDTH_PERCENTAGE) / 2
+        innerCircleBound = RectF(bounds)
+        innerCircleBound.inset(reduceWidthAndHeightBy, reduceWidthAndHeightBy)
+
+        //draw strip and current speed
+        innerCircleRadius = innerCircleBound.width() / 2
+        val currentSpeedText = String.format("%.2f", currentSpeed) + " " + DEFAULT_SPEED_UNIT
+        val textBound = Rect()
+        speedTextPaint.textSize = bounds.width() * CURRENT_SPEED_TEXT_SIZE_PERCENTAGE
+        speedTextPaint.getTextBounds(currentSpeedText, 0, currentSpeedText.length, textBound)
+
+
+        val textHeightToRadiusRatio = textBound.height() / innerCircleRadius
+
+        //2r = 180 degrees, i.e. r/2 = 45 degrees
+        //todo startdegree is suppose to be 45 degrees, not sure why 33 degrees making it work properly
+        val startDegree = 33f
+        val sweep = 90 * textHeightToRadiusRatio
+        //draw strip
+        speedTextStripPath = Path()
+        speedTextStripPath.arcTo(innerCircleBound, startDegree, -sweep)
+        speedTextStripPath.arcTo(innerCircleBound, 180 - startDegree + sweep, -sweep)
+        speedTextStripPath.close()
+
+
+        val ignitionIconDimen = bounds.width() * IGNITION_DIMEN_PERCENTAGE
+        ignitionIconBounds = Rect((innerCircleBound.centerX() - innerCircleRadius / 2 - ignitionIconDimen / 2).toInt(),
+                (innerCircleBound.centerY() - innerCircleRadius / 2 - ignitionIconDimen / 2).toInt(),
+                (innerCircleBound.centerX() - innerCircleRadius / 2 + ignitionIconDimen / 2).toInt(),
+                (innerCircleBound.centerY() - innerCircleRadius / 2 + ignitionIconDimen / 2).toInt())
+
+        val checkEngineLightDimen = bounds.width() * CHECK_ENGINE_LIGHT_DIMEN_PERCENTAGE
+        checkEngineLightBounds = Rect((innerCircleBound.centerX() + innerCircleRadius / 2 - checkEngineLightDimen / 2).toInt(),
+                (innerCircleBound.centerY() - innerCircleRadius / 2 - checkEngineLightDimen / 2).toInt(),
+                (innerCircleBound.centerX() + innerCircleRadius / 2 + checkEngineLightDimen / 2).toInt(),
+                (innerCircleBound.centerY() - innerCircleRadius / 2 + checkEngineLightDimen / 2).toInt())
+
+        val indicatorDimen = bounds.width() * INDICATOR_DIMEN_PERCENTAGE
+        indicatorBound = Rect((innerCircleBound.centerX() + innerCircleBound.width() / 2).toInt(),
+                (innerCircleBound.centerY() - indicatorDimen / 2).toInt(),
+                (innerCircleBound.centerX() + innerCircleBound.width() / 2 + indicatorDimen).toInt(),
+                (innerCircleBound.centerY() + indicatorDimen / 2).toInt())
+    }
+
+
+    override fun drawGauge(canvas: Canvas, bounds: RectF) {
+        canvas.drawArc(bounds, startAngle, sweep, false, gaugePaint)
 
         drawTicks(canvas, bounds, startAngle,
                 sweep / (TOTAL_NO_OF_TICKS - 1),
@@ -178,66 +241,27 @@ internal class SpeedometerGauge(dashboard: Dashboard,
     private fun drawMiddleGaugeInnerCircle(canvas: Canvas, bounds: RectF) {
 
         //draw inner circle
-        val reduceWidthAndHeightBy = bounds.width() * (1 - INNER_CIRCLE_WIDTH_PERCENTAGE) / 2
-        val innerCircleBound = RectF(bounds)
-        innerCircleBound.inset(reduceWidthAndHeightBy, reduceWidthAndHeightBy)
         canvas.drawCircle(innerCircleBound.centerX(), innerCircleBound.centerY(),
                 innerCircleBound.width() / 2, innerCirclePaint)
 
-
-        //draw strip and current speed
-        val innerCircleRadius = innerCircleBound.width() / 2
-
         //calculate Text Bounds
-        val currentSpeedText = String.format("%.2f", currentSpeed) + " " + DEFAULT_SPEED_UNIT
-        val textBound = Rect()
-        speedTextPaint.textSize = bounds.width() * CURRENT_SPEED_TEXT_SIZE_PERCENTAGE
-        speedTextPaint.getTextBounds(currentSpeedText, 0, currentSpeedText.length, textBound)
+        val formattedSpeed = String.format("%.2f", currentSpeed)
+        val currentSpeedText = "$formattedSpeed $DEFAULT_SPEED_UNIT"
 
-
-        val textHeightToRadiusRatio = textBound.height() / innerCircleRadius
-
-        //2r = 180 degrees, i.e. r/2 = 45 degrees
-        //todo startdegree is suppose to be 45 degrees, not sure why 33 degrees making it work properly
-        val startDegree = 33f
-        val sweep = 90 * textHeightToRadiusRatio
-        //draw strip
-        val path = Path()
-        path.arcTo(innerCircleBound, startDegree, -sweep)
-        path.arcTo(innerCircleBound, 180 - startDegree + sweep, -sweep)
-        path.close()
-
-        canvas.drawPath(path, speedStripPaint)
+        canvas.drawPath(speedTextStripPath, speedStripPaint)
         canvas.drawText(currentSpeedText, innerCircleBound.centerX(),
                 innerCircleBound.centerY() + innerCircleRadius / 2, speedTextPaint)
 
 
         //draw check engine light
-        val ignitionIconDimen = bounds.width() * IGNITION_DIMEN_PERCENTAGE
-        val ignitionIconBounds = Rect((innerCircleBound.centerX() - innerCircleRadius / 2 - ignitionIconDimen / 2).toInt(),
-                (innerCircleBound.centerY() - innerCircleRadius / 2 - ignitionIconDimen / 2).toInt(),
-                (innerCircleBound.centerX() - innerCircleRadius / 2 + ignitionIconDimen / 2).toInt(),
-                (innerCircleBound.centerY() - innerCircleRadius / 2 + ignitionIconDimen / 2).toInt())
         drawIgnitionIcon(canvas, ignitionIconBounds)
-
-
         //draw check engine light
-        val checkEngineLightDimen = bounds.width() * CHECK_ENGINE_LIGHT_DIMEN_PERCENTAGE
-        val checkEngineLightBounds = Rect((innerCircleBound.centerX() + innerCircleRadius / 2 - checkEngineLightDimen / 2).toInt(),
-                (innerCircleBound.centerY() - innerCircleRadius / 2 - checkEngineLightDimen / 2).toInt(),
-                (innerCircleBound.centerX() + innerCircleRadius / 2 + checkEngineLightDimen / 2).toInt(),
-                (innerCircleBound.centerY() - innerCircleRadius / 2 + checkEngineLightDimen / 2).toInt())
         drawCheckEngineLightIcon(canvas, checkEngineLightBounds)
 
 
         //draw indicator
         canvas.save()
         canvas.rotate(getDegreeForCurrentSpeed(), innerCircleBound.centerX(), innerCircleBound.centerY())
-        val indicatorDimen = bounds.width() * INDICATOR_DIMEN_PERCENTAGE
-        val indicatorBound = Rect((innerCircleBound.centerX() + innerCircleBound.width() / 2).toInt(),
-                (innerCircleBound.centerY() - indicatorDimen / 2).toInt(),
-                (innerCircleBound.centerX() + innerCircleBound.width() / 2 + indicatorDimen).toInt(),
-                (innerCircleBound.centerY() + indicatorDimen / 2).toInt())
         drawIndicator(canvas, indicatorBound)
         canvas.restore()
     }

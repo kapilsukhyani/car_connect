@@ -54,6 +54,11 @@ internal class FuelAndCompassGauge(dashboard: Dashboard,
             dashboard.invalidate()
         }
 
+    private lateinit var fuelGaugeInnerBound: RectF
+    private lateinit var fuelGaugeOuterBound: RectF
+    private lateinit var fuelIconBounds: Rect
+    private lateinit var boundsAfterStrokeWidth: RectF
+
     private var currentFuelAnimator: ObjectAnimator? = null
     private var currentAzimuthAnimator: ObjectAnimator? = null
 
@@ -98,10 +103,34 @@ internal class FuelAndCompassGauge(dashboard: Dashboard,
         fuelIcon.setTint(offlineColor)
     }
 
+
+    override fun onBoundChanged(bounds: RectF) {
+
+        boundsAfterStrokeWidth = RectF(bounds)
+        boundsAfterStrokeWidth.inset(GAUGE_STROKE_WIDTH / 2, GAUGE_STROKE_WIDTH / 2)
+
+        val fuelGaugeWidth = bounds.width() * FUEL_GAUGE_DEFAULT_WIDTH_PERCENTAGE
+
+        fuelGaugeInnerBound = RectF(bounds)
+        fuelGaugeInnerBound.inset(fuelGaugeWidth + FUEL_GAUGE_BOUNDARY_STROKE_WIDTH / 2, fuelGaugeWidth + FUEL_GAUGE_BOUNDARY_STROKE_WIDTH / 2)
+
+        fuelGaugeOuterBound = RectF(bounds)
+        fuelGaugePaint.strokeWidth = fuelGaugeWidth
+        fuelGaugeOuterBound.inset(fuelGaugeWidth / 2, fuelGaugeWidth / 2)
+
+        val fuelIndicatorDimen = fuelGaugeWidth * .8f
+        val fuelIndicatorMarginFromGauge = fuelGaugeWidth * .2f
+        fuelIconBounds = Rect((bounds.centerX() - fuelIndicatorDimen / 2).toInt(),
+                (bounds.bottom - (fuelIndicatorDimen + fuelIndicatorMarginFromGauge)).toInt(),
+                (bounds.centerX() + fuelIndicatorDimen / 2).toInt(),
+                (bounds.bottom - fuelIndicatorMarginFromGauge).toInt())
+
+    }
+
+
     override fun drawGauge(canvas: Canvas, bounds: RectF) {
         canvas.drawArc(bounds, startAngle, sweep, false, gaugePaint)
-        val boundsAfterStrokeWidth = RectF(bounds)
-        boundsAfterStrokeWidth.inset(GAUGE_STROKE_WIDTH / 2, GAUGE_STROKE_WIDTH / 2)
+
         drawFuelGauge(canvas, boundsAfterStrokeWidth)
 //        drawCompass(canvas, boundsAfterStrokeWidth);
         drawCompassDrawable(canvas, boundsAfterStrokeWidth)
@@ -109,28 +138,13 @@ internal class FuelAndCompassGauge(dashboard: Dashboard,
 
 
     private fun drawFuelGauge(canvas: Canvas, bounds: RectF) {
-        val fuelGaugeWidth = bounds.width() * FUEL_GAUGE_DEFAULT_WIDTH_PERCENTAGE
 
-
-        val fuelGaugeInnerBound = RectF(bounds)
-        fuelGaugeInnerBound.inset(fuelGaugeWidth + FUEL_GAUGE_BOUNDARY_STROKE_WIDTH / 2, fuelGaugeWidth + FUEL_GAUGE_BOUNDARY_STROKE_WIDTH / 2)
         canvas.drawArc(fuelGaugeInnerBound, FUEL_GAUGE_START_ANGLE.toFloat(), FUEL_GAUGE_SWEEP_ANGLE.toFloat(), false, fuelGaugeBoundary)
-
-        val fuelGaugeOuterBound = RectF(bounds)
-        fuelGaugePaint.strokeWidth = fuelGaugeWidth
-        fuelGaugeOuterBound.inset(fuelGaugeWidth / 2, fuelGaugeWidth / 2)
 
         val sweepAngle = Math.abs(FUEL_GAUGE_SWEEP_ANGLE) * currentFuelPercentage
         canvas.drawArc(fuelGaugeOuterBound, FUEL_GAUGE_START_ANGLE.toFloat(), -sweepAngle, false, fuelGaugePaint)
 
-
-        val fuelIndicatorDimen = fuelGaugeWidth * .8f
-        val fuelIndicatorMarginFromGauge = fuelGaugeWidth * .2f
-        val rect = Rect((bounds.centerX() - fuelIndicatorDimen / 2).toInt(),
-                (bounds.bottom - (fuelIndicatorDimen + fuelIndicatorMarginFromGauge)).toInt(),
-                (bounds.centerX() + fuelIndicatorDimen / 2).toInt(),
-                (bounds.bottom - fuelIndicatorMarginFromGauge).toInt())
-        fuelIcon.bounds = rect
+        fuelIcon.bounds = fuelIconBounds
         fuelIcon.draw(canvas)
 
     }

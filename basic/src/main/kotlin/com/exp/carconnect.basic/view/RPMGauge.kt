@@ -86,6 +86,18 @@ internal class RPMGauge(dashboard: Dashboard,
 
     private val degreesPerDataPoint = sweep / TOTAL_NO_OF_DATA_POINTS
 
+    private val normalZoneStartAngle: Float = startAngle
+    private val normalZoneSweep: Float = sweep - CRITICAL_ANGLE_SWEEP
+    private val criticalZoneStartAngle: Float = startAngle + normalZoneSweep
+
+    private var bigTickLength: Float = 0.0f
+    private var bigTickWidth: Float = 0.0f
+
+    private var smallTickLength: Float = 0.0f
+    private var smallTickWidth: Float = 0.0f
+
+    private var textSize: Float = 0.0f
+    private var textMargin: Float = 0.0f
 
     init {
 
@@ -142,30 +154,31 @@ internal class RPMGauge(dashboard: Dashboard,
     }
 
 
+    override fun onBoundChanged(bounds: RectF) {
+
+        val gaugeCircumference = (2.0 * Math.PI * (bounds.width() / 2).toDouble()).toFloat()
+
+        //draw ticks
+        bigTickLength = bounds.width() * BIG_TICK_LENGTH_PERCENTAGE
+        bigTickWidth = gaugeCircumference * BIG_TICK_WIDTH_PERCENTAGE
+
+        smallTickLength = bounds.width() * SMALL_TICK_LENGTH_PERCENTAGE
+        smallTickWidth = gaugeCircumference * SMALL_TICK_WIDTH_PERCENTAGE
+
+        textSize = bounds.width() * TICK_MARKER_TEXT_SIZE_PERCENTAGE
+        textMargin = bounds.width() * TICK_MARKER_MARGIN_PERCENTAGE
+    }
+
+
     override fun drawGauge(canvas: Canvas, bounds: RectF) {
         canvas.drawArc(bounds, startAngle, sweep, false, gaugePaint)
 
-        val normalZoneStartAngle = startAngle
-        val normalZoneSweep = sweep - CRITICAL_ANGLE_SWEEP
-        val criticalZoneStartAngle = startAngle + normalZoneSweep
         canvas.drawArc(bounds, normalZoneStartAngle, normalZoneSweep, false, gaugePaint)
         val color = gaugePaint.color
         gaugePaint.color = criticalZoneColor
         canvas.drawArc(bounds, criticalZoneStartAngle, CRITICAL_ANGLE_SWEEP, false, gaugePaint)
         gaugePaint.color = color
 
-
-        val gaugeCircumference = (2.0 * Math.PI * (bounds.width() / 2).toDouble()).toFloat()
-
-        //draw ticks
-        val bigTickLength = bounds.width() * BIG_TICK_LENGTH_PERCENTAGE
-        val bigTickWidth = gaugeCircumference * BIG_TICK_WIDTH_PERCENTAGE
-
-        val smallTickLength = bounds.width() * SMALL_TICK_LENGTH_PERCENTAGE
-        val smallTickWidth = gaugeCircumference * SMALL_TICK_WIDTH_PERCENTAGE
-
-        val textSize = bounds.width() * TICK_MARKER_TEXT_SIZE_PERCENTAGE
-        val textMargin = bounds.width() * TICK_MARKER_MARGIN_PERCENTAGE
 
         drawTicks(canvas, bounds, startAngle,
                 sweep / (TOTAL_NO_OF_TICKS - 1),
@@ -177,7 +190,6 @@ internal class RPMGauge(dashboard: Dashboard,
 
 
         drawIndicator(canvas, bounds)
-
 
     }
 

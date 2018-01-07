@@ -247,6 +247,10 @@ class Dashboard @JvmOverloads constructor(context: Context, attrs: AttributeSet?
         val margin = availableHeight * DASHBOARD_LABEL_MARGIN_PERCENTAGE_OF_AVAILABLE_HEIGHT
         labelBoundsOnCanvas = RectF(margin, viewCenter!!.y + sideGaugeRadius + margin,
                 labelBound.width().toFloat(), viewCenter!!.y + sideGaugeRadius + availableHeight - margin)
+
+        speedometerGauge.onBoundChanged(middleGaugeBounds)
+        rpmGauge.onBoundChanged(leftGaugeBounds)
+        fuelAndCompassGauge.onBoundChanged(rightGaugeBounds)
     }
 
 

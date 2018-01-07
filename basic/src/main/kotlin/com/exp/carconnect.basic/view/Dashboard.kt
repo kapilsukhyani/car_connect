@@ -54,14 +54,15 @@ class Dashboard @JvmOverloads constructor(context: Context, attrs: AttributeSet?
         private val MINIMUM_HEIGHT = 400 // fifty percent of height
     }
 
-
+    private val vinCharGapInDegrees = VIN_SWEEP / VIN_LENGTH
     private lateinit var viewCenter: PointF
     private lateinit var middleGaugeBounds: RectF
     private lateinit var leftGaugeBounds: RectF
     private lateinit var rightGaugeBounds: RectF
     private lateinit var labelBoundsOnCanvas: RectF
-    private var middleGaugeRadius: Float = 0.toFloat()
-    private var sideGaugeRadius: Float = 0.toFloat()
+    private var middleGaugeRadius: Float = 0.0f
+    private var sideGaugeRadius: Float = 0.0f
+    private var vinCharSize: Float = 0.0f
 
     var onOnlineChangedListener: ((Boolean) -> Unit)? = null
     var onVINChangedListener: ((String) -> Unit)? = null
@@ -248,6 +249,12 @@ class Dashboard @JvmOverloads constructor(context: Context, attrs: AttributeSet?
         labelBoundsOnCanvas = RectF(margin, viewCenter!!.y + sideGaugeRadius + margin,
                 labelBound.width().toFloat(), viewCenter!!.y + sideGaugeRadius + availableHeight - margin)
 
+
+        val middleGaugeCircumference: Float = (Math.PI * middleGaugeBounds.width()).toFloat()
+        val areaToDrawVinText = middleGaugeCircumference * (VIN_SWEEP / 360f)
+        vinCharSize = areaToDrawVinText / VIN_LENGTH
+
+
         speedometerGauge.onBoundChanged(middleGaugeBounds)
         rpmGauge.onBoundChanged(leftGaugeBounds)
         fuelAndCompassGauge.onBoundChanged(rightGaugeBounds)
@@ -290,14 +297,10 @@ class Dashboard @JvmOverloads constructor(context: Context, attrs: AttributeSet?
         gaugeBackgroundDrawable.draw(canvas)
     }
 
+
     private fun drawVin(canvas: Canvas, middleGaugeBounds: RectF) {
         if (!vin.isEmpty()) {
-            val circumference: Float = (Math.PI * middleGaugeBounds.width()).toFloat()
-            val areaToDrawText = circumference * (VIN_SWEEP / 360f)
-
-            val vinCharSize = areaToDrawText / VIN_LENGTH
             vinPaint.textSize = vinCharSize
-            val gapInDegrees = VIN_SWEEP / VIN_LENGTH
             var totalRotationSoFar = VIN_START_ANGLE
             canvas.save()
             canvas.rotate(VIN_START_ANGLE, middleGaugeBounds.centerX(), middleGaugeBounds.centerY())
@@ -309,8 +312,8 @@ class Dashboard @JvmOverloads constructor(context: Context, attrs: AttributeSet?
                 canvas.drawText(vin.substring(i, i + 1), x, y, vinPaint)
                 canvas.restore()
 
-                canvas.rotate(-gapInDegrees, middleGaugeBounds.centerX(), middleGaugeBounds.centerY())
-                totalRotationSoFar -= gapInDegrees
+                canvas.rotate(-vinCharGapInDegrees, middleGaugeBounds.centerX(), middleGaugeBounds.centerY())
+                totalRotationSoFar -= vinCharGapInDegrees
             }
 
             canvas.restore()

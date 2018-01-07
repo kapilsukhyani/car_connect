@@ -6,16 +6,16 @@
     <application android:name=".CarConnectApp">
 
 
-        <activity
-            android:name=".activity.TestActivity"
-            android:hardwareAccelerated="true"
-            android:theme="@style/Theme.AppCompat.DayNight" >
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
+        <!--<activity-->
+            <!--android:name=".activity.TestActivity"-->
+            <!--android:hardwareAccelerated="true"-->
+            <!--android:theme="@style/Theme.AppCompat.DayNight" >-->
+            <!--<intent-filter>-->
+                <!--<action android:name="android.intent.action.MAIN" />-->
 
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity>
+                <!--<category android:name="android.intent.category.LAUNCHER" />-->
+            <!--</intent-filter>-->
+        <!--</activity>-->
         <activity
             android:name=".activity.DashboardSimulatorActivity"
             android:theme="@style/Theme.AppCompat.DayNight">

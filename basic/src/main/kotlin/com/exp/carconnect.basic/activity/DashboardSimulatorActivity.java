@@ -43,7 +43,7 @@ public class DashboardSimulatorActivity extends AppCompatActivity {
         dashboard.setOnVINChangedListener(new Function1<String, Unit>() {
             @Override
             public Unit invoke(String s) {
-                System.out.println("Vin: " + s);
+//                System.out.println("Vin: " + s);
 
                 return null;
             }
@@ -51,7 +51,7 @@ public class DashboardSimulatorActivity extends AppCompatActivity {
         dashboard.setOnOnlineChangedListener(new Function1<Boolean, Unit>() {
             @Override
             public Unit invoke(Boolean aBoolean) {
-                System.out.println("Online: " + aBoolean);
+//                System.out.println("Online: " + aBoolean);
 
                 return null;
             }
@@ -59,7 +59,7 @@ public class DashboardSimulatorActivity extends AppCompatActivity {
         dashboard.setOnIgnitionChangedListener(new Function1<Boolean, Unit>() {
             @Override
             public Unit invoke(Boolean aBoolean) {
-                System.out.println("Ignition: " + aBoolean);
+//                System.out.println("Ignition: " + aBoolean);
 
                 return null;
             }
@@ -68,7 +68,7 @@ public class DashboardSimulatorActivity extends AppCompatActivity {
         dashboard.setOnCheckEngineLightChangedListener(new Function1<Boolean, Unit>() {
             @Override
             public Unit invoke(Boolean aBoolean) {
-                System.out.println("Check Engine Light: " + aBoolean);
+//                System.out.println("Check Engine Light: " + aBoolean);
 
                 return null;
             }
@@ -76,7 +76,7 @@ public class DashboardSimulatorActivity extends AppCompatActivity {
         dashboard.setOnFuelPercentageChangedListener(new Function1<Float, Unit>() {
             @Override
             public Unit invoke(Float aFloat) {
-                System.out.println("Fuel: " + aFloat);
+//                System.out.println("Fuel: " + aFloat);
 
                 return null;
             }
@@ -84,7 +84,7 @@ public class DashboardSimulatorActivity extends AppCompatActivity {
         dashboard.setOnSpeedChangedListener(new Function1<Float, Unit>() {
             @Override
             public Unit invoke(Float aFloat) {
-                System.out.println("SPEED: " + aFloat);
+//                System.out.println("SPEED: " + aFloat);
 
                 return null;
             }
@@ -93,7 +93,7 @@ public class DashboardSimulatorActivity extends AppCompatActivity {
         dashboard.setOnRPMChangedListener(new Function1<Float, Unit>() {
             @Override
             public Unit invoke(Float aFloat) {
-                System.out.println("RPM: " + aFloat);
+//                System.out.println("RPM: " + aFloat);
                 return null;
             }
         });
@@ -102,7 +102,7 @@ public class DashboardSimulatorActivity extends AppCompatActivity {
         vm.getCompassLiveData().observe(this, new Observer<CompassEvent>() {
             @Override
             public void onChanged(@Nullable CompassEvent compassEvent) {
-                Log.d("SampleViewActivity", "Current azimuth " + compassEvent.getAzimuth());
+//                Log.d("SampleViewActivity", "Current azimuth " + compassEvent.getAzimuth());
                 dashboard.setCurrentAzimuth(compassEvent.getAzimuth());
             }
         });

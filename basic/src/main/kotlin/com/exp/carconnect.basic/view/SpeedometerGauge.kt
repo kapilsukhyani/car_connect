@@ -245,8 +245,7 @@ internal class SpeedometerGauge(dashboard: Dashboard,
                 innerCircleBound.width() / 2, innerCirclePaint)
 
         //calculate Text Bounds
-        val formattedSpeed = String.format("%.2f", currentSpeed)
-        val currentSpeedText = "$formattedSpeed $DEFAULT_SPEED_UNIT"
+        val currentSpeedText = String.format("%.2f", currentSpeed) + " " + DEFAULT_SPEED_UNIT
 
         canvas.drawPath(speedTextStripPath, speedStripPaint)
         canvas.drawText(currentSpeedText, innerCircleBound.centerX(),
@@ -301,20 +300,8 @@ internal class SpeedometerGauge(dashboard: Dashboard,
             val dribbleBy = DRIBBLE_RANDOM.nextFloat() * (DRIBBLE_RANGE - 0.0f) + 0.0f
             dribbleSpeedAnimator = ObjectAnimator.ofFloat(this, "currentSpeed", currentSpeed, dashboard.currentSpeed + dribbleBy,
                     dashboard.currentSpeed, dashboard.currentSpeed - dribbleBy, currentSpeed)
-            dribbleSpeedAnimator?.addListener(object : Animator.AnimatorListener {
-                override fun onAnimationRepeat(animation: Animator?) {
-                }
-
-                override fun onAnimationEnd(animation: Animator?) {
-                    dribble()
-                }
-
-                override fun onAnimationCancel(animation: Animator?) {
-                }
-
-                override fun onAnimationStart(animation: Animator?) {
-                }
-            })
+            dribbleSpeedAnimator?.repeatMode = ObjectAnimator.RESTART
+            dribbleSpeedAnimator?.repeatCount = ObjectAnimator.INFINITE
             dribbleSpeedAnimator?.start()
         }
     }

@@ -225,20 +225,8 @@ internal class RPMGauge(dashboard: Dashboard,
             val dribbleBy = DRIBBLE_RANDOM.nextFloat() * (DRIBBLE_RANGE - 0.0f) + 0.0f
             dribbleRPMAnimator = ObjectAnimator.ofFloat(this, "currentRPM", currentRPM, dashboard.currentRPM + dribbleBy,
                     dashboard.currentRPM, dashboard.currentRPM - dribbleBy, currentRPM)
-            dribbleRPMAnimator?.addListener(object : Animator.AnimatorListener {
-                override fun onAnimationRepeat(animation: Animator?) {
-                }
-
-                override fun onAnimationEnd(animation: Animator?) {
-                    dribble()
-                }
-
-                override fun onAnimationCancel(animation: Animator?) {
-                }
-
-                override fun onAnimationStart(animation: Animator?) {
-                }
-            })
+            dribbleRPMAnimator?.repeatMode = ObjectAnimator.RESTART
+            dribbleRPMAnimator?.repeatCount = ObjectAnimator.INFINITE
             dribbleRPMAnimator?.start()
         }
     }

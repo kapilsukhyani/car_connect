@@ -5,6 +5,7 @@ import android.animation.ObjectAnimator
 import android.annotation.SuppressLint
 import android.graphics.*
 import android.support.graphics.drawable.VectorDrawableCompat
+import android.support.v4.graphics.ColorUtils
 import android.text.TextPaint
 import com.exp.carconnect.basic.R
 import java.util.*
@@ -243,6 +244,11 @@ internal class SpeedometerGauge(dashboard: Dashboard,
 
 
     private fun drawMiddleGaugeInnerCircle(canvas: Canvas, bounds: RectF) {
+
+        val currentSpeedOverMaxSpeedRatio = currentSpeed / MAX_SPEED.toFloat()
+        innerCirclePaint.color = ColorUtils.blendARGB(gaugePaint.color, Color.RED, currentSpeedOverMaxSpeedRatio)
+        speedStripPaint.color = ColorUtils.blendARGB(gaugePaint.color, Color.RED, currentSpeedOverMaxSpeedRatio)
+
 
         //draw inner circle
         canvas.drawCircle(innerCircleBound.centerX(), innerCircleBound.centerY(),

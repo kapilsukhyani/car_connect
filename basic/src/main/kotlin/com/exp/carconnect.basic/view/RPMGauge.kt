@@ -4,6 +4,7 @@ import android.animation.Animator
 import android.animation.ObjectAnimator
 import android.annotation.SuppressLint
 import android.graphics.*
+import android.support.v4.graphics.ColorUtils
 import android.text.TextPaint
 import java.util.*
 
@@ -195,6 +196,9 @@ internal class RPMGauge(dashboard: Dashboard,
     }
 
     private fun drawIndicator(canvas: Canvas, parentBounds: RectF) {
+        val currentSpeedOverMaxSpeedRatio = currentRPM / MAX_RPM.toFloat()
+        indicatorCenterPaint.color = ColorUtils.blendARGB(gaugePaint.color, Color.RED, currentSpeedOverMaxSpeedRatio)
+
         val indicatorCenterRadius = parentBounds.width() * INDICATOR_CENTER_PERCENTAGE / 2
         canvas.drawCircle(parentBounds.centerX(), parentBounds.centerY(), indicatorCenterRadius, indicatorCenterPaint)
 

@@ -4,6 +4,7 @@ import android.animation.ObjectAnimator
 import android.annotation.SuppressLint
 import android.graphics.*
 import android.support.graphics.drawable.VectorDrawableCompat
+import android.support.v4.graphics.ColorUtils
 import android.text.TextPaint
 import com.exp.carconnect.basic.R
 import java.util.*
@@ -144,6 +145,7 @@ internal class FuelAndCompassGauge(dashboard: Dashboard,
         val sweepAngle = Math.abs(FUEL_GAUGE_SWEEP_ANGLE) * currentFuelPercentage
         canvas.drawArc(fuelGaugeOuterBound, FUEL_GAUGE_START_ANGLE.toFloat(), -sweepAngle, false, fuelGaugePaint)
 
+        fuelIcon.setTint(ColorUtils.blendARGB(gaugePaint.color, Color.RED, 1 - currentFuelPercentage))
         fuelIcon.bounds = fuelIconBounds
         fuelIcon.draw(canvas)
 

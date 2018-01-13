@@ -1,5 +1,8 @@
 package com.exp.carconnect.basic.view
 
+import android.animation.Animator
+import android.animation.AnimatorListenerAdapter
+import android.animation.ValueAnimator
 import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.*
@@ -59,7 +62,10 @@ class Dashboard @JvmOverloads constructor(context: Context, attrs: AttributeSet?
     private lateinit var middleGaugeBounds: RectF
     private lateinit var leftGaugeBounds: RectF
     private lateinit var rightGaugeBounds: RectF
+    private lateinit var leftGaugeBoundsToBeShownCompletely: RectF
+    private lateinit var rightGaugeBoundsToBeShownCompletely: RectF
     private lateinit var labelBoundsOnCanvas: RectF
+    private var animatingSideGauges = false
     private var middleGaugeRadius: Float = 0.0f
     private var sideGaugeRadius: Float = 0.0f
     private var vinCharSize: Float = 0.0f
@@ -153,6 +159,19 @@ class Dashboard @JvmOverloads constructor(context: Context, attrs: AttributeSet?
         }
 
 
+    var showSideGauges = false
+        set(value) {
+            if (value != field && !animatingSideGauges) {
+                field = value
+                if (field) {
+                    showSideGauges()
+                } else {
+                    hideSideGauges()
+                }
+            }
+        }
+
+
     private val onlineColor = getContext().getColor(android.R.color.holo_blue_bright)
     private val offlineColor = getContext().getColor(android.R.color.darker_gray)
 
@@ -212,7 +231,6 @@ class Dashboard @JvmOverloads constructor(context: Context, attrs: AttributeSet?
             }
         })
 
-
     }
 
     override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
@@ -227,21 +245,29 @@ class Dashboard @JvmOverloads constructor(context: Context, attrs: AttributeSet?
         middleGaugeRadius = remainingWidthAfterPadding * MIDDLE_GAUGE_WIDTH_PERCENTAGE / 2
         sideGaugeRadius = remainingWidthAfterPadding * LEFT_GAUGE_WIDTH_PERCENTAGE / 2
 
-        middleGaugeBounds = RectF(viewCenter!!.x - middleGaugeRadius, viewCenter!!.y - middleGaugeRadius,
-                viewCenter!!.x + middleGaugeRadius, viewCenter!!.y + middleGaugeRadius)
+        middleGaugeBounds = RectF(viewCenter.x - middleGaugeRadius, viewCenter.y - middleGaugeRadius,
+                viewCenter.x + middleGaugeRadius, viewCenter.y + middleGaugeRadius)
 
         val leftGaugeStartPoint = Math.ceil(middleGaugeBounds.left - sideGaugeRadius * Math.sqrt(2.0)).toInt()
-        leftGaugeBounds = RectF(leftGaugeStartPoint.toFloat(), viewCenter!!.y - sideGaugeRadius,
-                leftGaugeStartPoint + 2 * sideGaugeRadius, viewCenter!!.y + sideGaugeRadius)
+        leftGaugeBounds = RectF(leftGaugeStartPoint.toFloat(), viewCenter.y - sideGaugeRadius,
+                leftGaugeStartPoint + 2 * sideGaugeRadius, viewCenter.y + sideGaugeRadius)
+        leftGaugeBoundsToBeShownCompletely = RectF(leftGaugeBounds)
 
         val rightGaugeEndpoint = Math.ceil(middleGaugeBounds.right + sideGaugeRadius * Math.sqrt(2.0)).toInt()
-        rightGaugeBounds = RectF(rightGaugeEndpoint - 2 * sideGaugeRadius, viewCenter!!.y - sideGaugeRadius,
-                rightGaugeEndpoint.toFloat(), viewCenter!!.y + sideGaugeRadius)
+        rightGaugeBounds = RectF(rightGaugeEndpoint - 2 * sideGaugeRadius, viewCenter.y - sideGaugeRadius,
+                rightGaugeEndpoint.toFloat(), viewCenter.y + sideGaugeRadius)
+        rightGaugeBoundsToBeShownCompletely = RectF(rightGaugeBounds)
+
+        if (!showSideGauges) {
+            rightGaugeBounds.offset(-rightGaugeBounds.width(), 0f)
+            leftGaugeBounds.offset(leftGaugeBounds.width(), 0f)
+        }
+
 
         val availableHeight = (remainingHeihtAfterPadding - (2 * sideGaugeRadius)) / 2
         val margin = availableHeight * DASHBOARD_LABEL_MARGIN_PERCENTAGE_OF_AVAILABLE_HEIGHT
-        labelBoundsOnCanvas = RectF(margin, viewCenter!!.y + sideGaugeRadius + margin,
-                labelBound.width().toFloat(), viewCenter!!.y + sideGaugeRadius + availableHeight - margin)
+        labelBoundsOnCanvas = RectF(margin, viewCenter.y + sideGaugeRadius + margin,
+                labelBound.width().toFloat(), viewCenter.y + sideGaugeRadius + availableHeight - margin)
 
 
         val middleGaugeCircumference: Float = (Math.PI * middleGaugeBounds.width()).toFloat()
@@ -258,7 +284,6 @@ class Dashboard @JvmOverloads constructor(context: Context, attrs: AttributeSet?
     //todo improve this and avoid allocation in onDraw
     @SuppressLint("DrawAllocation")
     override fun onDraw(canvas: Canvas) {
-        drawGaugeBackgrounds(canvas, middleGaugeBounds, leftGaugeBounds, rightGaugeBounds)
         drawGauges(canvas, middleGaugeBounds, leftGaugeBounds, rightGaugeBounds)
         drawVin(canvas, middleGaugeBounds)
         drawLabel(canvas, labelBoundsOnCanvas)
@@ -274,21 +299,28 @@ class Dashboard @JvmOverloads constructor(context: Context, attrs: AttributeSet?
     }
 
     private fun drawGauges(canvas: Canvas, middleGaugeBounds: RectF, leftSideGaugeBounds: RectF, rightSideGaugeBounds: RectF) {
-        speedometerGauge.drawGauge(canvas, middleGaugeBounds)
-        rpmGauge.drawGauge(canvas, leftSideGaugeBounds)
-        fuelAndCompassGauge.drawGauge(canvas, rightSideGaugeBounds)
+        drawRPMGauge(canvas, leftSideGaugeBounds)
+        drawFuelGauge(canvas, rightSideGaugeBounds)
+        drawSpeedometerGauge(canvas, middleGaugeBounds)
     }
 
-    private fun drawGaugeBackgrounds(canvas: Canvas, middleGaugeBounds: RectF, leftSideGaugeBounds: RectF, rightSideGaugeBounds: RectF) {
-        gaugeBackgroundDrawable.setBounds(leftSideGaugeBounds.left.toInt(), leftSideGaugeBounds.top.toInt(), leftSideGaugeBounds.right.toInt(), leftSideGaugeBounds.bottom.toInt())
-        gaugeBackgroundDrawable.draw(canvas)
-
-        gaugeBackgroundDrawable.setBounds(rightSideGaugeBounds.left.toInt(), rightSideGaugeBounds.top.toInt(), rightSideGaugeBounds.right.toInt(), rightSideGaugeBounds.bottom.toInt())
-        gaugeBackgroundDrawable.draw(canvas)
-
+    private fun drawSpeedometerGauge(canvas: Canvas, middleGaugeBounds: RectF) {
         //drawing middle gauge bg at end, otherwise left and right gauge bgs overwrite the middle gauge bg a little bit
         gaugeBackgroundDrawable.setBounds(middleGaugeBounds.left.toInt(), middleGaugeBounds.top.toInt(), middleGaugeBounds.right.toInt(), middleGaugeBounds.bottom.toInt())
         gaugeBackgroundDrawable.draw(canvas)
+        speedometerGauge.drawGauge(canvas, middleGaugeBounds)
+    }
+
+    private fun drawRPMGauge(canvas: Canvas, leftSideGaugeBounds: RectF) {
+        gaugeBackgroundDrawable.setBounds(leftSideGaugeBounds.left.toInt(), leftSideGaugeBounds.top.toInt(), leftSideGaugeBounds.right.toInt(), leftSideGaugeBounds.bottom.toInt())
+        gaugeBackgroundDrawable.draw(canvas)
+        rpmGauge.drawGauge(canvas, leftSideGaugeBounds)
+    }
+
+    private fun drawFuelGauge(canvas: Canvas, rightSideGaugeBounds: RectF) {
+        gaugeBackgroundDrawable.setBounds(rightSideGaugeBounds.left.toInt(), rightSideGaugeBounds.top.toInt(), rightSideGaugeBounds.right.toInt(), rightSideGaugeBounds.bottom.toInt())
+        gaugeBackgroundDrawable.draw(canvas)
+        fuelAndCompassGauge.drawGauge(canvas, rightSideGaugeBounds)
     }
 
 
@@ -331,20 +363,64 @@ class Dashboard @JvmOverloads constructor(context: Context, attrs: AttributeSet?
         }
     }
 
+    private fun showSideGauges() {
+        startSideGaugeAnimation(rightGaugeBounds.left,
+                rightGaugeBoundsToBeShownCompletely.left)
+        {
+            rightGaugeBounds.offset(it, 0f)
+            leftGaugeBounds.offset(-it, 0f)
+        }
+    }
+
+    private fun hideSideGauges() {
+        startSideGaugeAnimation(rightGaugeBoundsToBeShownCompletely.left,
+                rightGaugeBounds.left - rightGaugeBounds.width())
+        {
+            rightGaugeBounds.offset(-it, 0f)
+            leftGaugeBounds.offset(it, 0f)
+        }
+    }
+
+
+    private fun startSideGaugeAnimation(animateFrom: Float, animateTo: Float, offsetBoundsBy: (Float) -> Unit) {
+        val animator = ValueAnimator
+                .ofFloat(animateFrom, animateTo)
+        animator.addUpdateListener({
+            val animatedBy = Math.abs((it.animatedValue as Float) - rightGaugeBounds.left)
+            offsetBoundsBy(animatedBy)
+            rpmGauge.onBoundChanged(leftGaugeBounds)
+            fuelAndCompassGauge.onBoundChanged(rightGaugeBounds)
+            invalidate()
+        })
+        animator.addListener(object : AnimatorListenerAdapter() {
+            override fun onAnimationStart(animation: Animator?) {
+                animatingSideGauges = true
+            }
+
+            override fun onAnimationEnd(animation: Animator?) {
+                animatingSideGauges = false
+            }
+        })
+        animator.start()
+    }
+
     internal fun invalidateSpeedometerGauge() {
-        middleGaugeBounds.round(transientRect)
-        invalidate(transientRect)
+//        middleGaugeBounds.round(transientRect)
+//        invalidate(transientRect)
+        invalidate()
     }
 
     internal fun invalidateRPMGauge() {
-        leftGaugeBounds.round(transientRect)
-        invalidate(transientRect)
+//        leftGaugeBounds.round(transientRect)
+//        invalidate(transientRect)
+        invalidate()
     }
 
 
     internal fun invalidateFuelGauge() {
-        rightGaugeBounds.round(transientRect)
-        invalidate(transientRect)
+//        rightGaugeBounds.round(transientRect)
+//        invalidate(transientRect)
+        invalidate()
     }
 
     override fun onSaveInstanceState(): Parcelable {

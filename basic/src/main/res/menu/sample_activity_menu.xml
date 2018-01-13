@@ -3,25 +3,30 @@
     <item
         android:id="@+id/enableDisableTest"
         android:enabled="true"
-        android:title="Enable/Disable Test"></item>
+        android:title="Enable/Disable Test" />
     <item
         android:id="@+id/onlineOffline"
         android:enabled="true"
-        android:title="Online/Offline"></item>
+        android:title="Online/Offline" />
     <item
         android:id="@+id/enableDisableDribble"
         android:enabled="true"
-        android:title="Enable/Disable Dribble"></item>
+        android:title="Enable/Disable Dribble" />
     <item
         android:id="@+id/updateRPM"
         android:enabled="true"
-        android:title="Update RPM"></item>
+        android:title="Update RPM" />
     <item
         android:id="@+id/updateSPEED"
         android:enabled="true"
-        android:title="Update Speed"></item>
+        android:title="Update Speed" />
     <item
         android:id="@+id/updateFuel"
         android:enabled="true"
-        android:title="Update Fuel"></item>
+        android:title="Update Fuel" />
+
+    <item
+        android:id="@+id/hideShowSideGauges"
+        android:enabled="true"
+        android:title="Hide/Show Side Gauges" />
 </menu>

@@ -1,13 +1,17 @@
 package com.exp.carconnect.basic.activity;
 
+import android.app.Dialog;
 import android.content.pm.ActivityInfo;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.annotation.RequiresApi;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.EditText;
 
 import com.exp.carconnect.basic.R;
 import com.exp.carconnect.basic.view.Dashboard;
@@ -137,18 +141,77 @@ public class DashboardSimulatorActivity extends AppCompatActivity {
         } else if (i == R.id.onlineOffline) {
             dashboard.setOnline(!dashboard.getOnline());
         } else if (i == R.id.updateRPM) {
-            dashboard.setCurrentRPM(a.nextInt(8));
+            showDialog("RPM", new Function1<String, String>() {
+                @Override
+                public String invoke(String s) {
+                    if (s.equals("RANDOM")) {
+                        dashboard.setCurrentRPM(a.nextInt(8));
+                        return null;
+
+                    }
+                    dashboard.setCurrentRPM(Integer.valueOf(s));
+                    return null;
+                }
+            });
 
         } else if (i == R.id.updateSPEED) {
-            dashboard.setCurrentSpeed(a.nextInt(320));
+            showDialog("SPEED", new Function1<String, String>() {
+                @Override
+                public String invoke(String s) {
+                    if (s.equals("RANDOM")) {
+                        dashboard.setCurrentSpeed(a.nextInt(320));
+                        return null;
+
+                    }
+                    dashboard.setCurrentSpeed(Integer.valueOf(s));
+                    return null;
+                }
+            });
         } else if (i == R.id.updateFuel) {
-            dashboard.setFuelPercentage(a.nextFloat());
+
+            showDialog("Fuel", new Function1<String, String>() {
+                @Override
+                public String invoke(String s) {
+                    if (s.equals("RANDOM")) {
+                        dashboard.setFuelPercentage(a.nextFloat());
+                        return null;
+
+                    }
+                    dashboard.setFuelPercentage(Float.valueOf(s));
+                    return null;
+                }
+            });
+
         } else if (i == R.id.hideShowSideGauges) {
             dashboard.setShowSideGauges(!dashboard.getShowSideGauges());
         } else if (i == R.id.updateCurrentAirIntake) {
-            dashboard.setCurrentAirIntakeTemp(a.nextInt(65));
+
+
+            showDialog("AIR-INTAKE", new Function1<String, String>() {
+                @Override
+                public String invoke(String s) {
+                    if (s.equals("RANDOM")) {
+                        dashboard.setCurrentAirIntakeTemp(a.nextInt(65));
+                        return null;
+
+                    }
+                    dashboard.setCurrentAirIntakeTemp(Integer.valueOf(s));
+                    return null;
+                }
+            });
         } else if (i == R.id.updateCurrentAmbient) {
-            dashboard.setCurrentAmbientTemp(a.nextInt(55));
+            showDialog("AMBIENT", new Function1<String, String>() {
+                @Override
+                public String invoke(String s) {
+                    if (s.equals("RANDOM")) {
+                        dashboard.setCurrentAmbientTemp(a.nextInt(55));
+                        return null;
+
+                    }
+                    dashboard.setCurrentAmbientTemp(Integer.valueOf(s));
+                    return null;
+                }
+            });
 
         } else {
             return false;
@@ -156,4 +219,38 @@ public class DashboardSimulatorActivity extends AppCompatActivity {
 
         return true;
     }
+
+    private Dialog dialog;
+
+    private void showDialog(String attributeName, final Function1<String, String> callback) {
+        View view = getLayoutInflater().inflate(R.layout.field_setter, null);
+        final EditText valueField = view.findViewById(R.id.value);
+        valueField.setHint("Add a value for " + attributeName);
+        view.findViewById(R.id.setRandomButton)
+                .setOnClickListener(
+                        new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                callback.invoke("RANDOM");
+                                dialog.dismiss();
+                            }
+                        }
+
+                );
+        view.findViewById(R.id.setFieldButton)
+                .setOnClickListener(
+                        new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                callback.invoke(valueField.getText().toString());
+                                dialog.dismiss();
+                            }
+                        }
+
+                );
+        dialog = new AlertDialog.Builder(this).setView(view).show();
+
+    }
+
+
 }

@@ -34,7 +34,7 @@ internal class FuelAndTemperatureGauge(dashboard: Dashboard,
 
         private const val MAXIMUM_AIR_INTAKE_TEMPERATURE = 65f // 60 degrees celsius
         private const val MAXIMUM_AMBIENT_TEMPERATURE = 55f // 50 degrees celsius
-        private const val TEMPERATURE_ROTATION_DEGREES_PERCENTAGE_OVER_TEMPERATURE_CIRCLE_RADIUS = .018f
+        private const val TEMPERATURE_ROTATION_DEGREES_PERCENTAGE_OVER_TEMPERATURE_CIRCLE_RADIUS = .015f
         private const val SMALLEST_TEMPERATURE_DOTT_RADIUS_PERCENTAGE_OVER_WIDTH = .008f
     }
 

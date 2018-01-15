@@ -159,7 +159,7 @@ class Dashboard @JvmOverloads constructor(context: Context, attrs: AttributeSet?
         }
 
 
-    var showSideGauges = false
+    var showSideGauges = true
         set(value) {
             if (value != field && !animatingSideGauges) {
                 field = value
@@ -171,9 +171,16 @@ class Dashboard @JvmOverloads constructor(context: Context, attrs: AttributeSet?
             }
         }
 
+//    private val onlineColor = Color.rgb(255, 116, 0)
+//    private val onlineColor = Color.rgb(105, 8, 233)
+    //    private val onlineColor = Color.rgb(105, 71, 255)
+    //    private val onlineColor = Color.rgb(198, 132, 0)
+    //private val onlineColor = Color.rgb(89, 134, 0)
+    //    private val onlineColor = Color.rgb(101, 57, 244)
 
-    private val onlineColor = getContext().getColor(android.R.color.holo_blue_bright)
-    private val offlineColor = getContext().getColor(android.R.color.darker_gray)
+
+    private val onlineColor = Color.rgb(104, 82, 168)
+    private val offlineColor = Color.argb(100, 104, 82, 168)
 
     private val vinOnlineColor = context.getColor(android.R.color.holo_orange_dark)
     private val vinOfflineColor = context.getColor(android.R.color.white)
@@ -190,7 +197,7 @@ class Dashboard @JvmOverloads constructor(context: Context, attrs: AttributeSet?
             currentSpeed, showIgnitionIcon, showCheckEngineLight, speedDribbleEnabled, onlineColor, offlineColor)
     private val rpmGauge = RPMGauge(this, LEFT_GAUGE_START_ANGLE.toFloat(), LEFT_GAUGE_SWEEP_ANGLE.toFloat(),
             rpmDribbleEnabled, currentRPM, onlineColor, offlineColor)
-    private val fuelAndCompassGauge = FuelAndCompassGauge(this, RIGHT_GAUGE_START_ANGLE.toFloat(), RIGHT_GAUGE_SWEEP_ANGLE.toFloat(),
+    private val fuelAndCompassGauge = FuelAndTemperatureGauge(this, RIGHT_GAUGE_START_ANGLE.toFloat(), RIGHT_GAUGE_SWEEP_ANGLE.toFloat(),
             .01f, currentAzimuth, onlineColor, offlineColor)
 
 
@@ -277,7 +284,10 @@ class Dashboard @JvmOverloads constructor(context: Context, attrs: AttributeSet?
 
         speedometerGauge.onBoundChanged(middleGaugeBounds)
         rpmGauge.onBoundChanged(leftGaugeBounds)
-        fuelAndCompassGauge.onBoundChanged(rightGaugeBounds)
+
+        val sideAndMiddleGaugeIntersectionLength = Math.abs(rightGaugeBoundsToBeShownCompletely.left - middleGaugeBounds.right)
+        fuelAndCompassGauge.onBoundChanged(rightGaugeBounds, middleGaugeRadius, sideAndMiddleGaugeIntersectionLength)
+
     }
 
 

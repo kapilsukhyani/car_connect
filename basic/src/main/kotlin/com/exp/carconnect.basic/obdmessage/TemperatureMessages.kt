@@ -1,16 +1,16 @@
 package com.exp.carconnect.basic.obdmessage
 
 
-class TemperatureRequest(temperatureType: TemperatureType,
+class TemperatureRequest(private val temperatureType: TemperatureType,
                          retriable: Boolean = true,
                          repeatable: IsRepeatable = IsRepeatable.No) :
         OBDRequest("TemperatureRequest", temperatureType.command, retriable, repeatable) {
     override fun toResponse(rawResponse: String): OBDResponse {
-        return TemperatureResponse(rawResponse)
+        return TemperatureResponse(rawResponse, temperatureType)
     }
 }
 
-class TemperatureResponse(rawResponse: String) : OBDResponse("TemperatureResponse", rawResponse) {
+class TemperatureResponse(rawResponse: String, val type: TemperatureType) : OBDResponse("TemperatureResponse", rawResponse) {
     val temperature: Int
 
     init {

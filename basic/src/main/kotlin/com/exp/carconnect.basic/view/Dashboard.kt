@@ -150,10 +150,19 @@ class Dashboard @JvmOverloads constructor(context: Context, attrs: AttributeSet?
             }
         }
 
-    var currentAzimuth = 0.0f
+
+    var currentAirIntakeTemp = 0.0f
         set(value) {
             if (value != field) {
-                fuelAndCompassGauge.currentAzimuth = value
+                fuelAndCompassGauge.currentAirIntakeTemperature = value
+                field = value
+            }
+        }
+
+    var currentAmbientTemp = 0.0f
+        set(value) {
+            if (value != field) {
+                fuelAndCompassGauge.currentAmbientTemperature = value
                 field = value
             }
         }
@@ -198,7 +207,7 @@ class Dashboard @JvmOverloads constructor(context: Context, attrs: AttributeSet?
     private val rpmGauge = RPMGauge(this, LEFT_GAUGE_START_ANGLE.toFloat(), LEFT_GAUGE_SWEEP_ANGLE.toFloat(),
             rpmDribbleEnabled, currentRPM, onlineColor, offlineColor)
     private val fuelAndCompassGauge = FuelAndTemperatureGauge(this, RIGHT_GAUGE_START_ANGLE.toFloat(), RIGHT_GAUGE_SWEEP_ANGLE.toFloat(),
-            .01f, currentAzimuth, onlineColor, offlineColor)
+            .01f, currentAirIntakeTemp, currentAmbientTemp, onlineColor, offlineColor)
 
 
     init {

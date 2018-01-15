@@ -4,13 +4,10 @@ import android.app.Application
 import android.arch.lifecycle.AndroidViewModel
 import android.arch.lifecycle.MediatorLiveData
 import android.arch.lifecycle.MutableLiveData
-import android.arch.lifecycle.Transformations
 import com.exp.carconnect.Logger
 import com.exp.carconnect.OBDMultiRequest
 import com.exp.carconnect.basic.CarConnectApp
 import com.exp.carconnect.basic.OBDEngine
-import com.exp.carconnect.basic.compass.CompassEvent
-import com.exp.carconnect.basic.compass.CompassLiveData
 import com.exp.carconnect.basic.di.Main
 import com.exp.carconnect.basic.obdmessage.*
 import io.reactivex.Scheduler
@@ -26,6 +23,9 @@ class OBDDashboardVM(app: Application) : AndroidViewModel(app) {
         private val RPM_FACTOR = 1000.0f
         private val vinRequest = VinRequest()
         private val fuelLevelRequest = FuelLevelRequest(repeatable = IsRepeatable.Yes(1, TimeUnit.MINUTES))
+        private val temperatureRequest = OBDMultiRequest("Temperature", listOf(TemperatureRequest(TemperatureType.AIR_INTAKE),
+                TemperatureRequest(TemperatureType.AMBIENT_AIR)),
+                IsRepeatable.Yes(500, TimeUnit.MILLISECONDS))
         private val restDataRequest = OBDMultiRequest("Dashboard",
                 listOf(SpeedRequest(),
                         RPMRequest(),
@@ -36,8 +36,6 @@ class OBDDashboardVM(app: Application) : AndroidViewModel(app) {
     }
 
     private val obdResponseLiveData: MutableLiveData<OBDDashboard> = MutableLiveData()
-    private val compassLiveData = Transformations.map<CompassEvent, OBDDashboard>(CompassLiveData(app),
-            { compassEvent -> obdResponseLiveData.value?.copy(currentAzimuth = compassEvent.azimuth) })
     val dashboardLiveData: MediatorLiveData<OBDDashboard> = MediatorLiveData()
 
 
@@ -54,10 +52,8 @@ class OBDDashboardVM(app: Application) : AndroidViewModel(app) {
         val initialSnapshot = OBDDashboard()
 
         (app as CarConnectApp).newConnectionComponent!!.inject(this)
-        dashboardLiveData.addSource(compassLiveData, { dashboardLiveData.value = it })
         dashboardLiveData.addSource(obdResponseLiveData, {
-            dashboardLiveData.value = it?.copy(currentAzimuth =
-            dashboardLiveData.value!!.currentAzimuth)
+            dashboardLiveData.value = it
         })
         obdResponseLiveData.value = initialSnapshot
         dashboardLiveData.value = initialSnapshot
@@ -70,6 +66,23 @@ class OBDDashboardVM(app: Application) : AndroidViewModel(app) {
                 .subscribe({ it -> obdResponseLiveData.value = obdResponseLiveData.value?.copy(vin = it.vin) },
                         { it -> Logger.log(TAG, "exception while loading vin", it) },
                         { Logger.log(TAG, "Vin loader completed") }))
+
+        subscriptions.add(obdEngine.submit<OBDResponse>(temperatureRequest)
+                .observeOn(mainScheduler)
+                .subscribe({ response ->
+                    when ((response as TemperatureResponse).type) {
+                        TemperatureType.AIR_INTAKE -> {
+                            obdResponseLiveData.value = obdResponseLiveData.value?.copy(currentAirIntakeTemp =
+                            response.temperature.toFloat())
+                        }
+                        TemperatureType.AMBIENT_AIR -> {
+                            obdResponseLiveData.value = obdResponseLiveData.value?.copy(currentAmbientTemp =
+                            response.temperature.toFloat())
+                        }
+                    }
+                },
+                        { it -> Logger.log(TAG, "exception while loading temperature", it) },
+                        { Logger.log(TAG, "Temperature loader completed") }))
 
         subscriptions.add(obdEngine.submit<FuelLevelResponse>(fuelLevelRequest)
                 .observeOn(mainScheduler)
@@ -113,4 +126,4 @@ class OBDDashboardVM(app: Application) : AndroidViewModel(app) {
 data class OBDDashboard(val online: Boolean = false, val vin: String = "", val rpm: Float = 0.0f,
                         val speed: Float = 0.0f, val fuel: Float = 0.0f,
                         val ignition: Boolean = false, val checkEngineLight: Boolean = false,
-                        val currentAzimuth: Float = 0.0f)
+                        val currentAirIntakeTemp: Float = 0.0f, val currentAmbientTemp: Float = 0.0f)

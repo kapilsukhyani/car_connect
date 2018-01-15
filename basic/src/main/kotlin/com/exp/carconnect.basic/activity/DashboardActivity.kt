@@ -74,6 +74,7 @@ class DashboardActivity : AppCompatActivity() {
         dashboard.showIgnitionIcon = dashboardData.ignition
         dashboard.showCheckEngineLight = dashboardData.checkEngineLight
         dashboard.fuelPercentage = dashboardData.fuel
-        dashboard.currentAzimuth = dashboardData.currentAzimuth
+        dashboard.currentAirIntakeTemp = dashboardData.currentAirIntakeTemp
+        dashboard.currentAmbientTemp = dashboardData.currentAmbientTemp
     }
 }

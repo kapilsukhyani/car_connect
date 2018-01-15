@@ -14,7 +14,8 @@ internal class FuelAndTemperatureGauge(dashboard: Dashboard,
                                        private val startAngle: Float,
                                        private val sweep: Float,
                                        currentFuelPercentage: Float,
-                                       currentAzimuth: Float,
+                                       currentAirIntakeTemp: Float,
+                                       currentAmbientTemp: Float,
                                        onlineColor: Int,
                                        offlineColor: Int) : RightGauge(dashboard, onlineColor, offlineColor) {
     companion object {
@@ -59,14 +60,17 @@ internal class FuelAndTemperatureGauge(dashboard: Dashboard,
             fuelPercentageChangedListener?.invoke(field)
         }
 
-    internal var currentAzimuth = currentAzimuth
+    internal var currentAirIntakeTemperature = currentAirIntakeTemp
         set(value) {
             field = value
             dashboard.invalidateFuelGauge()
         }
 
-    internal var currentAirIntakeTemperature = 25.0f
-    internal var currentAmbientTemperature = 35.0f
+    internal var currentAmbientTemperature = currentAmbientTemp
+        set(value) {
+            field = value
+            dashboard.invalidateFuelGauge()
+        }
 
     private var termperatureDottsRotationDegrees = 0.0f
     private var smallestTemperatureDottRadius = 0.0f

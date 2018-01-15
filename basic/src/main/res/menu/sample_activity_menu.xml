@@ -26,6 +26,15 @@
         android:title="Update Fuel" />
 
     <item
+        android:id="@+id/updateCurrentAirIntake"
+        android:enabled="true"
+        android:title="Update AirIntake Temp" />
+
+    <item
+        android:id="@+id/updateCurrentAmbient"
+        android:enabled="true"
+        android:title="Update Ambient Temp" />
+    <item
         android:id="@+id/hideShowSideGauges"
         android:enabled="true"
         android:title="Hide/Show Side Gauges" />

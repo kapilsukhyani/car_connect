@@ -6,6 +6,7 @@ import android.graphics.*
 import android.support.graphics.drawable.VectorDrawableCompat
 import android.support.v4.graphics.ColorUtils
 import android.text.TextPaint
+import android.view.MotionEvent
 import com.exp.carconnect.basic.R
 import java.util.*
 
@@ -49,6 +50,15 @@ internal class FuelAndTemperatureGauge(dashboard: Dashboard,
 
 
     internal var fuelPercentageChangedListener: ((Float) -> Unit)? = null
+    //todo implement following listeners
+    internal var airIntakeTempChangedListener: ((Float) -> Unit)? = null
+    internal var ambientTempChangedListener: ((Float) -> Unit)? = null
+
+    internal var onFuelIconCLickListener: ((Float) -> Unit)? = null
+    internal var onAirIntakeTempClickListener: ((Float) -> Unit)? = null
+    internal var onAmbientTempClickListener: ((Float) -> Unit)? = null
+
+
     private var currentFuelPercentage = currentFuelPercentage
         set(value) {
             field = if (value == 0.0f) {
@@ -79,6 +89,10 @@ internal class FuelAndTemperatureGauge(dashboard: Dashboard,
     private lateinit var ambientLabelBounds: RectF
     private lateinit var currentAmbientTextStartingPoint: PointF
     private lateinit var temperatureDottCenter: PointF
+
+    private lateinit var ambientTouchBounds: RectF
+    private lateinit var airIntakeTouchBounds: RectF
+
 
     private lateinit var fuelGaugeInnerBound: RectF
     private lateinit var fuelGaugeOuterBound: RectF
@@ -163,6 +177,7 @@ internal class FuelAndTemperatureGauge(dashboard: Dashboard,
 
         val temperatureTextBoundLeftEdge = (temperatureGaugeCircleRadius + temperatureGaugeCircleCenter.x + 2 * smallestTemperatureDottRadius * MAX_NO_OF_TEMPERATURE_DOTTS)
 
+        //todo improve text bound calculation, touch is not getting registered properly as of now
         temperatureTextPaint.getTextBounds(AIR_INTAKE_TEXT, 0, AIR_INTAKE_TEXT.length, textBound)
         val currentAirIntakeTempString = String.format("%.1f", currentAirIntakeTemperature) + " " + CELSIUS
         temperatureTextPaint.getTextBounds(currentAirIntakeTempString, 0, currentAirIntakeTempString.length, currentTempTextBound)
@@ -170,6 +185,8 @@ internal class FuelAndTemperatureGauge(dashboard: Dashboard,
 
         airIntakeLabelBounds = RectF(textBound)
         currentAirIntakeTextStartingPoint = PointF(textBound.left.toFloat(), textBound.top - currentTempTextBound.height().toFloat())
+        airIntakeTouchBounds = RectF(currentAirIntakeTextStartingPoint.x, currentAirIntakeTextStartingPoint.y - currentTempTextBound.height().toFloat(),
+                airIntakeLabelBounds.right, airIntakeLabelBounds.bottom)
 
         temperatureTextPaint.getTextBounds(AMBIENT_TEXT, 0, AMBIENT_TEXT.length, textBound)
         val currentAmbientTempString = String.format("%.1f", currentAmbientTemperature) + " " + CELSIUS
@@ -179,6 +196,8 @@ internal class FuelAndTemperatureGauge(dashboard: Dashboard,
         ambientLabelBounds = RectF(textBound)
         currentAmbientTextStartingPoint = PointF(textBound.left.toFloat(),
                 textBound.bottom + currentTempTextBound.height().toFloat())
+        ambientTouchBounds = RectF(ambientLabelBounds.left, ambientLabelBounds.top,
+                ambientLabelBounds.right, ambientLabelBounds.bottom + currentAmbientTextStartingPoint.y)
 
         temperatureDottCenter = PointF(temperatureGaugeCircleRadius + temperatureGaugeCircleCenter.x, temperatureGaugeCircleCenter.y)
 
@@ -324,5 +343,23 @@ internal class FuelAndTemperatureGauge(dashboard: Dashboard,
         currentFuelAnimator?.start()
     }
 
+    override fun onTap(event: MotionEvent): Boolean {
+        return when {
+            fuelIconBounds.contains(event.x.toInt(), event.y.toInt()) -> {
+                onFuelIconCLickListener?.invoke(dashboard.fuelPercentage)
+                true
+            }
+            ambientTouchBounds.contains(event.x, event.y) -> {
+                onAmbientTempClickListener?.invoke(dashboard.currentAmbientTemp)
+                true
+            }
+            airIntakeTouchBounds.contains(event.x, event.y) -> {
+                onAirIntakeTempClickListener?.invoke(dashboard.currentAirIntakeTemp)
+
+                true
+            }
+            else -> super.onTap(event)
+        }
+    }
 
 }

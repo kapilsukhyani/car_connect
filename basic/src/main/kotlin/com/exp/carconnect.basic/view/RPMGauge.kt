@@ -6,6 +6,7 @@ import android.annotation.SuppressLint
 import android.graphics.*
 import android.support.v4.graphics.ColorUtils
 import android.text.TextPaint
+import android.view.MotionEvent
 import java.util.*
 
 
@@ -82,6 +83,7 @@ internal class RPMGauge(dashboard: Dashboard,
     private var currentRPMAnimator: ObjectAnimator? = null
     private var dribbleRPMAnimator: ObjectAnimator? = null
     internal var rpmChangedListener: ((Float) -> Unit)? = null
+    internal var onRPMClickListener: ((Float) -> Unit)? = null
 
 
     private val degreesPerDataPoint = sweep / TOTAL_NO_OF_DATA_POINTS
@@ -267,6 +269,11 @@ internal class RPMGauge(dashboard: Dashboard,
 
     private fun getDegreesForCurrentRPM(): Float {
         return startAngle + degreesPerDataPoint * currentRPM
+    }
+
+    override fun onTap(event: MotionEvent): Boolean {
+        onRPMClickListener?.invoke(dashboard.currentRPM)
+        return true
     }
 
 

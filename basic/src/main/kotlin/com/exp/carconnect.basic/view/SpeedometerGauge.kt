@@ -7,6 +7,7 @@ import android.graphics.*
 import android.support.graphics.drawable.VectorDrawableCompat
 import android.support.v4.graphics.ColorUtils
 import android.text.TextPaint
+import android.view.MotionEvent
 import com.exp.carconnect.basic.R
 import java.util.*
 
@@ -52,6 +53,10 @@ internal class SpeedometerGauge(dashboard: Dashboard,
     internal var speedChangedListener: ((Float) -> Unit)? = null
     internal var ignitionIconChangedListener: ((Boolean) -> Unit)? = null
     internal var checkEngineLightChangedListener: ((Boolean) -> Unit)? = null
+    internal var onCheckEngineLightIconClickListener: ((Boolean) -> Unit)? = null
+    internal var onIgnitionIconClickListener: ((Boolean) -> Unit)? = null
+    internal var onSpeedStripClickListener: ((Float) -> Unit)? = null
+
     private var currentSpeed: Float = currentSpeed
         set(value) {
             field = value
@@ -108,6 +113,8 @@ internal class SpeedometerGauge(dashboard: Dashboard,
     private var innerCircleRadius: Float = 0.0f
     private lateinit var ignitionIconBounds: Rect
     private lateinit var checkEngineLightBounds: Rect
+    private lateinit var speedTextStripBounds: RectF
+
     private lateinit var indicatorBound: Rect
     private var bigTickLength: Float = 0.0f
     private var bigTickWidth: Float = 0.0f
@@ -169,6 +176,7 @@ internal class SpeedometerGauge(dashboard: Dashboard,
         dribble()
     }
 
+
     override fun onBoundChanged(bounds: RectF) {
         val gaugeCircumference = (2.0 * Math.PI * (bounds.width() / 2).toDouble()).toFloat()
 
@@ -207,6 +215,8 @@ internal class SpeedometerGauge(dashboard: Dashboard,
         speedTextStripPath.arcTo(innerCircleBound, 180 - startDegree + sweep, -sweep)
         speedTextStripPath.close()
 
+        speedTextStripBounds = RectF()
+        speedTextStripPath.computeBounds(speedTextStripBounds, true)
 
         val ignitionIconDimen = bounds.width() * IGNITION_DIMEN_PERCENTAGE
         ignitionIconBounds = Rect((innerCircleBound.centerX() - innerCircleRadius / 2 - ignitionIconDimen / 2).toInt(),
@@ -343,6 +353,24 @@ internal class SpeedometerGauge(dashboard: Dashboard,
             }
         })
         currentSpeedAnimator?.start()
+    }
+
+    override fun onTap(event: MotionEvent): Boolean {
+        return when {
+            ignitionIconBounds.contains(event.x.toInt(), event.y.toInt()) -> {
+                onIgnitionIconClickListener?.invoke(dashboard.showIgnitionIcon)
+                true
+            }
+            checkEngineLightBounds.contains(event.x.toInt(), event.y.toInt()) -> {
+                onCheckEngineLightIconClickListener?.invoke(dashboard.showCheckEngineLight)
+                true
+            }
+            speedTextStripBounds.contains(event.x, event.y) -> {
+                onSpeedStripClickListener?.invoke(dashboard.currentSpeed)
+                true
+            }
+            else -> super.onTap(event)
+        }
     }
 
 }

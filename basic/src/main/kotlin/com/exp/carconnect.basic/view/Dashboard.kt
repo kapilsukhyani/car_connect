@@ -12,8 +12,11 @@ import android.os.Parcelable
 import android.support.annotation.RequiresApi
 import android.support.v4.content.res.ResourcesCompat
 import android.support.v4.graphics.drawable.RoundedBitmapDrawableFactory
+import android.support.v4.view.GestureDetectorCompat
 import android.text.TextPaint
 import android.util.AttributeSet
+import android.view.GestureDetector
+import android.view.MotionEvent
 import android.view.View
 import com.exp.carconnect.basic.R
 import com.exp.carconnect.basic.view.RPMGauge.Companion.MAX_RPM
@@ -24,7 +27,11 @@ import java.util.*
 
 
 @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
-class Dashboard @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0, defStyleRes: Int = -1) : View(context, attrs, defStyleAttr, defStyleRes) {
+class Dashboard @JvmOverloads constructor(context: Context,
+                                          attrs: AttributeSet? = null,
+                                          defStyleAttr: Int = 0, defStyleRes: Int = -1) :
+        View(context, attrs, defStyleAttr, defStyleRes) {
+
 
     companion object {
         private val FUEL_PERCENTAGE_KEY = "fuel_percentage"
@@ -78,7 +85,7 @@ class Dashboard @JvmOverloads constructor(context: Context, attrs: AttributeSet?
     var fuelPercentage = 0.0f
         set(value) {
             if (value in 0.0..1.0 && value != field) {
-                fuelAndCompassGauge.updateFuel(value)
+                fuelAndTemperatureGauge.updateFuel(value)
                 field = value
             }
         }
@@ -154,7 +161,7 @@ class Dashboard @JvmOverloads constructor(context: Context, attrs: AttributeSet?
     var currentAirIntakeTemp = 0.0f
         set(value) {
             if (value != field) {
-                fuelAndCompassGauge.currentAirIntakeTemperature = value
+                fuelAndTemperatureGauge.currentAirIntakeTemperature = value
                 field = value
             }
         }
@@ -162,7 +169,7 @@ class Dashboard @JvmOverloads constructor(context: Context, attrs: AttributeSet?
     var currentAmbientTemp = 0.0f
         set(value) {
             if (value != field) {
-                fuelAndCompassGauge.currentAmbientTemperature = value
+                fuelAndTemperatureGauge.currentAmbientTemperature = value
                 field = value
             }
         }
@@ -206,8 +213,29 @@ class Dashboard @JvmOverloads constructor(context: Context, attrs: AttributeSet?
             currentSpeed, showIgnitionIcon, showCheckEngineLight, speedDribbleEnabled, onlineColor, offlineColor)
     private val rpmGauge = RPMGauge(this, LEFT_GAUGE_START_ANGLE.toFloat(), LEFT_GAUGE_SWEEP_ANGLE.toFloat(),
             rpmDribbleEnabled, currentRPM, onlineColor, offlineColor)
-    private val fuelAndCompassGauge = FuelAndTemperatureGauge(this, RIGHT_GAUGE_START_ANGLE.toFloat(), RIGHT_GAUGE_SWEEP_ANGLE.toFloat(),
+    private val fuelAndTemperatureGauge = FuelAndTemperatureGauge(this, RIGHT_GAUGE_START_ANGLE.toFloat(), RIGHT_GAUGE_SWEEP_ANGLE.toFloat(),
             .01f, currentAirIntakeTemp, currentAmbientTemp, onlineColor, offlineColor)
+
+    private val gestureListener = object : GestureDetector.SimpleOnGestureListener() {
+        override fun onSingleTapUp(e: MotionEvent): Boolean {
+            return when {
+                middleGaugeBounds.contains(e.x, e.y) -> {
+                    speedometerGauge.onTap(e)
+                    true
+                }
+                leftGaugeBounds.contains(e.x, e.y) -> {
+                    rpmGauge.onTap(e)
+                    true
+                }
+                rightGaugeBounds.contains(e.x, e.y) -> {
+                    fuelAndTemperatureGauge.onTap(e)
+                    true
+                }
+                else -> super.onSingleTapUp(e)
+            }
+        }
+    }
+    private val gestureDetector = GestureDetectorCompat(this.context, gestureListener)
 
 
     init {
@@ -247,6 +275,12 @@ class Dashboard @JvmOverloads constructor(context: Context, attrs: AttributeSet?
             }
         })
 
+    }
+
+
+    override fun onTouchEvent(event: MotionEvent?): Boolean {
+        this.gestureDetector.onTouchEvent(event)
+        return true
     }
 
     override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
@@ -295,7 +329,7 @@ class Dashboard @JvmOverloads constructor(context: Context, attrs: AttributeSet?
         rpmGauge.onBoundChanged(leftGaugeBounds)
 
         val sideAndMiddleGaugeIntersectionLength = Math.abs(rightGaugeBoundsToBeShownCompletely.left - middleGaugeBounds.right)
-        fuelAndCompassGauge.onBoundChanged(rightGaugeBounds, middleGaugeRadius, sideAndMiddleGaugeIntersectionLength)
+        fuelAndTemperatureGauge.onBoundChanged(rightGaugeBounds, middleGaugeRadius, sideAndMiddleGaugeIntersectionLength)
 
     }
 
@@ -339,7 +373,7 @@ class Dashboard @JvmOverloads constructor(context: Context, attrs: AttributeSet?
     private fun drawFuelGauge(canvas: Canvas, rightSideGaugeBounds: RectF) {
         gaugeBackgroundDrawable.setBounds(rightSideGaugeBounds.left.toInt(), rightSideGaugeBounds.top.toInt(), rightSideGaugeBounds.right.toInt(), rightSideGaugeBounds.bottom.toInt())
         gaugeBackgroundDrawable.draw(canvas)
-        fuelAndCompassGauge.drawGauge(canvas, rightSideGaugeBounds)
+        fuelAndTemperatureGauge.drawGauge(canvas, rightSideGaugeBounds)
     }
 
 
@@ -371,13 +405,13 @@ class Dashboard @JvmOverloads constructor(context: Context, attrs: AttributeSet?
             vinPaint.color = vinOnlineColor
             speedometerGauge.onConnected()
             rpmGauge.onConnected()
-            fuelAndCompassGauge.onConnected()
+            fuelAndTemperatureGauge.onConnected()
 
         } else {
             vinPaint.color = vinOfflineColor
             speedometerGauge.onDisconnected()
             rpmGauge.onDisconnected()
-            fuelAndCompassGauge.onDisconnected()
+            fuelAndTemperatureGauge.onDisconnected()
 
         }
     }
@@ -408,7 +442,7 @@ class Dashboard @JvmOverloads constructor(context: Context, attrs: AttributeSet?
             val animatedBy = Math.abs((it.animatedValue as Float) - rightGaugeBounds.left)
             offsetBoundsBy(animatedBy)
             rpmGauge.onBoundChanged(leftGaugeBounds)
-            fuelAndCompassGauge.onBoundChanged(rightGaugeBounds)
+            fuelAndTemperatureGauge.onBoundChanged(rightGaugeBounds)
             invalidate()
         })
         animator.addListener(object : AnimatorListenerAdapter() {
@@ -459,7 +493,7 @@ class Dashboard @JvmOverloads constructor(context: Context, attrs: AttributeSet?
     }
 
     fun setOnFuelPercentageChangedListener(listener: (Float) -> Unit) {
-        fuelAndCompassGauge.fuelPercentageChangedListener = listener
+        fuelAndTemperatureGauge.fuelPercentageChangedListener = listener
     }
 
     fun setOnCheckEngineLightChangedListener(listener: (Boolean) -> Unit) {
@@ -469,5 +503,36 @@ class Dashboard @JvmOverloads constructor(context: Context, attrs: AttributeSet?
     fun setOnIgnitionChangedListener(listener: (Boolean) -> Unit) {
         speedometerGauge.ignitionIconChangedListener = listener
     }
+
+
+    fun setOnRPMGaugeCLickListener(listener: (Float) -> Unit) {
+        rpmGauge.onRPMClickListener = listener
+
+    }
+
+    fun setOnIgnitionIconCLickListener(listener: (Boolean) -> Unit) {
+        speedometerGauge.onIgnitionIconClickListener = listener
+    }
+
+    fun setOnCheckEngineLightIconCLickListener(listener: (Boolean) -> Unit) {
+        speedometerGauge.onCheckEngineLightIconClickListener = listener
+    }
+
+    fun setOnSpeedStripClickListener(listener: (Float) -> Unit) {
+        speedometerGauge.onSpeedStripClickListener = listener
+    }
+
+    fun setOnAirIntakeTempClickListener(listener: (Float) -> Unit) {
+        fuelAndTemperatureGauge.onAirIntakeTempClickListener = listener
+    }
+
+    fun setOnAmbientTempClickListener(listener: (Float) -> Unit) {
+        fuelAndTemperatureGauge.onAmbientTempClickListener = listener
+    }
+
+    fun setOnFuelIconClickListener(listener: (Float) -> Unit) {
+        fuelAndTemperatureGauge.onFuelIconCLickListener = listener
+    }
+
 
 }

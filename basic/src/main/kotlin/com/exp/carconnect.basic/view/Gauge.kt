@@ -1,6 +1,7 @@
 package com.exp.carconnect.basic.view
 
 import android.graphics.*
+import android.view.MotionEvent
 
 
 internal abstract class Gauge(val dashboard: Dashboard,
@@ -130,6 +131,10 @@ internal abstract class Gauge(val dashboard: Dashboard,
         Color.colorToHSV(originalColor, hsv)
         hsv[2] *= 0.6f // value globalComponent
         return Color.HSVToColor(hsv)
+    }
+
+    open fun onTap(event: MotionEvent): Boolean {
+        return false
     }
 }
 

@@ -12,6 +12,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.Toast;
 
 import com.exp.carconnect.basic.R;
 import com.exp.carconnect.basic.view.Dashboard;
@@ -93,6 +94,60 @@ public class DashboardSimulatorActivity extends AppCompatActivity {
             @Override
             public Unit invoke(Float aFloat) {
 //                System.out.println("RPM: " + aFloat);
+                return null;
+            }
+        });
+
+        dashboard.setOnRPMGaugeCLickListener(new Function1<Float, Unit>() {
+            @Override
+            public Unit invoke(Float aFloat) {
+                Toast.makeText(DashboardSimulatorActivity.this, "rpm clicked: " + aFloat, Toast.LENGTH_LONG).show();
+                return null;
+            }
+        });
+
+        dashboard.setOnIgnitionIconCLickListener(new Function1<Boolean, Unit>() {
+            @Override
+            public Unit invoke(Boolean aFloat) {
+                Toast.makeText(DashboardSimulatorActivity.this, "ignition clicked: " + aFloat, Toast.LENGTH_LONG).show();
+                return null;
+            }
+        });
+        dashboard.setOnCheckEngineLightIconCLickListener(new Function1<Boolean, Unit>() {
+            @Override
+            public Unit invoke(Boolean aFloat) {
+                Toast.makeText(DashboardSimulatorActivity.this, "check engine clicked: " + aFloat, Toast.LENGTH_LONG).show();
+                return null;
+            }
+        });
+        dashboard.setOnSpeedStripClickListener(new Function1<Float, Unit>() {
+            @Override
+            public Unit invoke(Float aFloat) {
+                Toast.makeText(DashboardSimulatorActivity.this, "speed clicked: " + aFloat, Toast.LENGTH_LONG).show();
+                return null;
+            }
+        });
+
+        dashboard.setOnFuelIconClickListener(new Function1<Float, Unit>() {
+            @Override
+            public Unit invoke(Float aFloat) {
+                Toast.makeText(DashboardSimulatorActivity.this, "fuel clicked: " + aFloat, Toast.LENGTH_LONG).show();
+                return null;
+            }
+        });
+
+        dashboard.setOnAirIntakeTempClickListener(new Function1<Float, Unit>() {
+            @Override
+            public Unit invoke(Float aFloat) {
+                Toast.makeText(DashboardSimulatorActivity.this, "air intake clicked: " + aFloat, Toast.LENGTH_LONG).show();
+                return null;
+            }
+        });
+
+        dashboard.setOnAmbientTempClickListener(new Function1<Float, Unit>() {
+            @Override
+            public Unit invoke(Float aFloat) {
+                Toast.makeText(DashboardSimulatorActivity.this, "ambient clicked: " + aFloat, Toast.LENGTH_LONG).show();
                 return null;
             }
         });

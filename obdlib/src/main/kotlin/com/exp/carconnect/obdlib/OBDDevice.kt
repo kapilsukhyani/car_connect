@@ -1,4 +1,4 @@
-package com.exp.carconnect
+package com.exp.carconnect.obdlib
 
 import io.reactivex.Observable
 import java.io.InputStream
@@ -6,7 +6,7 @@ import java.io.OutputStream
 import java.util.regex.Pattern
 
 
-class OBDDevice(private val inputStream: InputStream, private val outputStream: OutputStream) : IOBDDevice {
+internal class OBDDevice(private val inputStream: InputStream, private val outputStream: OutputStream) : IOBDDevice {
 
     companion object {
         private val TAG: String = "OBDDevice"

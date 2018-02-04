@@ -1,4 +1,4 @@
-package com.exp.carconnect.basic.obdmessage
+package com.exp.carconnect.obdlib.obdmessage
 
 
 class AdaptiveTimingCommand(val mode: Int,

@@ -1,7 +1,7 @@
-package com.exp.carconnect.basic.obdmessage
+package com.exp.carconnect.obdlib.obdmessage
 
-import com.exp.carconnect.*
-import com.exp.carconnect.basic.obdmessage.NonAlphaNumericException.Companion.DIGITS_LETTERS_PATTERN
+import com.exp.carconnect.obdlib.*
+import com.exp.carconnect.obdlib.obdmessage.NonAlphaNumericException.Companion.DIGITS_LETTERS_PATTERN
 import io.reactivex.Observable
 import io.reactivex.Observer
 import io.reactivex.disposables.Disposable

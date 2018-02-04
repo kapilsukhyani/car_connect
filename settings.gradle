@@ -1,1 +1,1 @@
-include ':basic', ':app'
+include ':basic', ':app', ':obdlib'

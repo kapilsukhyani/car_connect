@@ -30,6 +30,7 @@ android {
 
 
 dependencies {
+    implementation project(":obdlib")
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jre7:$kotlin_version"
     implementation 'io.reactivex.rxjava2:rxjava:2.1.3'

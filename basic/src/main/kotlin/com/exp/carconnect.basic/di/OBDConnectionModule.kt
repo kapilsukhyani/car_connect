@@ -1,6 +1,6 @@
 package com.exp.carconnect.basic.di
 
-import com.exp.carconnect.basic.OBDEngine
+import com.exp.carconnect.obdlib.OBDEngine
 import dagger.Module
 import dagger.Provides
 import io.reactivex.Scheduler

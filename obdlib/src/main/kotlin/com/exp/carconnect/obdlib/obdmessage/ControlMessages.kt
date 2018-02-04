@@ -1,4 +1,4 @@
-package com.exp.carconnect.basic.obdmessage
+package com.exp.carconnect.obdlib.obdmessage
 
 import java.util.*
 import java.util.regex.Pattern

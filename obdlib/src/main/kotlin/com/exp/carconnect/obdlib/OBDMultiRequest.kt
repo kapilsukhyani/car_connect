@@ -1,8 +1,8 @@
-package com.exp.carconnect
+package com.exp.carconnect.obdlib
 
-import com.exp.carconnect.basic.obdmessage.IsRepeatable
-import com.exp.carconnect.basic.obdmessage.OBDRequest
-import com.exp.carconnect.basic.obdmessage.OBDResponse
+import com.exp.carconnect.obdlib.obdmessage.IsRepeatable
+import com.exp.carconnect.obdlib.obdmessage.OBDRequest
+import com.exp.carconnect.obdlib.obdmessage.OBDResponse
 import io.reactivex.Observable
 import java.util.*
 

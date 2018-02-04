@@ -1,8 +1,8 @@
-package com.exp.carconnect
+package com.exp.carconnect.obdlib
 
-import com.exp.carconnect.basic.obdmessage.IsRepeatable
-import com.exp.carconnect.basic.obdmessage.OBDRequest
-import com.exp.carconnect.basic.obdmessage.OBDResponse
+import com.exp.carconnect.obdlib.obdmessage.IsRepeatable
+import com.exp.carconnect.obdlib.obdmessage.OBDRequest
+import com.exp.carconnect.obdlib.obdmessage.OBDResponse
 import io.reactivex.BackpressureStrategy
 import io.reactivex.Observable
 import io.reactivex.ObservableEmitter
@@ -11,7 +11,7 @@ import io.reactivex.subjects.PublishSubject
 import java.util.*
 
 
-class OBDRequestPipe(private val ioScheduler: Scheduler,
+internal class OBDRequestPipe(private val ioScheduler: Scheduler,
                      private val computationScheduler: Scheduler,
                      private val obdDevice: IOBDDevice) : IOBDRequestPipe {
 

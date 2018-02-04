@@ -5,11 +5,11 @@ import android.arch.lifecycle.AndroidViewModel
 import android.arch.lifecycle.MediatorLiveData
 import android.arch.lifecycle.MutableLiveData
 import com.exp.carconnect.Logger
-import com.exp.carconnect.OBDMultiRequest
 import com.exp.carconnect.basic.CarConnectApp
-import com.exp.carconnect.basic.OBDEngine
 import com.exp.carconnect.basic.di.Main
-import com.exp.carconnect.basic.obdmessage.*
+import com.exp.carconnect.obdlib.OBDEngine
+import com.exp.carconnect.obdlib.OBDMultiRequest
+import com.exp.carconnect.obdlib.obdmessage.*
 import io.reactivex.Scheduler
 import io.reactivex.disposables.CompositeDisposable
 import java.util.concurrent.TimeUnit

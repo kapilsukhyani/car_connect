@@ -1,6 +1,6 @@
 package com.exp.carconnect.obdlib
 
-public class Logger {
+internal class Logger {
     companion object {
         fun log(tag: String, message: String) {
             System.out.println("[Thread: ${Thread.currentThread().name}] [$tag]: $message")

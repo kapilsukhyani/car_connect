@@ -1,1 +1,1 @@
-include ':basic', ':app', ':obdlib'
+include ':base', ':app', ':obdlib', ':dashboard', ':instantapp'

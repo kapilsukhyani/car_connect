@@ -1,5 +1,14 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     package="com.exp.carconnect.app">
 
-    <application android:label="CarConnect"></application>
+    <application android:label="CarConnect">
+        <provider
+            android:name="android.arch.lifecycle.ProcessLifecycleOwnerInitializer"
+            android:authorities="${applicationId}.lifecycle-trojan"
+            android:exported="false"
+            android:multiprocess="true"
+            tools:replace="android:authorities" />
+
+    </application>
 </manifest>

@@ -7,20 +7,34 @@
             android:name=".activity.DashboardActivity"
             android:screenOrientation="landscape"
             android:theme="@style/Theme.AppCompat.DayNight">
-            <intent-filter android:order="1">
-                <action android:name="android.intent.action.VIEW" />
+            <tools:validation testUrl="http://carobdconnect.com/obddashboard" />
+            <tools:validation testUrl="https://carobdconnect.com/obddashboard" />
 
-                <category android:name="android.intent.category.BROWSABLE" />
-                <category android:name="android.intent.category.DEFAULT" />
-
-                <data
-                    android:host="carobdconnect.com"
-                    android:path="/obddashboard"
-                    android:scheme="https" />
-            </intent-filter>
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+            <intent-filter android:order="1">
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data
+                    android:scheme="https"
+                    android:host="carobdconnect.com"
+                    android:pathPrefix="/obddashboard" />
+            </intent-filter>
+            <intent-filter android:order="1">
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data
+                    android:scheme="http"
+                    android:host="carobdconnect.com"
+                    android:pathPrefix="/obddashboard" />
             </intent-filter>
         </activity>
 

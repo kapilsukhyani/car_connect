@@ -3,6 +3,8 @@
     package="com.exp.carconnect.base">
 
     <uses-permission android:name="android.permission.BLUETOOTH" />
+    <uses-permission android:name="android.permission.INTERNET" />
+
     <application android:name="com.exp.carconnect.base.CarConnectApp">
 
         <activity
@@ -15,7 +17,9 @@
             </intent-filter>
         </activity>
 
-
+        <meta-data
+            android:name="io.fabric.ApiKey"
+            android:value="4fa3e9247ecc0eeb8ab3e273e1668b4daa362208" />
     </application>
 
 </manifest>

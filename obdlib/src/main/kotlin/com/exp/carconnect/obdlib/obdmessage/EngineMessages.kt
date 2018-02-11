@@ -1,9 +1,10 @@
 package com.exp.carconnect.obdlib.obdmessage
 
 
-class RPMRequest(retriable: Boolean = true,
+class RPMRequest(mode: OBDRequestMode = OBDRequestMode.CURRENT,
+                 retriable: Boolean = true,
                  repeatable: IsRepeatable = IsRepeatable.No) :
-        OBDRequest("RPMRequest", "01 0C", retriable, repeatable) {
+        MultiModeOBDRequest(mode, "RPMRequest", "0C", retriable, repeatable) {
     override fun toResponse(rawResponse: String): RPMResponse {
         return RPMResponse(rawResponse)
     }
@@ -22,9 +23,10 @@ class RPMResponse(rawResponse: String) : OBDResponse("RPMResponse", rawResponse)
     }
 }
 
-class AbsoluteLoadRequest(retriable: Boolean = true,
+class AbsoluteLoadRequest(mode: OBDRequestMode = OBDRequestMode.CURRENT,
+                          retriable: Boolean = true,
                           repeatable: IsRepeatable = IsRepeatable.No) :
-        OBDRequest("AbsoluteLoadRequest", "01 43", retriable, repeatable) {
+        MultiModeOBDRequest(mode, "AbsoluteLoadRequest", "43", retriable, repeatable) {
     override fun toResponse(rawResponse: String): OBDResponse {
         return AbsoluteLoadResponse(rawResponse)
     }
@@ -48,9 +50,10 @@ class AbsoluteLoadResponse(rawResponse: String) :
     }
 }
 
-class LoadRequest(retriable: Boolean = true,
+class LoadRequest(mode: OBDRequestMode = OBDRequestMode.CURRENT,
+                  retriable: Boolean = true,
                   repeatable: IsRepeatable = IsRepeatable.No) :
-        OBDRequest("LoadRequest", "01 04", retriable, repeatable) {
+        MultiModeOBDRequest(mode, "LoadRequest", "04", retriable, repeatable) {
     override fun toResponse(rawResponse: String): OBDResponse {
         return LoadResponse(rawResponse)
     }
@@ -67,9 +70,10 @@ class LoadResponse(rawResponse: String) :
 }
 
 
-class MassAirFlowRequest(retriable: Boolean = true,
+class MassAirFlowRequest(mode: OBDRequestMode = OBDRequestMode.CURRENT,
+                         retriable: Boolean = true,
                          repeatable: IsRepeatable = IsRepeatable.No) :
-        OBDRequest("MassAirFlowRequest", "01 10", retriable, repeatable) {
+        MultiModeOBDRequest(mode, "MassAirFlowRequest", "10", retriable, repeatable) {
     override fun toResponse(rawResponse: String): OBDResponse {
         return MassAirFlowResponse(rawResponse)
     }
@@ -91,9 +95,10 @@ class MassAirFlowResponse(rawResponse: String) :
 }
 
 
-class OilTempRequest(retriable: Boolean = true,
+class OilTempRequest(mode: OBDRequestMode = OBDRequestMode.CURRENT,
+                     retriable: Boolean = true,
                      repeatable: IsRepeatable = IsRepeatable.No) :
-        OBDRequest("OilTempRequest", "01 5C", retriable, repeatable) {
+        MultiModeOBDRequest(mode, "OilTempRequest", "5C", retriable, repeatable) {
     override fun toResponse(rawResponse: String): OBDResponse {
         return OilTempResponse(rawResponse)
     }
@@ -110,9 +115,10 @@ class OilTempResponse(rawResponse: String) :
 }
 
 
-class RuntimeRequest(retriable: Boolean = true,
+class RuntimeRequest(mode: OBDRequestMode = OBDRequestMode.CURRENT,
+                     retriable: Boolean = true,
                      repeatable: IsRepeatable = IsRepeatable.No) :
-        OBDRequest("RuntimeRequest", "01 1F", retriable, repeatable) {
+        MultiModeOBDRequest(mode, "RuntimeRequest", "1F", retriable, repeatable) {
     override fun toResponse(rawResponse: String): OBDResponse {
         return RuntimeResponse(rawResponse)
     }
@@ -137,9 +143,10 @@ class RuntimeResponse(rawResponse: String) :
 }
 
 
-class ThrottlePositionRequest(retriable: Boolean = true,
+class ThrottlePositionRequest(mode: OBDRequestMode = OBDRequestMode.CURRENT,
+                              retriable: Boolean = true,
                               repeatable: IsRepeatable = IsRepeatable.No) :
-        OBDRequest("ThrottlePositionRequest", "01 11", retriable, repeatable) {
+        MultiModeOBDRequest(mode, "ThrottlePositionRequest", "11", retriable, repeatable) {
     override fun toResponse(rawResponse: String): OBDResponse {
         return ThrottlePositionResponse(rawResponse)
     }
@@ -155,9 +162,10 @@ class ThrottlePositionResponse(rawResponse: String) :
     }
 }
 
-class SpeedRequest(retriable: Boolean = true,
+class SpeedRequest(mode: OBDRequestMode = OBDRequestMode.CURRENT,
+                   retriable: Boolean = true,
                    repeatable: IsRepeatable = IsRepeatable.No) :
-        OBDRequest("SpeedRequest", "01 0D", retriable, repeatable) {
+        MultiModeOBDRequest(mode, "SpeedRequest", "0D", retriable, repeatable) {
 
     override fun toResponse(rawResponse: String): OBDResponse {
         return SpeedResponse(rawResponse)

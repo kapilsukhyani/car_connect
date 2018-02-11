@@ -2,9 +2,10 @@ package com.exp.carconnect.obdlib.obdmessage
 
 import java.util.*
 
-class AirFuelRatioRequest(retriable: Boolean = true,
+class AirFuelRatioRequest(mode: OBDRequestMode = OBDRequestMode.CURRENT,
+                          retriable: Boolean = true,
                           repeatable: IsRepeatable = IsRepeatable.No) :
-        OBDRequest("AirFuelRatioRequest", "01 44", retriable, repeatable) {
+        MultiModeOBDRequest(mode, "AirFuelRatioRequest", "44", retriable, repeatable) {
     override fun toResponse(rawResponse: String): OBDResponse {
         return TimingAdvanceResponse(rawResponse)
     }
@@ -25,9 +26,10 @@ class AirFuelRatioResponse(rawResponse: String) : OBDResponse("AirFuelRatioRespo
 }
 
 
-class ConsumptionRateRequest(retriable: Boolean = true,
+class ConsumptionRateRequest(mode: OBDRequestMode = OBDRequestMode.CURRENT,
+                             retriable: Boolean = true,
                              repeatable: IsRepeatable = IsRepeatable.No) :
-        OBDRequest("ConsumptionRateRequest", "01 5E", retriable, repeatable) {
+        MultiModeOBDRequest(mode, "ConsumptionRateRequest", "5E", retriable, repeatable) {
     override fun toResponse(rawResponse: String): OBDResponse {
         return ConsumptionRateResponse(rawResponse)
     }
@@ -75,8 +77,8 @@ class FuelTypeResponse(rawResponse: String) : OBDResponse("FuelTypeResponse", ra
 }
 
 
-enum class FuelType (val value: Int,
-                                        val description: String) {
+enum class FuelType(val value: Int,
+                    val description: String) {
 
     GASOLINE(0x01, "Gasoline"),
     METHANOL(0x02, "Methanol"),
@@ -117,9 +119,10 @@ enum class FuelType (val value: Int,
 
 }
 
-class FuelLevelRequest(retriable: Boolean = true,
+class FuelLevelRequest(mode: OBDRequestMode = OBDRequestMode.CURRENT,
+                       retriable: Boolean = true,
                        repeatable: IsRepeatable = IsRepeatable.No) :
-        OBDRequest("FuelLevelRequest", "01 2F", retriable, repeatable) {
+        MultiModeOBDRequest(mode, "FuelLevelRequest", "2F", retriable, repeatable) {
     override fun toResponse(rawResponse: String): OBDResponse {
         return FuelLevelResponse(rawResponse)
     }
@@ -161,8 +164,8 @@ class FuelTrimResponse(rawResponse: String) : OBDResponse("FuelTrimResponse", ra
     }
 }
 
-enum class FuelTrim (val value: Int,
-                                        val bank: String) {
+enum class FuelTrim(val value: Int,
+                    val bank: String) {
 
     SHORT_TERM_BANK_1(0x06, "Short Term Fuel Trim Bank 1"),
     LONG_TERM_BANK_1(0x07, "Long Term Fuel Trim Bank 1"),
@@ -189,9 +192,10 @@ enum class FuelTrim (val value: Int,
 
 }
 
-class WidebandAirFuelRatioRequest(retriable: Boolean = true,
+class WidebandAirFuelRatioRequest(mode: OBDRequestMode = OBDRequestMode.CURRENT,
+                                  retriable: Boolean = true,
                                   repeatable: IsRepeatable = IsRepeatable.No) :
-        OBDRequest("WidebandAirFuelRatioRequest", "01 34", retriable, repeatable) {
+        MultiModeOBDRequest(mode, "WidebandAirFuelRatioRequest", "34", retriable, repeatable) {
     override fun toResponse(rawResponse: String): OBDResponse {
         return WidebandAirFuelRatioResponse(rawResponse)
     }

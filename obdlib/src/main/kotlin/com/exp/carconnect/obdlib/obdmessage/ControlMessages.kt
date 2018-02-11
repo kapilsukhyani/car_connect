@@ -3,9 +3,11 @@ package com.exp.carconnect.obdlib.obdmessage
 import java.util.*
 import java.util.regex.Pattern
 
-class DistanceRequest(distanceType: DistanceCommandType, retriable: Boolean = true,
+class DistanceRequest(mode: OBDRequestMode = OBDRequestMode.CURRENT,
+                      distanceType: DistanceCommandType,
+                      retriable: Boolean = true,
                       repeatable: IsRepeatable = IsRepeatable.No) :
-        OBDRequest("DistanceRequest ${distanceType.name}", distanceType.value, retriable, repeatable) {
+        MultiModeOBDRequest(mode, "DistanceRequest ${distanceType.name}", distanceType.value, retriable, repeatable) {
     override fun toResponse(rawResponse: String): OBDResponse {
         return DistanceResponse(rawResponse)
     }
@@ -26,13 +28,14 @@ class DistanceResponse(rawResponse: String) : OBDResponse("DistanceResponse", ra
 
 
 enum class DistanceCommandType private constructor(val value: String) {
-    MIL_ON("01 21"),
-    SINCE_CC_CLEARED("01 31")
+    SINCE_MIL_ON("21"),
+    SINCE_CC_CLEARED("31")
 }
 
-class DTCNumberRequest(retriable: Boolean = true,
+class DTCNumberRequest(mode: OBDRequestMode = OBDRequestMode.CURRENT,
+                       retriable: Boolean = true,
                        repeatable: IsRepeatable = IsRepeatable.No) :
-        OBDRequest("DTCNumberRequest", "01 01", retriable, repeatable) {
+        MultiModeOBDRequest(mode, "DTCNumberRequest", "01", retriable, repeatable) {
     override fun toResponse(rawResponse: String): OBDResponse {
         return DTCNumberResponse(rawResponse)
     }
@@ -54,9 +57,10 @@ class DTCNumberResponse(rawResponse: String) : OBDResponse("DTCNumberResponse", 
     }
 }
 
-class EquivalentRatioRequest(retriable: Boolean = true,
+class EquivalentRatioRequest(mode: OBDRequestMode = OBDRequestMode.CURRENT,
+                             retriable: Boolean = true,
                              repeatable: IsRepeatable = IsRepeatable.No) :
-        OBDRequest("EquivalentRatioRequest", "01 44", retriable, repeatable) {
+        MultiModeOBDRequest(mode, "EquivalentRatioRequest", "44", retriable, repeatable) {
     override fun toResponse(rawResponse: String): OBDResponse {
         return EquivalentRatioResponse(rawResponse)
     }
@@ -92,9 +96,10 @@ class IgnitionMonitorResponse(rawResponse: String) : OBDResponse("IgnitionMonito
     }
 }
 
-class ModuleVoltageRequest(retriable: Boolean = true,
+class ModuleVoltageRequest(mode: OBDRequestMode = OBDRequestMode.CURRENT,
+                           retriable: Boolean = true,
                            repeatable: IsRepeatable = IsRepeatable.No) :
-        OBDRequest("ModuleVoltageRequest", "01 42", retriable, repeatable) {
+        MultiModeOBDRequest(mode, "ModuleVoltageRequest", "42", retriable, repeatable) {
     override fun toResponse(rawResponse: String): OBDResponse {
         return ModuleVoltageResponse(rawResponse)
     }
@@ -188,9 +193,10 @@ class PendingTroubleCodesResponse(rawResponse: String) : OBDResponse("PendingTro
 }
 
 
-class TimingAdvanceRequest(retriable: Boolean = true,
+class TimingAdvanceRequest(mode: OBDRequestMode = OBDRequestMode.CURRENT,
+                           retriable: Boolean = true,
                            repeatable: IsRepeatable = IsRepeatable.No) :
-        OBDRequest("TimingAdvanceRequest", "01 0E", retriable, repeatable) {
+        MultiModeOBDRequest(mode, "TimingAdvanceRequest", "0E", retriable, repeatable) {
     override fun toResponse(rawResponse: String): OBDResponse {
         return TimingAdvanceResponse(rawResponse)
     }

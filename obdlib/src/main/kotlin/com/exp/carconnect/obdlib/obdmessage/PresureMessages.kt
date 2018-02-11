@@ -1,9 +1,10 @@
 package com.exp.carconnect.obdlib.obdmessage
 
 
-class BarometricPressureRequest(retriable: Boolean = true,
+class BarometricPressureRequest(mode: OBDRequestMode = OBDRequestMode.CURRENT,
+                                retriable: Boolean = true,
                                 repeatable: IsRepeatable = IsRepeatable.No) :
-        OBDRequest("BarometricPressureRequest", "01 33", retriable, repeatable) {
+        MultiModeOBDRequest(mode, "BarometricPressureRequest", "33", retriable, repeatable) {
     override fun toResponse(rawResponse: String): OBDResponse {
         return BarometricPressureResponse(rawResponse)
     }
@@ -24,9 +25,10 @@ class BarometricPressureResponse(rawResponse: String) : OBDResponse("BarometricP
 }
 
 
-class FuelPressureRequest(retriable: Boolean = true,
+class FuelPressureRequest(mode: OBDRequestMode = OBDRequestMode.CURRENT,
+                          retriable: Boolean = true,
                           repeatable: IsRepeatable = IsRepeatable.No) :
-        OBDRequest("FuelPressureRequest", "01 0A", retriable, repeatable) {
+        MultiModeOBDRequest(mode, "FuelPressureRequest", "0A", retriable, repeatable) {
     override fun toResponse(rawResponse: String): OBDResponse {
         return FuelPressureResponse(rawResponse)
     }
@@ -47,9 +49,10 @@ class FuelPressureResponse(rawResponse: String) : OBDResponse("FuelPressureRespo
 }
 
 
-class FuelRailPressureRequest(retriable: Boolean = true,
+class FuelRailPressureRequest(mode: OBDRequestMode = OBDRequestMode.CURRENT,
+                              retriable: Boolean = true,
                               repeatable: IsRepeatable = IsRepeatable.No) :
-        OBDRequest("FuelRailPressureRequest", "01 23", retriable, repeatable) {
+        MultiModeOBDRequest(mode, "FuelRailPressureRequest", "23", retriable, repeatable) {
     override fun toResponse(rawResponse: String): OBDResponse {
         return FuelRailPressureResponse(rawResponse)
     }
@@ -70,10 +73,10 @@ class FuelRailPressureResponse(rawResponse: String) : OBDResponse("FuelRailPress
 }
 
 
-
-class IntakeManifoldPressureRequest(retriable: Boolean = true,
-                              repeatable: IsRepeatable = IsRepeatable.No) :
-        OBDRequest("IntakeManifoldPressureRequest", "01 0B", retriable, repeatable) {
+class IntakeManifoldPressureRequest(mode: OBDRequestMode = OBDRequestMode.CURRENT,
+                                    retriable: Boolean = true,
+                                    repeatable: IsRepeatable = IsRepeatable.No) :
+        MultiModeOBDRequest(mode, "IntakeManifoldPressureRequest", "0B", retriable, repeatable) {
     override fun toResponse(rawResponse: String): OBDResponse {
         return IntakeManifoldPressureResponse(rawResponse)
     }

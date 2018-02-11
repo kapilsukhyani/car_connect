@@ -74,6 +74,22 @@ abstract class OBDRequest(val tag: String,
     }
 }
 
+abstract class MultiModeOBDRequest(mode: OBDRequestMode,
+                                   tag: String,
+                                   command: String,
+                                   retriable: Boolean = true,
+                                   isRepeatable: IsRepeatable = IsRepeatable.No,
+                                   returnCachedResponse: Boolean = false) :
+        OBDRequest(tag, "${mode.value} $command",
+                retriable,
+                isRepeatable,
+                returnCachedResponse)
+
+enum class OBDRequestMode(val value: String) {
+    CURRENT("01"),
+    FREEZE_FRAME("02")
+}
+
 sealed class IsRepeatable {
     object No : IsRepeatable()
     data class Yes(val frequency: Long,

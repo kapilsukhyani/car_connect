@@ -54,6 +54,10 @@ dependencies {
 //    implementation 'com.google.dagger:dagger-android-support:2.13' // if you use the support libraries
 //    kapt 'com.google.dagger:dagger-android-processor:2.13'
 
+    //kotlin redux
+   api 'com.github.pardom:redux-kotlin:1.2.0'
+   api 'com.github.pardom.redux-observable:redux-observable2:1.2.3'
+
     // ViewModel and LiveData
     api "android.arch.lifecycle:extensions:1.0.0"
     kapt "android.arch.lifecycle:compiler:1.0.0"
@@ -87,5 +91,6 @@ dependencies {
     androidTestApi 'com.android.support.test.espresso:espresso-core:3.0.0'
 
 
-    feature project(":dashboard")
+    feature project(':dashboard')
+    application project(':app')
 }

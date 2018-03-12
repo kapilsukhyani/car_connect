@@ -1,25 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     package="com.exp.carconnect.base">
 
     <uses-permission android:name="android.permission.BLUETOOTH" />
     <uses-permission android:name="android.permission.INTERNET" />
 
-    <application android:name="com.exp.carconnect.base.CarConnectApp">
+    <application>
 
         <activity
             android:name="com.exp.carconnect.base.activity.SetupActivity"
             android:theme="@style/Theme.AppCompat.DayNight">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
         </activity>
 
         <meta-data
             android:name="io.fabric.ApiKey"
             android:value="4fa3e9247ecc0eeb8ab3e273e1668b4daa362208" />
+
+        <provider
+            android:name="com.crashlytics.android.CrashlyticsInitProvider"
+            android:authorities="com.exp.carconnect.dashboard.test.crashlyticsinitprovider"
+            android:exported="false"
+            android:initOrder="100"
+            tools:replace="android:authorities"/>
     </application>
 
 </manifest>

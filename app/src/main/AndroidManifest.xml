@@ -2,12 +2,21 @@
     xmlns:tools="http://schemas.android.com/tools"
     package="com.exp.carconnect.app">
 
-    <application android:label="CarConnect">
+    <application
+        android:name=".CarConnectApp"
+        android:label="CarConnect"
+        tools:replace="android:name">
         <provider
             android:name="android.arch.lifecycle.ProcessLifecycleOwnerInitializer"
             android:authorities="${applicationId}.lifecycle-trojan"
             android:exported="false"
             android:multiprocess="true"
+            tools:replace="android:authorities" />
+        <provider
+            android:name="com.crashlytics.android.CrashlyticsInitProvider"
+            android:authorities="com.exp.carconnect.dashboard.test.crashlyticsinitprovider"
+            android:exported="false"
+            android:initOrder="100"
             tools:replace="android:authorities" />
 
     </application>

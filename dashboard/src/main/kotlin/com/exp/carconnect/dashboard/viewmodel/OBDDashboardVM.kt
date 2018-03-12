@@ -5,7 +5,7 @@ import android.arch.lifecycle.AndroidViewModel
 import android.arch.lifecycle.MediatorLiveData
 import android.arch.lifecycle.MutableLiveData
 import com.exp.carconnect.Logger
-import com.exp.carconnect.base.CarConnectApp
+import com.exp.carconnect.base.CarConnectAbstractApp
 import com.exp.carconnect.base.di.Injectable
 import com.exp.carconnect.base.di.Main
 import com.exp.carconnect.obdlib.OBDMultiRequest
@@ -49,8 +49,11 @@ class OBDDashboardVM(app: Application) : AndroidViewModel(app), Injectable {
 
     init {
         val initialSnapshot = OBDDashboard()
+//todo this injection is not working anymore
+//        (app as CarConnectApp).newConnectionComponent!!.inject(this)
+        obdEngine = (app as CarConnectAbstractApp).newConnectionComponent!!.getOBDEngine()
+        mainScheduler = app.newConnectionComponent!!.getScheduler()
 
-        (app as CarConnectApp).newConnectionComponent!!.inject(this)
         dashboardLiveData.addSource(obdResponseLiveData, {
             dashboardLiveData.value = it
         })

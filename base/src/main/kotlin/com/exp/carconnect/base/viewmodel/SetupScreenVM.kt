@@ -7,7 +7,7 @@ import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothSocket
 import android.util.Log
 import com.exp.carconnect.Logger
-import com.exp.carconnect.base.CarConnectApp
+import com.exp.carconnect.base.CarConnectAbstractApp
 import com.exp.carconnect.base.connect
 import com.exp.carconnect.base.di.Main
 import com.exp.carconnect.obdlib.OBDEngine
@@ -98,14 +98,15 @@ class SetupScreenVM(app: Application) : AndroidViewModel(app) {
     }
 
     private fun setupNewOBDConnectionComponent(socket: BluetoothSocket) {
-        getApplication<CarConnectApp>().buildNewConnectionComponent(socket.inputStream, socket.outputStream)
-        getApplication<CarConnectApp>().newConnectionComponent!!.inject(this)
+        getApplication<CarConnectAbstractApp>().buildNewConnectionComponent(socket.inputStream, socket.outputStream)
+        getApplication<CarConnectAbstractApp>().newConnectionComponent!!.inject(this)
     }
 
     override fun onCleared() {
         super.onCleared()
         subscriptions.dispose()
-        socket?.close()
+        //todo this cannot be done anymore since setup is just to initiate the connection and after that it other screens take over
+//        socket?.close()
     }
 }
 

@@ -1,18 +1,16 @@
 package com.exp.carconnect.base
 
 import android.app.Application
-import com.crashlytics.android.Crashlytics
 import com.exp.carconnect.base.di.CarConnectGlobalComponent
 import com.exp.carconnect.base.di.DaggerCarConnectGlobalComponent
 import com.exp.carconnect.base.di.NewOBDConnectionComponent
 import com.exp.carconnect.base.di.OBDConnectionModule
-import io.fabric.sdk.android.Fabric
 import java.io.InputStream
 import java.io.OutputStream
 import javax.inject.Inject
 
 
-class CarConnectApp : Application() {
+abstract class CarConnectAbstractApp : Application() {
     lateinit var globalComponent: CarConnectGlobalComponent
     @Inject
     lateinit var newConnectionComponentBuilder: NewOBDConnectionComponent.Builder
@@ -25,9 +23,10 @@ class CarConnectApp : Application() {
 
     override fun onCreate() {
         super.onCreate()
+        println("Creating app in mode: " + getMode())
         globalComponent = DaggerCarConnectGlobalComponent.builder().build()
         globalComponent.inject(this)
-        Fabric.with(this, Crashlytics())
+//        Fabric.with(this, Crashlytics())
     }
 
     fun buildNewConnectionComponent(inputStream: InputStream, outputStream: OutputStream) {
@@ -35,4 +34,8 @@ class CarConnectApp : Application() {
                 .requestModule(OBDConnectionModule(inputStream, outputStream))
                 .build()
     }
+
+    abstract fun getMode(): String
+
+
 }

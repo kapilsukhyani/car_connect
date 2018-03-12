@@ -2,7 +2,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     package="com.exp.carconnect.dashboard">
 
-    <application>
+    <application android:name=".DashboardInstantApp">
         <activity
             android:name=".activity.DashboardActivity"
             android:screenOrientation="landscape"
@@ -13,6 +13,7 @@
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
+                <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
             <intent-filter android:order="1">
                 <action android:name="android.intent.action.VIEW" />
@@ -44,5 +45,12 @@
             android:exported="false"
             android:multiprocess="true"
             tools:replace="android:authorities" />
+
+        <provider
+            android:name="com.crashlytics.android.CrashlyticsInitProvider"
+            android:authorities="com.exp.carconnect.dashboard.test.crashlyticsinitprovider"
+            android:exported="false"
+            android:initOrder="100"
+            tools:replace="android:authorities"/>
     </application>
 </manifest>

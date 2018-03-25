@@ -3,41 +3,41 @@
     package="com.exp.carconnect.dashboard">
 
     <application android:name=".DashboardInstantApp">
-        <activity
-            android:name=".activity.DashboardActivity"
-            android:screenOrientation="landscape"
-            android:theme="@style/Theme.AppCompat.DayNight">
-            <tools:validation testUrl="http://carobdconnect.com/obddashboard" />
-            <tools:validation testUrl="https://carobdconnect.com/obddashboard" />
+        <!--<activity-->
+            <!--android:name=".activity.DashboardActivity"-->
+            <!--android:screenOrientation="landscape"-->
+            <!--android:theme="@style/Theme.AppCompat.DayNight">-->
+            <!--<tools:validation testUrl="http://carobdconnect.com/obddashboard" />-->
+            <!--<tools:validation testUrl="https://carobdconnect.com/obddashboard" />-->
 
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
-                <category android:name="android.intent.category.DEFAULT" />
-            </intent-filter>
-            <intent-filter android:order="1">
-                <action android:name="android.intent.action.VIEW" />
+            <!--<intent-filter>-->
+                <!--<action android:name="android.intent.action.MAIN" />-->
+                <!--<category android:name="android.intent.category.LAUNCHER" />-->
+                <!--<category android:name="android.intent.category.DEFAULT" />-->
+            <!--</intent-filter>-->
+            <!--<intent-filter android:order="1">-->
+                <!--<action android:name="android.intent.action.VIEW" />-->
 
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.BROWSABLE" />
+                <!--<category android:name="android.intent.category.DEFAULT" />-->
+                <!--<category android:name="android.intent.category.BROWSABLE" />-->
 
-                <data
-                    android:scheme="https"
-                    android:host="carobdconnect.com"
-                    android:pathPrefix="/obddashboard" />
-            </intent-filter>
-            <intent-filter android:order="1">
-                <action android:name="android.intent.action.VIEW" />
+                <!--<data-->
+                    <!--android:scheme="https"-->
+                    <!--android:host="carobdconnect.com"-->
+                    <!--android:pathPrefix="/obddashboard" />-->
+            <!--</intent-filter>-->
+            <!--<intent-filter android:order="1">-->
+                <!--<action android:name="android.intent.action.VIEW" />-->
 
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.BROWSABLE" />
+                <!--<category android:name="android.intent.category.DEFAULT" />-->
+                <!--<category android:name="android.intent.category.BROWSABLE" />-->
 
-                <data
-                    android:scheme="http"
-                    android:host="carobdconnect.com"
-                    android:pathPrefix="/obddashboard" />
-            </intent-filter>
-        </activity>
+                <!--<data-->
+                    <!--android:scheme="http"-->
+                    <!--android:host="carobdconnect.com"-->
+                    <!--android:pathPrefix="/obddashboard" />-->
+            <!--</intent-filter>-->
+        <!--</activity>-->
 
         <provider
             android:name="android.arch.lifecycle.ProcessLifecycleOwnerInitializer"

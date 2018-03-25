@@ -2,11 +2,53 @@ package com.exp.carconnect.base.di
 
 import com.exp.carconnect.base.viewmodel.SetupScreenVM
 import com.exp.carconnect.obdlib.OBDEngine
+import dagger.Module
+import dagger.Provides
 import dagger.Subcomponent
 import io.reactivex.Scheduler
+import java.io.InputStream
+import java.io.OutputStream
+import javax.inject.Qualifier
+import javax.inject.Scope
 
-@OBDConnection
-@Subcomponent(modules = arrayOf(OBDConnectionModule::class))
+@MustBeDocumented
+@Retention(AnnotationRetention.RUNTIME)
+@Scope
+annotation class NewOBDConnection
+
+
+@Qualifier
+@MustBeDocumented
+@Retention(AnnotationRetention.RUNTIME)
+annotation class Io
+
+@Qualifier
+@MustBeDocumented
+@Retention(AnnotationRetention.RUNTIME)
+annotation class Computation
+
+@Qualifier
+@MustBeDocumented
+@Retention(AnnotationRetention.RUNTIME)
+annotation class Main
+
+
+@Module()
+class OBDConnectionModule(private val inputStream: InputStream,
+                          private val outputStream: OutputStream) {
+
+    @NewOBDConnection
+    @Provides
+    fun provideOBEngine(@Io ioScheduler: Scheduler,
+                        @Computation computationScheduler: Scheduler) =
+            OBDEngine(inputStream,
+                    outputStream,
+                    ioScheduler,
+                    computationScheduler)
+}
+
+@NewOBDConnection
+@Subcomponent(modules = [(OBDConnectionModule::class)])
 interface NewOBDConnectionComponent {
     @Subcomponent.Builder
     interface Builder {
@@ -14,10 +56,10 @@ interface NewOBDConnectionComponent {
         fun build(): NewOBDConnectionComponent
     }
 
-    fun inject(injectable: Injectable)
     fun inject(setupScreenVM: SetupScreenVM)
 
-    fun getOBDEngine() : OBDEngine
     @Main
-    fun getScheduler(): Scheduler
+    fun getMainScheduler(): Scheduler
+
+    fun getOBDEngine(): OBDEngine
 }

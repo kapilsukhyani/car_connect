@@ -32,6 +32,9 @@ android {
 }
 
 dependencies {
+    api 'com.google.dagger:dagger:2.13'
+    kapt 'com.google.dagger:dagger-compiler:2.13'
+
     implementation project(':base')
     implementation project(':dashboard')
 }

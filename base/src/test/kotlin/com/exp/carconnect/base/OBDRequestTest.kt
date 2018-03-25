@@ -1,7 +1,6 @@
 package com.exp.carconnect.base
 
-import com.exp.carconnect.base.obdmessage.OBDRequest
-import com.exp.carconnect.base.obdmessage.OBDResponse
+import org.junit.Test
 
 
 class OBDRequestTest {
@@ -137,5 +136,6 @@ class OBDRequestTest {
 //        Assert.assertEquals(actualException, (testSubscriber.errors()[0] as ExecutionException).cause)
 //
 //    }
+
 
 }

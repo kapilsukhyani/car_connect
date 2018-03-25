@@ -7,7 +7,7 @@ import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothSocket
 import android.util.Log
 import com.exp.carconnect.Logger
-import com.exp.carconnect.base.CarConnectAbstractApp
+import com.exp.carconnect.base.BaseAppContract
 import com.exp.carconnect.base.connect
 import com.exp.carconnect.base.di.Main
 import com.exp.carconnect.obdlib.OBDEngine
@@ -21,8 +21,8 @@ import javax.inject.Inject
 
 class SetupScreenVM(app: Application) : AndroidViewModel(app) {
     companion object {
-        val TAG = "SetupScreenVM"
-        private val INITIALIZATION = "Initialization"
+        const val TAG = "SetupScreenVM"
+        private const val INITIALIZATION = "Initialization"
         private val setupRequest = OBDMultiRequest(INITIALIZATION,
                 listOf(EchoOffCommand(), EchoOffCommand(), LineFeedOffCommand(), TimeoutCommand(62)))
         private val resetCommand = OBDResetCommand()
@@ -98,8 +98,9 @@ class SetupScreenVM(app: Application) : AndroidViewModel(app) {
     }
 
     private fun setupNewOBDConnectionComponent(socket: BluetoothSocket) {
-        getApplication<CarConnectAbstractApp>().buildNewConnectionComponent(socket.inputStream, socket.outputStream)
-        getApplication<CarConnectAbstractApp>().newConnectionComponent!!.inject(this)
+
+        (getApplication<Application>() as BaseAppContract).buildNewOBDConnectionComponent(socket.inputStream, socket.outputStream)
+        (getApplication<Application>() as BaseAppContract).newOBDConnectionComponent!!.inject(this)
     }
 
     override fun onCleared() {

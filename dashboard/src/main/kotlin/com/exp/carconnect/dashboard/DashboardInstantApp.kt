@@ -1,10 +1,8 @@
 package com.exp.carconnect.dashboard
 
-import com.exp.carconnect.base.CarConnectAbstractApp
+import android.app.Application
 
 
-class DashboardInstantApp : CarConnectAbstractApp() {
-    override fun getMode(): String {
-        return "Instant App- Dashboard"
-    }
+class DashboardInstantApp : Application() {
+
 }

@@ -5,9 +5,8 @@ import android.arch.lifecycle.AndroidViewModel
 import android.arch.lifecycle.MediatorLiveData
 import android.arch.lifecycle.MutableLiveData
 import com.exp.carconnect.Logger
-import com.exp.carconnect.base.CarConnectAbstractApp
-import com.exp.carconnect.base.di.Injectable
 import com.exp.carconnect.base.di.Main
+import com.exp.carconnect.dashboard.DashboardAppContract
 import com.exp.carconnect.obdlib.OBDMultiRequest
 import com.exp.carconnect.obdlib.obdmessage.*
 import io.reactivex.Scheduler
@@ -15,7 +14,7 @@ import io.reactivex.disposables.CompositeDisposable
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
-class OBDDashboardVM(app: Application) : AndroidViewModel(app), Injectable {
+class OBDDashboardVM(app: Application) : AndroidViewModel(app) {
     companion object {
         val TAG = "DashboardVM"
         private val FUEL_FACTOR = 100.0f
@@ -40,6 +39,7 @@ class OBDDashboardVM(app: Application) : AndroidViewModel(app), Injectable {
 
     private val subscriptions = CompositeDisposable()
 
+
     @Inject
     lateinit var obdEngine: com.exp.carconnect.obdlib.OBDEngine
     @Inject
@@ -49,10 +49,8 @@ class OBDDashboardVM(app: Application) : AndroidViewModel(app), Injectable {
 
     init {
         val initialSnapshot = OBDDashboard()
-//todo this injection is not working anymore
-//        (app as CarConnectApp).newConnectionComponent!!.inject(this)
-        obdEngine = (app as CarConnectAbstractApp).newConnectionComponent!!.getOBDEngine()
-        mainScheduler = app.newConnectionComponent!!.getScheduler()
+        (app as DashboardAppContract).buildNewDashboardComponent()
+        (app as DashboardAppContract).dashboardComponent!!.inject(this)
 
         dashboardLiveData.addSource(obdResponseLiveData, {
             dashboardLiveData.value = it

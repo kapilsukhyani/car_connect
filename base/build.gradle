@@ -55,8 +55,9 @@ dependencies {
 //    kapt 'com.google.dagger:dagger-android-processor:2.13'
 
     //kotlin redux
-   api 'com.github.pardom:redux-kotlin:1.2.0'
-   api 'com.github.pardom.redux-observable:redux-observable2:1.2.3'
+    api 'com.github.pardom:redux-kotlin:1.2.0'
+    api 'com.github.pardom.redux-observable:redux-observable2:1.2.3'
+    api 'com.github.pardom.redux-rxjava:redux-rxjava2:1.2.3'
 
     // ViewModel and LiveData
     api "android.arch.lifecycle:extensions:1.0.0"

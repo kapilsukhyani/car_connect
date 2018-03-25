@@ -1,40 +1,41 @@
 package com.exp.carconnect.base.state
 
 import android.bluetooth.BluetoothDevice
-import com.exp.carconnect.base.Frequency
-import com.exp.carconnect.base.LoadableState
-import com.exp.carconnect.base.UnAvailableAvailableData
+import com.exp.carconnect.base.*
+import com.exp.carconnect.base.store.PersistedAppState
 import com.exp.carconnect.obdlib.obdmessage.FuelType
-import java.util.*
 import java.util.concurrent.TimeUnit
 
 
-sealed class CarConnectHighLevelActions {
-    object InitApp : CarConnectHighLevelActions()
+fun AppState.findBaseAppState(): BaseAppState {
+    return moduleStateMap[BaseAppState.STATE_KEY] as BaseAppState
 }
 
 
-data class AppState(val baseAppState: BaseAppState = BaseAppState(),
-                    val extendedState: Map<String, ExtendedState> = mapOf(),
-                    val backStack: CarConnectViewBackStack = CarConnectViewBackStack())
-
-
-interface ExtendedState {
-    val stateId: String
+fun AppState.copyAndReplaceBaseAppState(state: LoadableState<BaseAppState, BaseAppStateLoadingError>): AppState {
+    return this.copy(moduleStateMap = moduleStateMap + Pair(BaseAppState.STATE_KEY, state))
 }
-
 
 data class BaseAppState(val mode: AppMode = AppMode.FullApp,
                         val appRunningMode: AppRunningMode = AppRunningMode.Foreground,
-                        val appStateLoadingState: LoadableState<BaseAppPersistedState, AppStateLoadingError> = LoadableState.NotLoaded(),
-                        val activeSession: UnAvailableAvailableData<ActiveSession>
-                        = UnAvailableAvailableData.UnAvailable())
+                        val baseAppPersistedState: BaseAppPersistedState = BaseAppPersistedState(),
+                        val activeSession: UnAvailableAvailableData<ActiveSession> = UnAvailableAvailableData.UnAvailable) : ModuleState {
+    companion object {
+        const val STATE_KEY = "BaseAppState"
+    }
+
+}
 
 data class BaseAppPersistedState(val knownDongles: Set<Dongle> = hashSetOf(),
                                  val knownVehicles: Set<Vehicle> = hashSetOf(),
                                  val lastConnectedDongle: Dongle? = null,
                                  val lastConnectedVehicle: Vehicle? = null,
-                                 val appSettings: AppSettings = AppSettings())
+                                 val appSettings: AppSettings = AppSettings()) {
+    constructor(persistedAppState: PersistedAppState) : this(persistedAppState.knownDongles,
+            persistedAppState.knownVehicles, persistedAppState.lastConnectedDongle,
+            persistedAppState.lastConnectedVehicle,
+            persistedAppState.appSettings)
+}
 
 
 sealed class AppMode {
@@ -52,9 +53,9 @@ enum class Feature {
 //atleast vin is required to create a vehicle instance
 data class Vehicle(val vin: String,
                    val supportedPIDs: UnAvailableAvailableData<Set<String>>
-                   = UnAvailableAvailableData.UnAvailable(),
+                   = UnAvailableAvailableData.UnAvailable,
                    val fuelType: UnAvailableAvailableData<FuelType>
-                   = UnAvailableAvailableData.UnAvailable())
+                   = UnAvailableAvailableData.UnAvailable)
 
 data class Dongle(val address: String, val name: String)
 
@@ -105,46 +106,39 @@ data class AppSettings(val dataSettings: DataSettings = DataSettings(),
 data class ActiveSession(val dongle: Dongle,
                          val vehicle: Vehicle,
                          val currentVehicleData: UnAvailableAvailableData<VehicleData>
-                         = UnAvailableAvailableData.UnAvailable())
+                         = UnAvailableAvailableData.UnAvailable)
 
 data class VehicleData(val rpm: UnAvailableAvailableData<Float>
-                       = UnAvailableAvailableData.UnAvailable(),
+                       = UnAvailableAvailableData.UnAvailable,
                        val speed: UnAvailableAvailableData<Float>
-                       = UnAvailableAvailableData.UnAvailable(),
+                       = UnAvailableAvailableData.UnAvailable,
                        val throttlePosition: UnAvailableAvailableData<Float>
-                       = UnAvailableAvailableData.UnAvailable(),
+                       = UnAvailableAvailableData.UnAvailable,
                        val fuel: UnAvailableAvailableData<Float>
-                       = UnAvailableAvailableData.UnAvailable(),
+                       = UnAvailableAvailableData.UnAvailable,
                        val ignition: UnAvailableAvailableData<Boolean>
-                       = UnAvailableAvailableData.UnAvailable(),
+                       = UnAvailableAvailableData.UnAvailable,
                        val milStatus: UnAvailableAvailableData<MILStatus>
-                       = UnAvailableAvailableData.UnAvailable(),
+                       = UnAvailableAvailableData.UnAvailable,
                        val currentAirIntakeTemp: UnAvailableAvailableData<Float>
-                       = UnAvailableAvailableData.UnAvailable(),
+                       = UnAvailableAvailableData.UnAvailable,
                        val currentAmbientTemp: UnAvailableAvailableData<Float>
-                       = UnAvailableAvailableData.UnAvailable(),
+                       = UnAvailableAvailableData.UnAvailable,
                        val fuelConsumptionRate: UnAvailableAvailableData<Float>
-                       = UnAvailableAvailableData.UnAvailable())
+                       = UnAvailableAvailableData.UnAvailable)
 
 sealed class MILStatus {
     object Off : MILStatus()
     data class On(val dtcs: List<String>,
                   val frame: UnAvailableAvailableData<FreezeFrame>
-                  = UnAvailableAvailableData.UnAvailable()) : MILStatus()
+                  = UnAvailableAvailableData.UnAvailable) : MILStatus()
 }
 
 //todo add all required parameters for freeze frame
 data class FreezeFrame(val rpm: Int, val speed: Int)
 
-//------------------------------------------------------------View State-----------------------------------------------------------------------------------------------------
+//------------------------------------------------------------View State--------------------------------------------------------------------------------------
 
-data class CarConnectViewBackStack(val stack: Stack<CarConnectView> = defaultBackStack())
-
-interface CarConnectIndividualViewState
-
-interface CarConnectView {
-    val screenState: CarConnectIndividualViewState
-}
 
 data class SplashScreen(override val screenState: SplashScreenState) : CarConnectView
 data class DeviceManagementScreen(override val screenState: DeviceManagementScreenState) : CarConnectView
@@ -157,6 +151,8 @@ sealed class SplashScreenState : CarConnectIndividualViewState {
     object LoadingAppState : SplashScreenState()
 
     object ShowingLoadingError : SplashScreenState()
+
+    object AppStateLoaded : SplashScreenState()
 }
 
 sealed class ConnectionScreenState : CarConnectIndividualViewState {
@@ -190,18 +186,11 @@ sealed class SettignsScreenState : CarConnectIndividualViewState {
 }
 
 
-abstract class CarConnectError(val type: String) : Throwable(type) {
-    //todo can this throwable be nullable?
-    abstract val error: Throwable
+// ------------------------------------- Error Categories ----------------------------------------------------------------------------------------------------
 
-    init {
-        super.initCause(error)
-    }
-}
-
-sealed class AppStateLoadingError : CarConnectError("AppStateLoadingError") {
-    data class UnkownError(override val error: Throwable) : AppStateLoadingError()
-    data class IOError(override val error: Throwable) : AppStateLoadingError()
+sealed class BaseAppStateLoadingError : CarConnectError("BaseAppStateLoadingError") {
+    data class UnkownError(override val error: Throwable) : BaseAppStateLoadingError()
+    data class IOError(override val error: Throwable) : BaseAppStateLoadingError()
 }
 
 sealed class ConnectionError : CarConnectError("ConnectionError") {
@@ -217,11 +206,4 @@ sealed class UpdateSettingsError : CarConnectError("UpdateSettingsError") {
 }
 
 
-fun defaultBackStack(): Stack<CarConnectView> {
-    return Stack<CarConnectView>().apply { push(SplashScreen(SplashScreenState.LoadingAppState)) }
-}
 
-fun asa() {
-    val aa = SplashScreen(SplashScreenState.LoadingAppState)
-
-}

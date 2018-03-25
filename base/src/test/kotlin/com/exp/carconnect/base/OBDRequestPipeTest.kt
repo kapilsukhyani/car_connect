@@ -1,11 +1,5 @@
 package com.exp.carconnect.base
 
-import com.exp.carconnect.IOBDDevice
-import com.exp.carconnect.OBDMultiRequest
-import com.exp.carconnect.OBDRequestPipe
-import com.exp.carconnect.base.obdmessage.RPMRequest
-import com.exp.carconnect.base.obdmessage.RPMResponse
-
 
 class OBDRequestPipeTest {
 //    private val TAG = "OBDRequestPipeTest"

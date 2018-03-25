@@ -20,12 +20,12 @@ fun BluetoothDevice.connect(): BluetoothSocket {
     var sock: BluetoothSocket
     var sockFallback: BluetoothSocket?
 
-    Log.d(CarConnectAbstractApp.TAG, "Starting Bluetooth connection..")
+    Log.d("BluetoothDeviceExt", "Starting Bluetooth connection..")
     try {
         sock = this.createRfcommSocketToServiceRecord(MY_UUID)
         sock.connect()
     } catch (e1: Exception) {
-        Log.e(CarConnectAbstractApp.TAG, "There was an error while establishing Bluetooth connection. Falling back..", e1)
+        Log.e("BluetoothDeviceExt", "There was an error while establishing Bluetooth connection. Falling back..", e1)
         val clazz = this::class.java
         val paramTypes = arrayOf<Class<*>>(Integer.TYPE)
         try {
@@ -35,7 +35,7 @@ fun BluetoothDevice.connect(): BluetoothSocket {
             sockFallback.connect()
             sock = sockFallback
         } catch (e2: Exception) {
-            Log.e(CarConnectAbstractApp.TAG, "Couldn't fallback while establishing Bluetooth connection.", e2)
+            Log.e("BluetoothDeviceExt", "Couldn't fallback while establishing Bluetooth connection.", e2)
             throw IOException(e2.message)
         }
 

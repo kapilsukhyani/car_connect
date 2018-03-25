@@ -7,9 +7,9 @@ import android.arch.lifecycle.MutableLiveData
 import com.exp.carconnect.base.BaseAppContract
 import com.exp.carconnect.base.LoadableState
 import com.exp.carconnect.base.asCustomObservable
+import com.exp.carconnect.base.state.CommonAppAction
 import com.exp.carconnect.base.state.SplashScreenState
 import io.reactivex.disposables.CompositeDisposable
-import redux.asObservable
 
 
 class SplashVM(app: Application) : AndroidViewModel(app) {
@@ -22,23 +22,22 @@ class SplashVM(app: Application) : AndroidViewModel(app) {
     init {
         stateSubscription.add(store
                 .asCustomObservable()
-                .map { appState ->
-                    appState
-                            .moduleStateMap
-                            .forEach { entry ->
-                                when (entry.value) {
-                                    LoadableState.Loading,
-                                    LoadableState.NotLoaded -> {
-                                        return@map SplashScreenState.LoadingAppState
-                                    }
-                                    is LoadableState.LoadingError -> {
-                                        return@map SplashScreenState.ShowingLoadingError
-                                    }
-                                }
+                .map { it.moduleStateMap }
+                .distinctUntilChanged()
+                .map {
+                    it.forEach { entry ->
+                        when (entry.value) {
+                            LoadableState.Loading,
+                            LoadableState.NotLoaded -> {
+                                return@map SplashScreenState.LoadingAppState
                             }
-
-                    return@map SplashScreenState.AppStateLoaded
-
+                            is LoadableState.LoadingError -> {
+                                return@map SplashScreenState.ShowingLoadingError
+                            }
+                        }
+                    }
+                    store.dispatch(CommonAppAction.AppStateLoaded)
+                    return@map SplashScreenState.LoadingAppState
                 }
                 .subscribe(
                         {

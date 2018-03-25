@@ -62,7 +62,7 @@ class CarConnectApp : Application(),
         val reducers = combineReducers(AppStateNavigationReducer(),
                 BaseAppStateReducer())
         val initialState = AppState(mapOf(Pair(BaseAppState.STATE_KEY, LoadableState.NotLoaded)),
-                CarConnectUIState(Stack(), null))
+                CarConnectUIState(Stack()))
         val middleware = createEpicMiddleware(BaseSateLoadingEpic(Schedulers.io(), AndroidSchedulers.mainThread()))
 
         println("debugtag: creating store")

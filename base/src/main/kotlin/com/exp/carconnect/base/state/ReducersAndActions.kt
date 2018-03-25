@@ -35,3 +35,11 @@ class BaseAppStateReducer : Reducer<AppState> {
 
 }
 
+
+sealed class CommonAppAction {
+    object AppStateLoaded : CommonAppAction()
+    object BackPressed : CommonAppAction()
+    object FinishView : CommonAppAction()
+
+}
+

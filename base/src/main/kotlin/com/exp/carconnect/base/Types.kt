@@ -1,8 +1,5 @@
 package com.exp.carconnect.base
 
-import com.exp.carconnect.base.state.SplashScreen
-import com.exp.carconnect.base.state.SplashScreenState
-import java.util.*
 import java.util.concurrent.TimeUnit
 
 //----------------------------------- Generic data structures -------------------------------------------------
@@ -30,21 +27,18 @@ data class AppState(val moduleStateMap: Map<String, LoadableState<ModuleState, T
 
 interface ModuleState
 
-data class CarConnectUIState(val backStack: Stack<out CarConnectView> = defaultBackStack(),
-                             val currentView: CarConnectView? = try {
-                                 backStack.peek()
-                             } catch (ex: EmptyStackException) {
-                                 null
-                             })
+data class CarConnectUIState(val backStack: List<CarConnectView> = emptyList()) {
+    val currentView: CarConnectView? = if (backStack.isEmpty()) {
+        null
+    } else {
+        backStack[backStack.size - 1]
+    }
+}
 
 interface CarConnectIndividualViewState
 
 interface CarConnectView {
     val screenState: CarConnectIndividualViewState
-}
-
-fun defaultBackStack(): Stack<CarConnectView> {
-    return Stack<CarConnectView>().apply { push(SplashScreen(SplashScreenState.LoadingAppState)) }
 }
 
 

@@ -2,19 +2,21 @@ package com.exp.carconnect.app.state
 
 import com.exp.carconnect.base.AppState
 import com.exp.carconnect.base.CarConnectView
-import com.exp.carconnect.base.state.SplashScreen
-import com.exp.carconnect.base.state.SplashScreenState
+import com.exp.carconnect.base.state.*
 import redux.api.Reducer
-import java.util.*
 
-fun AppState.addViewToBackState(view: CarConnectView): AppState {
+fun AppState.pushViewToBackState(view: CarConnectView): AppState {
+    val uiState = this.uiState.copy(backStack = this.uiState.backStack + view)
+    return this.copy(uiState = uiState)
+}
 
-    val backStack = Stack<CarConnectView>()
-    backStack.addAll(this.uiState.backStack + view)
-    val uiState = this.uiState.copy(backStack = backStack,
-            currentView = view)
+fun AppState.popViewFromBackStack(): AppState {
+    val uiState = this.uiState.copy(backStack = this.uiState.backStack.subList(0, this.uiState.backStack.size - 1))
+    return this.copy(uiState = uiState)
+}
 
-
+fun AppState.replaceViewAtStackTop(view: CarConnectView): AppState {
+    val uiState = this.uiState.copy(backStack = this.uiState.backStack.subList(0, this.uiState.backStack.size - 1) + view)
     return this.copy(uiState = uiState)
 }
 
@@ -27,7 +29,18 @@ class AppStateNavigationReducer : Reducer<AppState> {
     override fun reduce(state: AppState, action: Any?): AppState {
         return when (action) {
             is NavigationActions.ShowSplashScreen -> {
-                state.addViewToBackState(SplashScreen(action.state))
+                state.pushViewToBackState(SplashScreen(action.state))
+            }
+
+            CommonAppAction.FinishView -> {
+                state.popViewFromBackStack()
+            }
+
+            CommonAppAction.AppStateLoaded -> {
+                state.replaceViewAtStackTop(DeviceManagementScreen(DeviceManagementScreenState.ShowingDevices))
+            }
+            CommonAppAction.BackPressed -> {
+                state.popViewFromBackStack()
             }
             else -> {
                 state

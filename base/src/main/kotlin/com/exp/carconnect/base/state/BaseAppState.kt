@@ -151,8 +151,6 @@ sealed class SplashScreenState : CarConnectIndividualViewState {
     object LoadingAppState : SplashScreenState()
 
     object ShowingLoadingError : SplashScreenState()
-
-    object AppStateLoaded : SplashScreenState()
 }
 
 sealed class ConnectionScreenState : CarConnectIndividualViewState {

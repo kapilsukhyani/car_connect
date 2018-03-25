@@ -6,6 +6,7 @@ import android.arch.lifecycle.LiveData
 import android.arch.lifecycle.MutableLiveData
 import com.exp.carconnect.base.BaseAppContract
 import com.exp.carconnect.base.LoadableState
+import com.exp.carconnect.base.asCustomObservable
 import com.exp.carconnect.base.state.SplashScreenState
 import io.reactivex.disposables.CompositeDisposable
 import redux.asObservable
@@ -20,7 +21,7 @@ class SplashVM(app: Application) : AndroidViewModel(app) {
 
     init {
         stateSubscription.add(store
-                .asObservable()
+                .asCustomObservable()
                 .map { appState ->
                     appState
                             .moduleStateMap

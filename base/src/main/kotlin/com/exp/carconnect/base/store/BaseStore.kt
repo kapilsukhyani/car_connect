@@ -12,5 +12,10 @@ data class PersistedAppState(val knownDongles: Set<Dongle> = hashSetOf(),
                              val appSettings: AppSettings = AppSettings())
 
 internal fun loadAppState(): Single<PersistedAppState> {
-    return Single.just(PersistedAppState())
+
+    return Single.fromCallable {
+        Thread.sleep(3000)
+        throw IllegalStateException()
+    }
+
 }

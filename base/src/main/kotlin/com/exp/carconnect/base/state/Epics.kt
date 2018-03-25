@@ -26,8 +26,8 @@ class BaseSateLoadingEpic(val ioScheduler: Scheduler,
                                     }
                                     .onErrorReturn {
                                         BaseAppActions.BaseAppStateLoadError(BaseAppStateLoadingError.UnkownError(it))
-                                    })
-                            .subscribeOn(ioScheduler)
+                                    }
+                                    .subscribeOn(ioScheduler))
                             .observeOn(mainThreadScheduler)
                             .toObservable()
                 }

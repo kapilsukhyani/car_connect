@@ -3,6 +3,11 @@ package com.exp.carconnect.base
 import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothSocket
 import android.util.Log
+import io.reactivex.Observable
+import io.reactivex.ObservableEmitter
+import io.reactivex.ObservableOnSubscribe
+import redux.StoreChangeDisposable
+import redux.api.Store
 import java.io.IOException
 import java.util.*
 
@@ -42,4 +47,31 @@ fun BluetoothDevice.connect(): BluetoothSocket {
     }
 
     return sock
+}
+
+
+fun <S : Any> Store<S>.asCustomObservable(): Observable<S> {
+    return Observable.create(StoreChangeOnSubscribe(this))
+}
+
+class StoreChangeOnSubscribe<S : Any>(private val store: Store<S>) : ObservableOnSubscribe<S> {
+
+    override fun subscribe(emitter: ObservableEmitter<S>) {
+        val subscription = store.subscribe {
+            if (!emitter.isDisposed) {
+                emitter.onNext(store.state)
+            }
+        }
+
+        if (!emitter.isDisposed) {
+            emitter.onNext(store.state)
+        }
+
+        emitter.setDisposable(object : StoreChangeDisposable() {
+            override fun onDispose() {
+                subscription.unsubscribe()
+            }
+        })
+    }
+
 }

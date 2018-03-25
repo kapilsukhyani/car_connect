@@ -7,9 +7,9 @@ import android.arch.lifecycle.MutableLiveData
 import com.exp.carconnect.app.CarConnectApp
 import com.exp.carconnect.app.state.NavigationActions
 import com.exp.carconnect.base.CarConnectView
+import com.exp.carconnect.base.asCustomObservable
 import com.exp.carconnect.base.state.SplashScreenState
 import io.reactivex.disposables.Disposable
-import redux.asObservable
 
 
 class WindowVM(app: Application) : AndroidViewModel(app) {
@@ -24,10 +24,12 @@ class WindowVM(app: Application) : AndroidViewModel(app) {
     private val stateSubscription: Disposable
 
     init {
+
         stateSubscription = getApplication<CarConnectApp>()
                 .store
-                .asObservable()
+                .asCustomObservable()
                 .map { it.uiState }
+                .distinctUntilChanged()
                 .subscribe({ uiState ->
                     if (uiState.currentView == null) {
                         //cold boot

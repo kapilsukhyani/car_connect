@@ -10,6 +10,7 @@ import com.exp.carconnect.base.di.CarConnectGlobalComponent
 import com.exp.carconnect.base.di.DaggerCarConnectGlobalComponent
 import com.exp.carconnect.base.di.NewOBDConnectionComponent
 import com.exp.carconnect.base.di.OBDConnectionModule
+import com.exp.carconnect.base.fragment.DeviceManagementScreenStateReducer
 import com.exp.carconnect.base.state.BaseAppState
 import com.exp.carconnect.base.state.BaseAppStateReducer
 import com.exp.carconnect.base.state.BaseSateLoadingEpic
@@ -60,7 +61,7 @@ class CarConnectApp : Application(),
         //        Fabric.with(this, Crashlytics())
 
         val reducers = combineReducers(AppStateNavigationReducer(),
-                BaseAppStateReducer())
+                BaseAppStateReducer(), DeviceManagementScreenStateReducer())
         val initialState = AppState(mapOf(Pair(BaseAppState.STATE_KEY, LoadableState.NotLoaded)),
                 CarConnectUIState(Stack()))
         val middleware = createEpicMiddleware(BaseSateLoadingEpic(Schedulers.io(), AndroidSchedulers.mainThread()))

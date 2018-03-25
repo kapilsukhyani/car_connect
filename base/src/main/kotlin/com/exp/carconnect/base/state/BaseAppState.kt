@@ -172,7 +172,11 @@ sealed class ConnectionScreenState : CarConnectIndividualViewState {
 
 sealed class DeviceManagementScreenState : CarConnectIndividualViewState {
     //connect action will move state to connecting
-    object ShowingDevices : DeviceManagementScreenState()
+    object LoadingDevices : DeviceManagementScreenState()
+
+    data class ShowingDevices(val devices: Set<BluetoothDevice>) : DeviceManagementScreenState()
+
+    object ShowingBluetoothUnAvailableError : DeviceManagementScreenState()
 }
 
 

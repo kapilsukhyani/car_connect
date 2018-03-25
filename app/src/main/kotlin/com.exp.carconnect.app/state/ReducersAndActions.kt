@@ -37,7 +37,7 @@ class AppStateNavigationReducer : Reducer<AppState> {
             }
 
             CommonAppAction.AppStateLoaded -> {
-                state.replaceViewAtStackTop(DeviceManagementScreen(DeviceManagementScreenState.ShowingDevices))
+                state.replaceViewAtStackTop(DeviceManagementScreen(DeviceManagementScreenState.LoadingDevices))
             }
             CommonAppAction.BackPressed -> {
                 state.popViewFromBackStack()

@@ -1,5 +1,6 @@
 package com.exp.carconnect.base.state
 
+import android.bluetooth.BluetoothDevice
 import com.exp.carconnect.base.AppState
 import com.exp.carconnect.base.LoadableState
 import redux.api.Reducer
@@ -40,6 +41,6 @@ sealed class CommonAppAction {
     object AppStateLoaded : CommonAppAction()
     object BackPressed : CommonAppAction()
     object FinishView : CommonAppAction()
-
+    data class BondedDeviceSelected(val device: BluetoothDevice) : CommonAppAction()
 }
 

@@ -9,8 +9,10 @@ import android.view.View
 import com.exp.carconnect.app.R
 import com.exp.carconnect.app.viewmodel.WindowVM
 import com.exp.carconnect.base.CarConnectView
+import com.exp.carconnect.base.fragment.DeviceConnectionView
 import com.exp.carconnect.base.fragment.DeviceManagementView
 import com.exp.carconnect.base.fragment.SplashView
+import com.exp.carconnect.base.state.ConnectionScreen
 import com.exp.carconnect.base.state.DeviceManagementScreen
 import com.exp.carconnect.base.state.SplashScreen
 
@@ -45,6 +47,10 @@ class CarConnectWindow : AppCompatActivity() {
 
             is DeviceManagementScreen -> {
                 replaceFragment(DeviceManagementView())
+            }
+
+            is ConnectionScreen -> {
+                replaceFragment(DeviceConnectionView())
             }
         }
     }

@@ -14,6 +14,7 @@ import com.exp.carconnect.base.AppState
 import com.exp.carconnect.base.BaseAppContract
 import com.exp.carconnect.base.R
 import com.exp.carconnect.base.asCustomObservable
+import com.exp.carconnect.base.state.CommonAppAction
 import com.exp.carconnect.base.state.DeviceManagementScreen
 import com.exp.carconnect.base.state.DeviceManagementScreenState
 import io.reactivex.disposables.Disposable
@@ -23,11 +24,13 @@ import redux.api.Reducer
 class DeviceManagementView : Fragment() {
 
     private lateinit var statusView: TextView
+    private lateinit var deviceManagementVM: DeviceManagementVM
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        ViewModelProviders.of(this)
+        deviceManagementVM = ViewModelProviders.of(this)
                 .get(DeviceManagementVM::class.java)
-                .getScreenStateLiveData()
+        deviceManagementVM.getScreenStateLiveData()
                 .observe(this, Observer {
                     onNewState(it!!)
                 })
@@ -37,12 +40,22 @@ class DeviceManagementView : Fragment() {
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val rootView = inflater.inflate(R.layout.view_device_management, null)
         statusView = rootView.findViewById(R.id.status)
+        rootView.findViewById<View>(R.id.deviceSelectedSimulator)
+                .setOnClickListener {
+                    //todo remove test code
+                    onDeviceSelected(BluetoothAdapter.getDefaultAdapter().getRemoteDevice("FE:85:EE:7F:E7:6B"))
+                }
         return rootView
     }
 
     private fun onNewState(it: DeviceManagementScreenState) {
         statusView.text = it.toString()
     }
+
+    private fun onDeviceSelected(device: BluetoothDevice) {
+        deviceManagementVM.onDeviceSelected(device)
+    }
+
 
 }
 
@@ -80,6 +93,10 @@ class DeviceManagementVM(app: Application) : AndroidViewModel(app) {
 
     fun getScreenStateLiveData(): LiveData<DeviceManagementScreenState> {
         return deviceManagementViewLiveData
+    }
+
+    fun onDeviceSelected(device: BluetoothDevice) {
+        store.dispatch(CommonAppAction.BondedDeviceSelected(device))
     }
 }
 

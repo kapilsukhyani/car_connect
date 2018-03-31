@@ -4,7 +4,9 @@ import android.arch.lifecycle.Observer
 import android.arch.lifecycle.ViewModelProviders
 import android.os.Bundle
 import android.support.v4.app.Fragment
+import android.support.v4.app.FragmentTransaction
 import android.support.v7.app.AppCompatActivity
+import android.transition.*
 import android.view.View
 import com.exp.carconnect.app.R
 import com.exp.carconnect.app.viewmodel.WindowVM
@@ -21,7 +23,6 @@ class CarConnectWindow : AppCompatActivity() {
 
     private lateinit var windowContainer: View
     private lateinit var windowVM: WindowVM
-
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -47,6 +48,9 @@ class CarConnectWindow : AppCompatActivity() {
 
             is DeviceManagementScreen -> {
                 replaceFragment(DeviceManagementView())
+//                replaceFragment(DeviceManagementView(),
+//                        SplashView.finSharedElement(windowContainer),
+//                        DeviceManagementView.getSharedElementTransitionName())
             }
 
             is ConnectionScreen -> {
@@ -56,9 +60,27 @@ class CarConnectWindow : AppCompatActivity() {
     }
 
 
-    private fun replaceFragment(fragment: Fragment) {
+    private fun FragmentTransaction.addShareElementTransitionIfNotEmpty(sharedElement: View? = null,
+                                                                        sharedElementTransitionName: String? = null): FragmentTransaction {
+        return if (sharedElement != null && null != sharedElementTransitionName) {
+            this.addSharedElement(sharedElement, sharedElementTransitionName)
+        } else {
+            return this
+        }
+    }
+
+    private fun replaceFragment(fragment: Fragment,
+                                sharedElement: View? = null,
+                                sharedElementTransitionName: String? = null) {
+        fragment.enterTransition = Fade()
+        fragment.exitTransition = Fade()
+        if (null != sharedElement && null != sharedElementTransitionName) {
+            fragment.sharedElementEnterTransition = SharedElementTransition()
+            fragment.sharedElementReturnTransition = SharedElementTransition()
+        }
         supportFragmentManager
                 .beginTransaction()
+                .addShareElementTransitionIfNotEmpty(sharedElement, sharedElementTransitionName)
                 .replace(R.id.window_container, fragment)
                 .commitNow()
     }
@@ -68,3 +90,12 @@ class CarConnectWindow : AppCompatActivity() {
         windowVM.onBackPressed()
     }
 }
+
+class SharedElementTransition : TransitionSet() {
+    init {
+        ordering = ORDERING_TOGETHER;
+        addTransition(ChangeBounds())
+                .addTransition(ChangeTransform())
+    }
+}
+

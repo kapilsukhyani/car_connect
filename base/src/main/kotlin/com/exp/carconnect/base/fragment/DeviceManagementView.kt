@@ -6,10 +6,12 @@ import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
 import android.os.Bundle
 import android.support.v4.app.Fragment
+import android.support.v7.widget.RecyclerView
+import android.util.Log
+import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.TextView
 import com.exp.carconnect.base.AppState
 import com.exp.carconnect.base.BaseAppContract
 import com.exp.carconnect.base.R
@@ -23,8 +25,16 @@ import redux.api.Reducer
 
 class DeviceManagementView : Fragment() {
 
-    private lateinit var statusView: TextView
+    companion object {
+        const val TAG = "DeviceManagementView"
+        fun getSharedElementTransitionName(): String {
+            return "app_logo_transition"
+        }
+    }
+
     private lateinit var deviceManagementVM: DeviceManagementVM
+    private lateinit var bondedDeviceContainer: View
+    private lateinit var bondedDeviceList: RecyclerView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -39,21 +49,44 @@ class DeviceManagementView : Fragment() {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val rootView = inflater.inflate(R.layout.view_device_management, null)
-        statusView = rootView.findViewById(R.id.status)
-        rootView.findViewById<View>(R.id.deviceSelectedSimulator)
-                .setOnClickListener {
-                    //todo remove test code
-                    onDeviceSelected(BluetoothAdapter.getDefaultAdapter().getRemoteDevice("FE:85:EE:7F:E7:6B"))
-                }
+        bondedDeviceContainer = rootView.findViewById(R.id.bonded_devices_container)
+        bondedDeviceList = rootView.findViewById(R.id.bonded_devices_list)
+        animateDeviceContainer { }
         return rootView
     }
 
     private fun onNewState(it: DeviceManagementScreenState) {
-        statusView.text = it.toString()
+        Log.d(TAG, "Received new state : $it")
+        when (it) {
+            is DeviceManagementScreenState.ShowingDevices -> showDevices(it.devices)
+
+            DeviceManagementScreenState.ShowingBluetoothUnAvailableError -> {
+
+            }
+        }
+
+    }
+
+    private fun showDevices(devices: Set<BluetoothDevice>) {
+        animateDeviceContainer { }
+
+    }
+
+
+    private fun animateDeviceContainer(onAnimationComplete: () -> Unit) {
+        bondedDeviceContainer
+                .animate()
+                .translationYBy(-TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP,
+                        350.toFloat(), resources.displayMetrics))
+                .setDuration(300)
+                .start()
+
+
     }
 
     private fun onDeviceSelected(device: BluetoothDevice) {
         deviceManagementVM.onDeviceSelected(device)
+
     }
 
 

@@ -80,6 +80,9 @@ dependencies {
         transitive = true
     }
 
+
+    api 'com.android.support.constraint:constraint-layout:1.0.2'
+
     // Test helpers for LiveData
     testApi "android.arch.core:core-testing:1.0.0"
 

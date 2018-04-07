@@ -5,10 +5,15 @@ import android.arch.lifecycle.*
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
 import android.os.Bundle
+import android.os.Handler
+import android.support.constraint.ConstraintLayout
+import android.support.constraint.ConstraintSet
 import android.support.v4.app.Fragment
 import android.support.v7.widget.RecyclerView
+import android.transition.Slide
+import android.transition.TransitionManager
+import android.transition.TransitionSet
 import android.util.Log
-import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -35,6 +40,8 @@ class DeviceManagementView : Fragment() {
     private lateinit var deviceManagementVM: DeviceManagementVM
     private lateinit var bondedDeviceContainer: View
     private lateinit var bondedDeviceList: RecyclerView
+    private lateinit var containerLayout: ConstraintLayout
+    private val constraintSet = ConstraintSet()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -51,6 +58,8 @@ class DeviceManagementView : Fragment() {
         val rootView = inflater.inflate(R.layout.view_device_management, null)
         bondedDeviceContainer = rootView.findViewById(R.id.bonded_devices_container)
         bondedDeviceList = rootView.findViewById(R.id.bonded_devices_list)
+        containerLayout = rootView.findViewById(R.id.container)
+        constraintSet.clone(containerLayout)
         animateDeviceContainer { }
         return rootView
     }
@@ -74,13 +83,11 @@ class DeviceManagementView : Fragment() {
 
 
     private fun animateDeviceContainer(onAnimationComplete: () -> Unit) {
-        bondedDeviceContainer
-                .animate()
-                .translationYBy(-TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP,
-                        350.toFloat(), resources.displayMetrics))
-                .setDuration(300)
-                .start()
-
+        Handler().postDelayed({
+            constraintSet.setGuidelinePercent(R.id.vertical_guideline, 0.4f)
+            TransitionManager.beginDelayedTransition(containerLayout)
+            constraintSet.applyTo(containerLayout)
+        }, 1000)
 
     }
 
@@ -112,10 +119,10 @@ class DeviceManagementVM(app: Application) : AndroidViewModel(app) {
 
         BluetoothAdapter
                 .getDefaultAdapter()?.let {
-            store.dispatch(DeviceManagementViewScreenAction
-                    .BondedDevicesAvailable(it
-                            .bondedDevices))
-        } ?: store.dispatch(DeviceManagementViewScreenAction
+                    store.dispatch(DeviceManagementViewScreenAction
+                            .BondedDevicesAvailable(it
+                                    .bondedDevices))
+                } ?: store.dispatch(DeviceManagementViewScreenAction
                 .BluetoothNotAvailable)
 
     }

@@ -6,15 +6,13 @@
     android:background="@drawable/app_background">
 
 
-    <TextView
+    <ImageView
         android:id="@+id/app_logo"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="15dp"
-        android:fontFamily="@font/atomic_age"
-        android:text="@string/car_connect"
-        android:textSize="30dp"
-        android:textStyle="bold"
+        android:scaleType="centerInside"
+        android:src="@drawable/app_logo_burnt"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"

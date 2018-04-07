@@ -6,7 +6,10 @@ import android.os.Bundle
 import android.support.v4.app.Fragment
 import android.support.v4.app.FragmentTransaction
 import android.support.v7.app.AppCompatActivity
-import android.transition.*
+import android.transition.ChangeBounds
+import android.transition.ChangeTransform
+import android.transition.Fade
+import android.transition.TransitionSet
 import android.view.View
 import com.exp.carconnect.app.R
 import com.exp.carconnect.app.viewmodel.WindowVM
@@ -47,10 +50,10 @@ class CarConnectWindow : AppCompatActivity() {
             }
 
             is DeviceManagementScreen -> {
-                replaceFragment(DeviceManagementView())
+                replaceFragment(DeviceManagementView(), viewTransition = false)
 //                replaceFragment(DeviceManagementView(),
 //                        SplashView.finSharedElement(windowContainer),
-//                        DeviceManagementView.getSharedElementTransitionName())
+//                        DeviceManagementView.getSharedElementTransitionName(), false)
             }
 
             is ConnectionScreen -> {
@@ -71,9 +74,12 @@ class CarConnectWindow : AppCompatActivity() {
 
     private fun replaceFragment(fragment: Fragment,
                                 sharedElement: View? = null,
-                                sharedElementTransitionName: String? = null) {
-        fragment.enterTransition = Fade()
-        fragment.exitTransition = Fade()
+                                sharedElementTransitionName: String? = null,
+                                viewTransition: Boolean = true) {
+        if (viewTransition) {
+            fragment.enterTransition = Fade()
+            fragment.exitTransition = Fade()
+        }
         if (null != sharedElement && null != sharedElementTransitionName) {
             fragment.sharedElementEnterTransition = SharedElementTransition()
             fragment.sharedElementReturnTransition = SharedElementTransition()

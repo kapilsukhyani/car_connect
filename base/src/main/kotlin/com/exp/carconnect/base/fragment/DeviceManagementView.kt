@@ -1,22 +1,26 @@
 package com.exp.carconnect.base.fragment
 
+import android.animation.Animator
+import android.animation.AnimatorListenerAdapter
+import android.animation.AnimatorSet
+import android.animation.ValueAnimator
 import android.app.Application
 import android.arch.lifecycle.*
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
+import android.content.Context
 import android.os.Bundle
-import android.os.Handler
 import android.support.constraint.ConstraintLayout
 import android.support.constraint.ConstraintSet
 import android.support.v4.app.Fragment
 import android.support.v7.widget.RecyclerView
-import android.transition.Slide
-import android.transition.TransitionManager
-import android.transition.TransitionSet
 import android.util.Log
+import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.animation.LinearInterpolator
+import android.widget.ImageView
 import com.exp.carconnect.base.AppState
 import com.exp.carconnect.base.BaseAppContract
 import com.exp.carconnect.base.R
@@ -39,6 +43,7 @@ class DeviceManagementView : Fragment() {
 
     private lateinit var deviceManagementVM: DeviceManagementVM
     private lateinit var bondedDeviceContainer: View
+    private lateinit var appLogo: ImageView
     private lateinit var bondedDeviceList: RecyclerView
     private lateinit var containerLayout: ConstraintLayout
     private val constraintSet = ConstraintSet()
@@ -53,14 +58,19 @@ class DeviceManagementView : Fragment() {
                 })
     }
 
+    override fun onAttach(context: Context?) {
+        super.onAttach(context)
+        animateDeviceContainer { }
+    }
+
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val rootView = inflater.inflate(R.layout.view_device_management, null)
         bondedDeviceContainer = rootView.findViewById(R.id.bonded_devices_container)
         bondedDeviceList = rootView.findViewById(R.id.bonded_devices_list)
         containerLayout = rootView.findViewById(R.id.container)
-        constraintSet.clone(containerLayout)
-        animateDeviceContainer { }
+        appLogo = rootView.findViewById(R.id.app_logo)
+
         return rootView
     }
 
@@ -83,11 +93,52 @@ class DeviceManagementView : Fragment() {
 
 
     private fun animateDeviceContainer(onAnimationComplete: () -> Unit) {
-        Handler().postDelayed({
-            constraintSet.setGuidelinePercent(R.id.vertical_guideline, 0.4f)
-            TransitionManager.beginDelayedTransition(containerLayout)
+
+
+        val guidelineAnimator = ValueAnimator.ofFloat(1f, .4f)
+        guidelineAnimator.startDelay = 1000
+        guidelineAnimator.addUpdateListener { it ->
+            constraintSet.clone(containerLayout)
+            constraintSet.setGuidelinePercent(R.id.vertical_guideline, it.animatedValue as Float)
             constraintSet.applyTo(containerLayout)
-        }, 1000)
+        }
+        guidelineAnimator.interpolator = LinearInterpolator()
+        guidelineAnimator.duration = 300
+
+        val appLogoAnimator = ValueAnimator.ofFloat(.92f, .70f)
+        appLogoAnimator.addUpdateListener { it ->
+            constraintSet.clone(containerLayout)
+            constraintSet.setVerticalBias(R.id.app_logo, it.animatedValue as Float)
+            constraintSet.applyTo(containerLayout)
+        }
+        appLogoAnimator.interpolator = LinearInterpolator()
+
+        appLogoAnimator.addListener(object : AnimatorListenerAdapter() {
+            override fun onAnimationEnd(animation: Animator?) {
+                appLogo.pivotX = appLogo.width / 2.toFloat()
+                appLogo.pivotY = appLogo.height / 2.toFloat()
+                appLogo
+                        .animate()
+                        .rotationBy(-90f)
+                        .setDuration(200)
+                        .setListener(object : AnimatorListenerAdapter() {
+                            override fun onAnimationEnd(animation: Animator?) {
+                                appLogo
+                                        .animate()
+                                        .setListener(null)
+                                        .translationXBy(-300f)
+                                        .start()
+                            }
+                        })
+                        .start()
+
+            }
+        })
+
+
+        val animatorSet = AnimatorSet()
+        animatorSet.playSequentially(guidelineAnimator, appLogoAnimator)
+        animatorSet.start()
 
     }
 

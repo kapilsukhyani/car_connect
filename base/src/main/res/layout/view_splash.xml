@@ -1,22 +1,59 @@
 <?xml version="1.0" encoding="utf-8"?>
 <android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/container"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@drawable/app_background">
 
+    <android.support.constraint.Guideline
+        android:id="@+id/vertical_guideline"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_percent=".25" />
+
+    <android.support.constraint.Guideline
+        android:id="@+id/horizontal_guideline"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        app:layout_constraintGuide_percent=".5" />
+
+
+    <ImageView
+        android:id="@+id/track_vertical"
+        android:layout_width="10dp"
+        android:layout_height="0dp"
+        android:src="@drawable/track_element"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/vertical_guideline" />
+
+    <ImageView
+        android:id="@+id/track_horizontal"
+        android:layout_width="0dp"
+        android:layout_height="10dp"
+        android:layout_marginRight="5dp"
+        android:src="@drawable/track_element_horizontal"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toLeftOf="@id/horizontal_guideline"
+        app:layout_constraintTop_toTopOf="@id/vertical_guideline" />
 
     <ImageView
         android:id="@+id/app_logo"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="15dp"
+        android:layout_width="100dp"
+        android:layout_height="80dp"
+        android:backgroundTint="@android:color/white"
+        android:rotation="-90"
         android:scaleType="centerInside"
-        android:src="@drawable/app_logo_burnt"
+        android:src="@drawable/ic_race_car"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.92" />
 
 
 </android.support.constraint.ConstraintLayout>

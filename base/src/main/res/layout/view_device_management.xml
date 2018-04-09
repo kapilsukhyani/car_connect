@@ -13,17 +13,55 @@
         android:orientation="horizontal"
         app:layout_constraintGuide_percent="1" />
 
+    <android.support.constraint.Guideline
+        android:id="@+id/fixed_vertical_guideline"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_percent="0.25" />
+
+    <android.support.constraint.Guideline
+        android:id="@+id/horizontal_guideline"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        app:layout_constraintGuide_percent=".5" />
+
+
+    <ImageView
+        android:id="@+id/track_vertical"
+        android:layout_width="10dp"
+        android:layout_height="0dp"
+        android:src="@drawable/track_element"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/fixed_vertical_guideline" />
+
+    <ImageView
+        android:id="@+id/track_horizontal"
+        android:layout_width="0dp"
+        android:layout_height="10dp"
+        android:layout_marginRight="5dp"
+        android:src="@drawable/track_element_horizontal"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toLeftOf="@id/horizontal_guideline"
+        app:layout_constraintTop_toTopOf="@id/fixed_vertical_guideline" />
+
     <ImageView
         android:id="@+id/app_logo"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="100dp"
+        android:layout_height="80dp"
+        android:rotation="-90"
         android:scaleType="centerInside"
-        android:src="@drawable/app_logo_lighten"
+        android:src="@drawable/ic_race_car_active"
         android:transitionName="app_logo_transition"
         app:layout_constraintBottom_toTopOf="@+id/vertical_guideline"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias=".5"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias=".92" />
 
     <android.support.v7.widget.CardView
         android:layout_width="0dp"

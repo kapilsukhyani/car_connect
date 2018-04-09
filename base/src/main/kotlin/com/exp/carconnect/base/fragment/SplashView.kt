@@ -1,13 +1,24 @@
 package com.exp.carconnect.base.fragment
 
+import android.animation.Animator
+import android.animation.AnimatorSet
+import android.animation.ValueAnimator
 import android.app.Application
 import android.arch.lifecycle.*
 import android.os.Bundle
+import android.os.Handler
+import android.support.constraint.ConstraintLayout
+import android.support.constraint.ConstraintSet
 import android.support.v4.app.Fragment
+import android.support.v4.view.animation.FastOutLinearInInterpolator
+import android.support.v4.view.animation.FastOutSlowInInterpolator
+import android.transition.TransitionManager
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.animation.Animation
+import android.view.animation.AnimationSet
 import com.exp.carconnect.base.BaseAppContract
 import com.exp.carconnect.base.LoadableState
 import com.exp.carconnect.base.R
@@ -26,6 +37,8 @@ class SplashView : Fragment() {
     }
 
     private lateinit var appLogo: View
+    private val constraintSet = ConstraintSet()
+    private lateinit var containerLayout: ConstraintLayout
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         ViewModelProviders
@@ -44,9 +57,43 @@ class SplashView : Fragment() {
     override fun onCreateView(inflater: LayoutInflater?, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val view = layoutInflater.inflate(R.layout.view_splash, null)
         appLogo = view.findViewById(R.id.app_logo)
+        containerLayout = view.findViewById(R.id.container)
+        constraintSet.clone(containerLayout)
         return view
     }
 
+
+
+    fun animateView() {
+        val animator = ValueAnimator.ofFloat(.95f, .45f)
+        animator.startDelay = 1000
+        animator.addUpdateListener { it ->
+            constraintSet.setVerticalBias(R.id.app_logo, it.animatedValue as Float)
+            constraintSet.applyTo(containerLayout)
+        }
+        animator.interpolator = FastOutSlowInInterpolator()
+        animator.duration = 600
+        animator.addListener(object : Animator.AnimatorListener {
+            override fun onAnimationRepeat(animation: Animator?) {
+            }
+
+            override fun onAnimationEnd(animation: Animator?) {
+                appLogo.animate()
+                        .rotationBy(-90f)
+                        .translationXBy(-30f)
+                        .translationYBy(-70f)
+                        .start()
+            }
+
+            override fun onAnimationCancel(animation: Animator?) {
+            }
+
+            override fun onAnimationStart(animation: Animator?) {
+            }
+        })
+
+        animator.start()
+    }
 
     fun getSharedElement(): View {
         return appLogo;

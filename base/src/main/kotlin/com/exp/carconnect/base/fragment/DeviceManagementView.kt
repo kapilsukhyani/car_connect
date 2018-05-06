@@ -13,6 +13,7 @@ import android.os.Bundle
 import android.support.constraint.ConstraintLayout
 import android.support.constraint.ConstraintSet
 import android.support.v4.app.Fragment
+import android.support.v4.view.animation.FastOutSlowInInterpolator
 import android.support.v7.widget.RecyclerView
 import android.util.Log
 import android.util.TypedValue
@@ -95,7 +96,7 @@ class DeviceManagementView : Fragment() {
     private fun animateDeviceContainer(onAnimationComplete: () -> Unit) {
 
 
-        val guidelineAnimator = ValueAnimator.ofFloat(1f, .4f)
+        val guidelineAnimator = ValueAnimator.ofFloat(1f, .465f)
         guidelineAnimator.startDelay = 1000
         guidelineAnimator.addUpdateListener { it ->
             constraintSet.clone(containerLayout)
@@ -121,12 +122,14 @@ class DeviceManagementView : Fragment() {
                         .animate()
                         .rotationBy(-90f)
                         .setDuration(200)
+                        .setInterpolator(FastOutSlowInInterpolator())
                         .setListener(object : AnimatorListenerAdapter() {
                             override fun onAnimationEnd(animation: Animator?) {
                                 appLogo
                                         .animate()
                                         .setListener(null)
-                                        .translationXBy(-300f)
+                                        .setInterpolator(LinearInterpolator())
+                                        .translationXBy(-500f)
                                         .start()
                             }
                         })

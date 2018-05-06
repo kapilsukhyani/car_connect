@@ -37,6 +37,8 @@ dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     api project(":obdlib")
 
+    api 'com.facebook.shimmer:shimmer:0.1.0@aar'
+
     api 'com.google.android.instantapps:instantapps:1.1.0'
 
     api "org.jetbrains.kotlin:kotlin-stdlib-jre7:$kotlin_version"
@@ -83,6 +85,7 @@ dependencies {
 
 
     api 'com.android.support.constraint:constraint-layout:1.0.2'
+
 
     // Test helpers for LiveData
     testApi "android.arch.core:core-testing:1.0.0"

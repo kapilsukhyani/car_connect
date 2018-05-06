@@ -30,9 +30,9 @@
 
     <ImageView
         android:id="@+id/track_vertical"
-        android:layout_width="10dp"
+        android:layout_width="75dp"
         android:layout_height="0dp"
-        android:src="@drawable/track_element"
+        android:src="@drawable/track_element_horizontal"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
@@ -41,7 +41,7 @@
     <ImageView
         android:id="@+id/track_horizontal"
         android:layout_width="0dp"
-        android:layout_height="10dp"
+        android:layout_height="75dp"
         android:layout_marginRight="5dp"
         android:src="@drawable/track_element_horizontal"
         app:layout_constraintLeft_toLeftOf="parent"
@@ -64,6 +64,7 @@
         app:layout_constraintVertical_bias=".92" />
 
     <android.support.v7.widget.CardView
+        android:id="@+id/bonded_devices_card"
         android:layout_width="0dp"
         android:layout_height="0dp"
         app:cardElevation="5dp"
@@ -99,5 +100,27 @@
 
     </android.support.v7.widget.CardView>
 
+
+    <com.facebook.shimmer.ShimmerFrameLayout
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
+        app:auto_start="false"
+        app:layout_constraintBottom_toTopOf="@+id/track_vertical"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias=".5"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:fontFamily="@font/atomic_age"
+            android:text="@string/car_connect"
+            android:textColor="#f43b47"
+            android:textSize="35dp"
+            android:textStyle="bold" />
+    </com.facebook.shimmer.ShimmerFrameLayout>
 
 </android.support.constraint.ConstraintLayout>

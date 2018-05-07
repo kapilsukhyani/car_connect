@@ -7,6 +7,7 @@ import android.arch.lifecycle.MutableLiveData
 import com.exp.carconnect.app.CarConnectApp
 import com.exp.carconnect.app.state.NavigationActions
 import com.exp.carconnect.base.AppState
+import com.exp.carconnect.base.CarConnectUIState
 import com.exp.carconnect.base.CarConnectView
 import com.exp.carconnect.base.asCustomObservable
 import com.exp.carconnect.base.state.CommonAppAction
@@ -33,7 +34,10 @@ class WindowVM(app: Application) : AndroidViewModel(app) {
         stateSubscription = store
                 .asCustomObservable()
                 .map { it.uiState }
-                .distinctUntilChanged()
+                .distinctUntilChanged { carConnectUIState: CarConnectUIState, carConnectUIState1: CarConnectUIState ->
+                    carConnectUIState?.currentView?.let { it::class.java } == carConnectUIState1?.currentView?.let { it::class.java }
+
+                }
                 .subscribe({ uiState ->
                     currentViewLiveData.value = uiState.currentView
                 }, { error ->

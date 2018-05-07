@@ -4,6 +4,7 @@ import android.animation.Animator
 import android.animation.AnimatorListenerAdapter
 import android.animation.AnimatorSet
 import android.animation.ValueAnimator
+import android.app.AlertDialog
 import android.app.Application
 import android.arch.lifecycle.*
 import android.bluetooth.BluetoothAdapter
@@ -14,14 +15,17 @@ import android.support.constraint.ConstraintLayout
 import android.support.constraint.ConstraintSet
 import android.support.v4.app.Fragment
 import android.support.v4.view.animation.FastOutSlowInInterpolator
+import android.support.v7.widget.DefaultItemAnimator
+import android.support.v7.widget.DividerItemDecoration
+import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
 import android.util.Log
-import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.animation.LinearInterpolator
 import android.widget.ImageView
+import android.widget.TextView
 import com.exp.carconnect.base.AppState
 import com.exp.carconnect.base.BaseAppContract
 import com.exp.carconnect.base.R
@@ -51,17 +55,12 @@ class DeviceManagementView : Fragment() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        deviceManagementVM = ViewModelProviders.of(this)
-                .get(DeviceManagementVM::class.java)
-        deviceManagementVM.getScreenStateLiveData()
-                .observe(this, Observer {
-                    onNewState(it!!)
-                })
+
     }
 
     override fun onAttach(context: Context?) {
         super.onAttach(context)
-        animateDeviceContainer { }
+//        animateDeviceContainer { }
     }
 
 
@@ -72,7 +71,20 @@ class DeviceManagementView : Fragment() {
         containerLayout = rootView.findViewById(R.id.container)
         appLogo = rootView.findViewById(R.id.app_logo)
 
+        bondedDeviceList.layoutManager = LinearLayoutManager(activity)
+        bondedDeviceList.itemAnimator = DefaultItemAnimator()
+        bondedDeviceList.addItemDecoration(DividerItemDecoration(activity, DividerItemDecoration.VERTICAL))
         return rootView
+    }
+
+    override fun onViewCreated(view: View?, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        deviceManagementVM = ViewModelProviders.of(this)
+                .get(DeviceManagementVM::class.java)
+        deviceManagementVM.getScreenStateLiveData()
+                .observe(this, Observer {
+                    onNewState(it!!)
+                })
     }
 
     private fun onNewState(it: DeviceManagementScreenState) {
@@ -81,14 +93,30 @@ class DeviceManagementView : Fragment() {
             is DeviceManagementScreenState.ShowingDevices -> showDevices(it.devices)
 
             DeviceManagementScreenState.ShowingBluetoothUnAvailableError -> {
-
+                showBluetoothNotAvailableError()
             }
         }
 
     }
 
+    private fun showBluetoothNotAvailableError() {
+        AlertDialog
+                .Builder(activity)
+                .setTitle(getString(R.string.bluetooth_error_title))
+                .setMessage(getString(R.string.bluetooth_not_available_message))
+                .setCancelable(false)
+                .setPositiveButton(android.R.string.ok) { dialog, which ->
+                    deviceManagementVM.onBluetoothErrorAcknowledged()
+                    dialog.dismiss()
+                }
+                .create()
+                .show()
+    }
+
     private fun showDevices(devices: Set<BluetoothDevice>) {
-        animateDeviceContainer { }
+        animateDeviceContainer {
+            bondedDeviceList.adapter = BondedDeviceAdapter(DeviceManagementView@ this.activity, devices.toList())
+        }
 
     }
 
@@ -130,6 +158,11 @@ class DeviceManagementView : Fragment() {
                                         .setListener(null)
                                         .setInterpolator(LinearInterpolator())
                                         .translationXBy(-500f)
+                                        .setListener(object : AnimatorListenerAdapter() {
+                                            override fun onAnimationEnd(animation: Animator?) {
+                                                onAnimationComplete()
+                                            }
+                                        })
                                         .start()
                             }
                         })
@@ -192,6 +225,10 @@ class DeviceManagementVM(app: Application) : AndroidViewModel(app) {
     fun onDeviceSelected(device: BluetoothDevice) {
         store.dispatch(CommonAppAction.BondedDeviceSelected(device))
     }
+
+    fun onBluetoothErrorAcknowledged() {
+        store.dispatch(CommonAppAction.BackPressed)
+    }
 }
 
 
@@ -230,5 +267,26 @@ class DeviceManagementScreenStateReducer : Reducer<AppState> {
             }
         }
     }
+
+}
+
+
+private class BondedDeviceAdapter(val context: Context, val bondedDevices: List<BluetoothDevice>) : RecyclerView.Adapter<BondedDeviceRowViewHolder>() {
+
+    override fun onCreateViewHolder(parent: ViewGroup?, viewType: Int): BondedDeviceRowViewHolder {
+        return BondedDeviceRowViewHolder(LayoutInflater.from(context).inflate(android.R.layout.simple_list_item_1, null) as TextView)
+    }
+
+    override fun getItemCount(): Int {
+        return bondedDevices.size
+    }
+
+    override fun onBindViewHolder(holder: BondedDeviceRowViewHolder, position: Int) {
+        holder.textView.text = bondedDevices[position].name
+    }
+
+}
+
+private class BondedDeviceRowViewHolder(val textView: TextView) : RecyclerView.ViewHolder(textView) {
 
 }

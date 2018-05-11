@@ -115,7 +115,9 @@ class DeviceManagementView : Fragment() {
 
     private fun showDevices(devices: Set<BluetoothDevice>) {
         animateDeviceContainer {
-            bondedDeviceList.adapter = BondedDeviceAdapter(DeviceManagementView@ this.activity, devices.toList())
+            bondedDeviceList.adapter = BondedDeviceAdapter(DeviceManagementView@ this.activity, devices.toList()) {
+                deviceManagementVM.onDeviceSelected(it)
+            }
         }
 
     }
@@ -271,10 +273,10 @@ class DeviceManagementScreenStateReducer : Reducer<AppState> {
 }
 
 
-private class BondedDeviceAdapter(val context: Context, val bondedDevices: List<BluetoothDevice>) : RecyclerView.Adapter<BondedDeviceRowViewHolder>() {
+private class BondedDeviceAdapter(val context: Context, val bondedDevices: List<BluetoothDevice>, val itemClickListener: (BluetoothDevice) -> Unit) : RecyclerView.Adapter<BondedDeviceRowViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup?, viewType: Int): BondedDeviceRowViewHolder {
-        return BondedDeviceRowViewHolder(LayoutInflater.from(context).inflate(android.R.layout.simple_list_item_1, null) as TextView)
+        return BondedDeviceRowViewHolder(LayoutInflater.from(context).inflate(android.R.layout.simple_list_item_1, null) as TextView, itemClickListener)
     }
 
     override fun getItemCount(): Int {
@@ -283,10 +285,15 @@ private class BondedDeviceAdapter(val context: Context, val bondedDevices: List<
 
     override fun onBindViewHolder(holder: BondedDeviceRowViewHolder, position: Int) {
         holder.textView.text = bondedDevices[position].name
+        holder.textView.tag = bondedDevices[position]
     }
 
 }
 
-private class BondedDeviceRowViewHolder(val textView: TextView) : RecyclerView.ViewHolder(textView) {
-
+private class BondedDeviceRowViewHolder(val textView: TextView, itemClickListener: (BluetoothDevice) -> Unit) : RecyclerView.ViewHolder(textView) {
+    init {
+        textView.setOnClickListener {
+            itemClickListener.invoke(textView.tag as BluetoothDevice)
+        }
+    }
 }

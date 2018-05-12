@@ -1,24 +1,18 @@
 package com.exp.carconnect.base.fragment
 
 import android.animation.Animator
-import android.animation.AnimatorSet
 import android.animation.ValueAnimator
 import android.app.Application
 import android.arch.lifecycle.*
 import android.os.Bundle
-import android.os.Handler
 import android.support.constraint.ConstraintLayout
 import android.support.constraint.ConstraintSet
 import android.support.v4.app.Fragment
-import android.support.v4.view.animation.FastOutLinearInInterpolator
 import android.support.v4.view.animation.FastOutSlowInInterpolator
-import android.transition.TransitionManager
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.view.animation.Animation
-import android.view.animation.AnimationSet
 import com.exp.carconnect.base.BaseAppContract
 import com.exp.carconnect.base.LoadableState
 import com.exp.carconnect.base.R

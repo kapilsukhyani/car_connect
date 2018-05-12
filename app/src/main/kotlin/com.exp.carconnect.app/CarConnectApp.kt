@@ -2,18 +2,17 @@ package com.exp.carconnect.app
 
 import android.app.Application
 import com.exp.carconnect.app.state.AppStateNavigationReducer
-import com.exp.carconnect.base.AppState
-import com.exp.carconnect.base.BaseAppContract
-import com.exp.carconnect.base.CarConnectUIState
-import com.exp.carconnect.base.LoadableState
+import com.exp.carconnect.base.*
 import com.exp.carconnect.base.di.CarConnectGlobalComponent
 import com.exp.carconnect.base.di.DaggerCarConnectGlobalComponent
 import com.exp.carconnect.base.di.NewOBDConnectionComponent
 import com.exp.carconnect.base.di.OBDConnectionModule
+import com.exp.carconnect.base.fragment.DeviceConnectionScreenStateReducer
 import com.exp.carconnect.base.fragment.DeviceManagementScreenStateReducer
 import com.exp.carconnect.base.state.BaseAppState
 import com.exp.carconnect.base.state.BaseAppStateReducer
 import com.exp.carconnect.base.state.BaseSateLoadingEpic
+import com.exp.carconnect.base.state.OBDSessionManagementEpic
 import com.exp.carconnect.dashboard.DashboardAppContract
 import com.exp.carconnect.dashboard.di.DashboardComponent
 import com.exp.carconnect.dashboard.di.DashboardModule
@@ -61,14 +60,16 @@ class CarConnectApp : Application(),
         //        Fabric.with(this, Crashlytics())
 
         val reducers = combineReducers(AppStateNavigationReducer(),
-                BaseAppStateReducer(), DeviceManagementScreenStateReducer())
+                BaseAppStateReducer(), DeviceManagementScreenStateReducer(), DeviceConnectionScreenStateReducer())
         val initialState = AppState(mapOf(Pair(BaseAppState.STATE_KEY, LoadableState.NotLoaded)),
                 CarConnectUIState(Stack()))
-        val middleware = createEpicMiddleware(BaseSateLoadingEpic(Schedulers.io(), AndroidSchedulers.mainThread()))
+        val appStateLoadingMiddleware = createEpicMiddleware(BaseSateLoadingEpic(Schedulers.io(), AndroidSchedulers.mainThread()))
+        val obdSessionManagementMiddleware = createEpicMiddleware(OBDSessionManagementEpic(Schedulers.io(), AndroidSchedulers.mainThread()
+                , OBDDeviceSessionManager(Schedulers.io(), Schedulers.computation(), AndroidSchedulers.mainThread())))
 
         println("debugtag: creating store")
 
-        store = createStore(reducers, initialState, applyMiddleware(middleware))
+        store = createStore(reducers, initialState, applyMiddleware(appStateLoadingMiddleware, obdSessionManagementMiddleware))
 
         println("debugtag: created store")
 

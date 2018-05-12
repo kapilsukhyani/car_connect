@@ -115,11 +115,10 @@ class DeviceManagementView : Fragment() {
 
     private fun showDevices(devices: Set<BluetoothDevice>) {
         animateDeviceContainer {
-            bondedDeviceList.adapter = BondedDeviceAdapter(DeviceManagementView@ this.activity, devices.toList()) {
-                deviceManagementVM.onDeviceSelected(it)
-            }
         }
-
+        bondedDeviceList.adapter = BondedDeviceAdapter(DeviceManagementView@ this.activity, devices.toList()) {
+            deviceManagementVM.onDeviceSelected(it)
+        }
     }
 
 
@@ -208,11 +207,16 @@ class DeviceManagementVM(app: Application) : AndroidViewModel(app) {
 
         BluetoothAdapter
                 .getDefaultAdapter()?.let {
-                    store.dispatch(DeviceManagementViewScreenAction
-                            .BondedDevicesAvailable(it
-                                    .bondedDevices))
-                } ?: store.dispatch(DeviceManagementViewScreenAction
-                .BluetoothNotAvailable)
+                    if (it.isEnabled) {
+                        store.dispatch(DeviceManagementViewAction
+                                .ShowBondedDevices(it
+                                        .bondedDevices))
+                    } else {
+                        store.dispatch(DeviceManagementViewAction
+                                .ShowBluetoothError)
+                    }
+                } ?: store.dispatch(DeviceManagementViewAction
+                .ShowBluetoothError)
 
     }
 
@@ -225,7 +229,7 @@ class DeviceManagementVM(app: Application) : AndroidViewModel(app) {
     }
 
     fun onDeviceSelected(device: BluetoothDevice) {
-        store.dispatch(CommonAppAction.BondedDeviceSelected(device))
+        store.dispatch(CommonAppAction.StartNewSession(device))
     }
 
     fun onBluetoothErrorAcknowledged() {
@@ -234,16 +238,16 @@ class DeviceManagementVM(app: Application) : AndroidViewModel(app) {
 }
 
 
-sealed class DeviceManagementViewScreenAction {
-    data class BondedDevicesAvailable(val devices: Set<BluetoothDevice>) : DeviceManagementViewScreenAction()
-    object BluetoothNotAvailable : DeviceManagementViewScreenAction()
+sealed class DeviceManagementViewAction {
+    data class ShowBondedDevices(val devices: Set<BluetoothDevice>) : DeviceManagementViewAction()
+    object ShowBluetoothError : DeviceManagementViewAction()
 }
 
 
 class DeviceManagementScreenStateReducer : Reducer<AppState> {
     override fun reduce(state: AppState, action: Any): AppState {
         return when (action) {
-            is DeviceManagementViewScreenAction.BondedDevicesAvailable -> {
+            is DeviceManagementViewAction.ShowBondedDevices -> {
 
                 state.copy(uiState = state
                         .uiState
@@ -254,7 +258,7 @@ class DeviceManagementScreenStateReducer : Reducer<AppState> {
                                 DeviceManagementScreen(DeviceManagementScreenState.ShowingDevices(action.devices))))
             }
 
-            is DeviceManagementViewScreenAction.BluetoothNotAvailable -> {
+            is DeviceManagementViewAction.ShowBluetoothError -> {
 
                 state.copy(uiState = state
                         .uiState

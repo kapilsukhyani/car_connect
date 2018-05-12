@@ -165,7 +165,7 @@ sealed class ConnectionScreenState : CarConnectIndividualViewState {
 
     data class ShwowingSetupError(val error: SetupError) : ConnectionScreenState()
 
-    object FinishingSetup : ConnectionScreenState()
+    object SetupCompleted : ConnectionScreenState()
 
 }
 

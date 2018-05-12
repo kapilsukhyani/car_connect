@@ -1,6 +1,7 @@
 package com.exp.carconnect.base.state
 
 import com.exp.carconnect.base.AppState
+import com.exp.carconnect.base.OBDDeviceSessionManager
 import com.exp.carconnect.base.store.loadAppState
 import io.reactivex.Observable
 import io.reactivex.Scheduler
@@ -9,8 +10,8 @@ import redux.INIT
 import redux.api.Store
 import redux.observable.Epic
 
-class BaseSateLoadingEpic(val ioScheduler: Scheduler,
-                          val mainThreadScheduler: Scheduler) : Epic<AppState> {
+class BaseSateLoadingEpic(private val ioScheduler: Scheduler,
+                          private val mainThreadScheduler: Scheduler) : Epic<AppState> {
 
     override fun map(actions: Observable<out Any>, store: Store<AppState>): Observable<out Any> {
         return actions
@@ -34,5 +35,25 @@ class BaseSateLoadingEpic(val ioScheduler: Scheduler,
 
     }
 
+
+}
+
+class OBDSessionManagementEpic(private val ioScheduler: Scheduler,
+                               private val mainThreadScheduler: Scheduler,
+                               private val sessionManager: OBDDeviceSessionManager) : Epic<AppState> {
+    override fun map(actions: Observable<out Any>, store: Store<AppState>): Observable<out Any> {
+
+        return actions
+                .filter {
+                    it is CommonAppAction.StartNewSession
+                }
+
+                .flatMap {
+                    sessionManager.startNewSession((it as CommonAppAction.StartNewSession).device)
+                            .startWith(CommonAppAction.SessionStarted(it.device))
+                            .subscribeOn(ioScheduler)
+                            .observeOn(mainThreadScheduler)
+                }
+    }
 
 }

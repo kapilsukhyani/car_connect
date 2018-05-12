@@ -42,7 +42,7 @@ class AppStateNavigationReducer : Reducer<AppState> {
             CommonAppAction.BackPressed -> {
                 state.popViewFromBackStack()
             }
-            is CommonAppAction.BondedDeviceSelected -> {
+            is CommonAppAction.SessionStarted -> {
                 state.pushViewToBackState(ConnectionScreen(ConnectionScreenState.Connecting(action.device)))
             }
             else -> {

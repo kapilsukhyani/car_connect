@@ -87,6 +87,18 @@ class DeviceConnectionView : Fragment() {
             is ConnectionScreenState.ShwowingSetupError -> {
                 setStatus("Setup error")
             }
+
+            is ConnectionScreenState.LoadinVehicleInfo -> {
+                setStatus("Loading Vehicle Info")
+            }
+
+            is ConnectionScreenState.VehicleInfoLoaded -> {
+                setStatus("Loaded Vehicle Info")
+            }
+
+            is ConnectionScreenState.VehicleLoadingFailed -> {
+                setStatus("Loaded Vehicle Failed")
+            }
         }
     }
 
@@ -129,43 +141,43 @@ class DeviceConnectionScreenStateReducer : Reducer<AppState> {
     override fun reduce(state: AppState, action: Any): AppState {
         return when (action) {
             is CommonAppAction.DeviceConnectionFailed -> {
-
-                state.copy(uiState = state
-                        .uiState
-                        .copy(backStack = state
-                                .uiState
-                                .backStack
-                                .subList(0, state.uiState.backStack.size - 1) +
-                                ConnectionScreen(ConnectionScreenState
-                                        .ShowingConnectionError(ConnectionError.UnkownError(action.error)))))
+                updateState(state, ConnectionScreenState
+                        .ShowingConnectionError(ConnectionError.UnkownError(action.error)))
             }
 
             is CommonAppAction.RunningSetup -> {
-
-                state.copy(uiState = state
-                        .uiState
-                        .copy(backStack = state
-                                .uiState
-                                .backStack
-                                .subList(0, state.uiState.backStack.size - 1) +
-                                ConnectionScreen(ConnectionScreenState.RunningSetup)))
+                updateState(state, ConnectionScreenState.RunningSetup)
             }
 
             is CommonAppAction.SetupFailed -> {
+                updateState(state, ConnectionScreenState.ShwowingSetupError(SetupError.UnkownError(action.error)))
+            }
 
-                state.copy(uiState = state
-                        .uiState
-                        .copy(backStack = state
-                                .uiState
-                                .backStack
-                                .subList(0, state.uiState.backStack.size - 1) +
-                                ConnectionScreen(ConnectionScreenState.ShwowingSetupError(SetupError.UnkownError(action.error)))))
+            is CommonAppAction.VehicleInfoLoaded -> {
+                updateState(state, ConnectionScreenState.VehicleInfoLoaded(action.info))
+            }
+            is CommonAppAction.VehicleInfoLoadingFailed -> {
+                updateState(state, ConnectionScreenState.VehicleLoadingFailed(OBDDataLoadError.UnkownError(action.error)))
+            }
+            is CommonAppAction.LoadingVehicleInfo -> {
+                updateState(state, ConnectionScreenState.LoadinVehicleInfo)
             }
 
             else -> {
                 state
             }
         }
+    }
+
+
+    private fun updateState(state: AppState, connectionScreenState: ConnectionScreenState): AppState {
+        return state.copy(uiState = state
+                .uiState
+                .copy(backStack = state
+                        .uiState
+                        .backStack
+                        .subList(0, state.uiState.backStack.size - 1) +
+                        ConnectionScreen(connectionScreenState)))
     }
 
 }

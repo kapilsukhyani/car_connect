@@ -46,8 +46,11 @@ sealed class CommonAppAction {
     data class SessionStarted(val device: BluetoothDevice) : CommonAppAction()
     data class DeviceConnected(val device: BluetoothDevice, val socket: BluetoothSocket) : CommonAppAction()
     data class DeviceConnectionFailed(val device: BluetoothDevice, val error: Throwable) : CommonAppAction()
-    data class RunningSetup(val device: BluetoothDevice): CommonAppAction()
-    data class SetupCompleted(val device: BluetoothDevice): CommonAppAction()
+    data class RunningSetup(val device: BluetoothDevice) : CommonAppAction()
+    data class SetupCompleted(val device: BluetoothDevice) : CommonAppAction()
     data class SetupFailed(val device: BluetoothDevice, val error: Throwable) : CommonAppAction()
+    data class LoadingVehicleInfo(val device: BluetoothDevice) : CommonAppAction()
+    data class VehicleInfoLoadingFailed(val device: BluetoothDevice, val error: Throwable) : CommonAppAction()
+    data class VehicleInfoLoaded(val device: BluetoothDevice, val info: Vehicle) : CommonAppAction()
 }
 

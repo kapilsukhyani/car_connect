@@ -167,6 +167,13 @@ sealed class ConnectionScreenState : CarConnectIndividualViewState {
 
     object SetupCompleted : ConnectionScreenState()
 
+    object LoadinVehicleInfo : ConnectionScreenState()
+
+    data class VehicleInfoLoaded(val info: Vehicle) : ConnectionScreenState()
+
+    data class VehicleLoadingFailed(val error: OBDDataLoadError) : ConnectionScreenState()
+
+
 }
 
 
@@ -205,6 +212,11 @@ sealed class SetupError : CarConnectError("SetupError") {
 
 sealed class UpdateSettingsError : CarConnectError("UpdateSettingsError") {
     data class UnkownError(override val error: Throwable) : UpdateSettingsError()
+}
+
+
+sealed class OBDDataLoadError : CarConnectError("OBDDataLoadError") {
+    data class UnkownError(override val error: Throwable) : OBDDataLoadError()
 }
 
 

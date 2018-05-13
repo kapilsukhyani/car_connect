@@ -28,16 +28,48 @@ class TimeoutCommand(val timeout: Int,
                      repeatable: IsRepeatable = IsRepeatable.No) :
         OBDRequest("TimeoutRequest", "AT ST " + Integer.toHexString(0xFF and timeout), retriable, repeatable)
 
-class AvailablePidsCommand(command: PidCommand,
+class AvailablePidsCommand(val pidCommand: PidCommand,
                            retriable: Boolean = true,
                            repeatable: IsRepeatable = IsRepeatable.No) :
-        OBDRequest("AvailablePidsRequest", command.value, retriable, repeatable) {
-    override fun toResponse(rawResponse: String): OBDResponse {
-        return object : RawResponse(rawResponse) {
-            override fun getFormattedResult(): String {
-                return rawResponse.substring(4)
+        OBDRequest("AvailablePidsRequest", pidCommand.value, retriable, repeatable) {
+    override fun toResponse(rawResponse: String): AvailablePidsResponse {
+        return AvailablePidsResponse(pidCommand, rawResponse)
+    }
+}
+
+class AvailablePidsResponse(command: PidCommand, rawResponse: String) : OBDResponse("AvailablePidsResponse", rawResponse) {
+    val availablePids: Set<String>
+
+    init {
+        val availablePidsMutable = mutableSetOf<String>()
+        val buffer = rawResponse.toIntList().subList(2, 6)
+        var pidNumber = command.getStartingPid()
+        for (value in buffer) {
+            var i = 128
+            while (i >= 1) {
+                val isSet = (value and i) == i
+                if (isSet) {
+                    availablePidsMutable.add(pidNumber.getHexString())
+                }
+                i = i / 2
+                pidNumber++
             }
         }
+        availablePids = availablePidsMutable
+
+    }
+
+   private fun Int.getHexString(): String {
+        val hexString = this.toString(16)
+        return if (hexString.length == 1) {
+            "0$hexString"
+        } else {
+            hexString
+        }
+    }
+
+    override fun getFormattedResult(): String {
+        return rawResponse.substring(4)
     }
 }
 
@@ -62,19 +94,32 @@ class ResetTroubleCodesCommand(retriable: Boolean = true,
         OBDRequest("ResetTroubleCodesRequest", "04", retriable, repeatable)
 
 class OBDResetCommand(retriable: Boolean = true,
-                               repeatable: IsRepeatable = IsRepeatable.No) :
+                      repeatable: IsRepeatable = IsRepeatable.No) :
         OBDRequest("OBDResetCommand", "AT Z", retriable, repeatable)
 
 
+enum class PidCommand(val value: String) {
+    ONE_TO_TWENTY("01 00") {
+        override fun getStartingPid(): Int {
+            return 1
+        }
+    },
+    TWENTY_ONE_TO_FOURTY("01 20") {
+        override fun getStartingPid(): Int {
+            return 33
+        }
+    },
+    FOURTY_ONE_TO_SIXTY("01 40") {
+        override fun getStartingPid(): Int {
+            return 65
+        }
+    };
 
-enum class PidCommand (val value: String) {
-    ONE_TO_TWENTY("01 00"),
-    TWENTY_ONE_TO_FOURTY("01 20"),
-    FOURTY_ONE_TO_SIXTY("01 40")
+    abstract fun getStartingPid(): Int
 
 }
 
-enum class ObdProtocol (
+enum class ObdProtocol(
         val value: Char) {
 
     /**

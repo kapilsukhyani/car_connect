@@ -106,7 +106,7 @@ class OBDSession(val device: BluetoothDevice,
                 .map { responses ->
                     var vin: String? = null
                     var fuelType: FuelType? = null
-                    var availablePIDs = mutableSetOf<String>()
+                    val availablePIDs = mutableSetOf<String>()
                     responses.forEach {
                         when (it) {
                             is VinResponse -> {
@@ -115,14 +115,16 @@ class OBDSession(val device: BluetoothDevice,
                             is FuelTypeResponse -> {
                                 fuelType = FuelType.fromValue(it.fuelType)
                             }
-                            is RawResponse -> {
-                                Logger.log(TAG, "Available pids response " + it.rawResponse)
+                            is AvailablePidsResponse -> {
+                                Logger.log(TAG, "Available pids response " + it.availablePids)
+                                availablePIDs.addAll(it.availablePids)
                             }
                         }
                     }
 
                     CommonAppAction.VehicleInfoLoaded(device,
-                            Vehicle(vin!!, UnAvailableAvailableData.UnAvailable, UnAvailableAvailableData.Available(fuelType!!))) as CommonAppAction
+                            Vehicle(vin!!, UnAvailableAvailableData.Available(availablePIDs),
+                                    UnAvailableAvailableData.Available(fuelType!!))) as CommonAppAction
                 }
                 .toObservable()
                 .onErrorReturn { CommonAppAction.VehicleInfoLoadingFailed(device, it) }

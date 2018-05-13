@@ -1,8 +1,10 @@
 package com.exp.carconnect.base.state
 
 import android.bluetooth.BluetoothDevice
+import android.bluetooth.BluetoothSocket
 import com.exp.carconnect.base.*
 import com.exp.carconnect.base.store.PersistedAppState
+import com.exp.carconnect.obdlib.OBDEngine
 import com.exp.carconnect.obdlib.obdmessage.FuelType
 import java.util.concurrent.TimeUnit
 
@@ -104,9 +106,11 @@ data class AppSettings(val dataSettings: DataSettings = DataSettings(),
 
 
 data class ActiveSession(val dongle: Dongle,
-                         val vehicle: Vehicle,
-                         val currentVehicleData: UnAvailableAvailableData<VehicleData>
-                         = UnAvailableAvailableData.UnAvailable)
+                         val socket: BluetoothSocket,
+                         val engine: OBDEngine,
+                         val vehicle: LoadableState<Vehicle, Throwable> = LoadableState.NotLoaded,
+                         val currentVehicleData: LoadableState<VehicleData, Throwable>
+                         = LoadableState.NotLoaded)
 
 data class VehicleData(val rpm: UnAvailableAvailableData<Float>
                        = UnAvailableAvailableData.UnAvailable,

@@ -90,7 +90,7 @@ class SplashView : Fragment() {
     }
 
     fun getSharedElement(): View {
-        return appLogo;
+        return appLogo
     }
 
 }

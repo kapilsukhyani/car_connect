@@ -3,6 +3,7 @@ package com.exp.carconnect.base
 import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothSocket
 import com.exp.carconnect.Logger
+import com.exp.carconnect.base.state.BaseAppActions
 import com.exp.carconnect.base.state.CommonAppAction
 import com.exp.carconnect.base.state.Vehicle
 import com.exp.carconnect.obdlib.OBDEngine
@@ -10,6 +11,7 @@ import com.exp.carconnect.obdlib.OBDMultiRequest
 import com.exp.carconnect.obdlib.obdmessage.*
 import io.reactivex.Observable
 import io.reactivex.Scheduler
+import redux.api.Reducer
 import java.util.concurrent.TimeUnit
 
 class OBDDeviceSessionManager(private val ioScheduler: Scheduler,
@@ -17,7 +19,7 @@ class OBDDeviceSessionManager(private val ioScheduler: Scheduler,
                               private val mainScheduler: Scheduler) {
 
 
-    fun startNewSession(device: BluetoothDevice): Observable<CommonAppAction> {
+    fun startNewSession(device: BluetoothDevice): Observable<BaseAppActions> {
         return OBDSession(device,
                 ioScheduler,
                 computationScheduler,
@@ -46,19 +48,19 @@ class OBDSession(val device: BluetoothDevice,
                 AvailablePidsCommand(PidCommand.FOURTY_ONE_TO_SIXTY)))
     }
 
-    fun start(): Observable<CommonAppAction> {
+    fun start(): Observable<BaseAppActions> {
         return Observable
                 .fromCallable {
                     try {
                         val socket = device.connect()
-                        CommonAppAction.DeviceConnected(device, socket)
+                        BaseAppActions.DeviceConnected(device, socket)
                     } catch (e: Throwable) {
-                        CommonAppAction.DeviceConnectionFailed(device, e)
+                        BaseAppActions.DeviceConnectionFailed(device, e)
                     }
 
                 }.flatMap {
                     when (it) {
-                        is CommonAppAction.DeviceConnected -> {
+                        is BaseAppActions.DeviceConnected -> {
                             startOBDSession(it.socket, it.device)
                                     .startWith(it)
 
@@ -71,14 +73,14 @@ class OBDSession(val device: BluetoothDevice,
     }
 
 
-    private fun startOBDSession(socket: BluetoothSocket, device: BluetoothDevice): Observable<CommonAppAction> {
+    private fun startOBDSession(socket: BluetoothSocket, device: BluetoothDevice): Observable<BaseAppActions> {
         val engine = OBDEngine(socket.inputStream, socket.outputStream,
                 computationScheduler, ioScheduler)
         return Observable.concat(executeSetupCommands(engine), loadVehicleInfo(engine))
     }
 
 
-    private fun executeSetupCommands(engine: OBDEngine): Observable<CommonAppAction> {
+    private fun executeSetupCommands(engine: OBDEngine): Observable<BaseAppActions> {
         return engine.submit<OBDResponse>(resetCommand)
                 .doOnNext {
                     Logger.log(TAG, "Got response ${it::class.java.simpleName}[${it.getFormattedResult()}]")
@@ -91,15 +93,15 @@ class OBDSession(val device: BluetoothDevice,
                 .lastOrError()
                 .toObservable()
                 .map {
-                    CommonAppAction.SetupCompleted(device) as CommonAppAction
+                    BaseAppActions.SetupCompleted(device) as BaseAppActions
                 }
-                .onErrorReturn { CommonAppAction.SetupFailed(device, it) }
-                .startWith(CommonAppAction.RunningSetup(device))
+                .onErrorReturn { BaseAppActions.SetupFailed(device, it) }
+                .startWith(BaseAppActions.RunningSetup(device))
 
     }
 
 
-    private fun loadVehicleInfo(engine: OBDEngine): Observable<CommonAppAction> {
+    private fun loadVehicleInfo(engine: OBDEngine): Observable<BaseAppActions> {
         return engine.submit<OBDResponse>(vehicleInfoRequest)
                 .doOnNext { Logger.log(TAG, "Got response ${it::class.java.simpleName}[${it.getFormattedResult()}]") }
                 .toList()
@@ -122,14 +124,21 @@ class OBDSession(val device: BluetoothDevice,
                         }
                     }
 
-                    CommonAppAction.VehicleInfoLoaded(device,
+                    BaseAppActions.VehicleInfoLoaded(device,
                             Vehicle(vin!!, UnAvailableAvailableData.Available(availablePIDs),
-                                    UnAvailableAvailableData.Available(fuelType!!))) as CommonAppAction
+                                    UnAvailableAvailableData.Available(fuelType!!))) as BaseAppActions
                 }
                 .toObservable()
-                .onErrorReturn { CommonAppAction.VehicleInfoLoadingFailed(device, it) }
-                .startWith(CommonAppAction.LoadingVehicleInfo(device))
+                .onErrorReturn { BaseAppActions.VehicleInfoLoadingFailed(device, it) }
+                .startWith(BaseAppActions.LoadingVehicleInfo(device))
     }
 
+
+}
+
+class SessionReducer : Reducer<AppState> {
+    override fun reduce(state: AppState, action: Any): AppState {
+        return state
+    }
 
 }

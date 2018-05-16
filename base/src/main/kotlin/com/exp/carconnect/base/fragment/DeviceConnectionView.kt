@@ -140,26 +140,26 @@ class DeviceConnectionVM(app: Application) : AndroidViewModel(app) {
 class DeviceConnectionScreenStateReducer : Reducer<AppState> {
     override fun reduce(state: AppState, action: Any): AppState {
         return when (action) {
-            is CommonAppAction.DeviceConnectionFailed -> {
+            is BaseAppActions.DeviceConnectionFailed -> {
                 updateState(state, ConnectionScreenState
                         .ShowingConnectionError(ConnectionError.UnkownError(action.error)))
             }
 
-            is CommonAppAction.RunningSetup -> {
+            is BaseAppActions.RunningSetup -> {
                 updateState(state, ConnectionScreenState.RunningSetup)
             }
 
-            is CommonAppAction.SetupFailed -> {
+            is BaseAppActions.SetupFailed -> {
                 updateState(state, ConnectionScreenState.ShwowingSetupError(SetupError.UnkownError(action.error)))
             }
 
-            is CommonAppAction.VehicleInfoLoaded -> {
+            is BaseAppActions.VehicleInfoLoaded -> {
                 updateState(state, ConnectionScreenState.VehicleInfoLoaded(action.info))
             }
-            is CommonAppAction.VehicleInfoLoadingFailed -> {
+            is BaseAppActions.VehicleInfoLoadingFailed -> {
                 updateState(state, ConnectionScreenState.VehicleLoadingFailed(OBDDataLoadError.UnkownError(action.error)))
             }
-            is CommonAppAction.LoadingVehicleInfo -> {
+            is BaseAppActions.LoadingVehicleInfo -> {
                 updateState(state, ConnectionScreenState.LoadinVehicleInfo)
             }
 

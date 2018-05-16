@@ -12,6 +12,17 @@ sealed class BaseAppActions {
     data class LoadedBaseAppState(val state: BaseAppState) : BaseAppActions()
     data class BaseAppStateLoadError(val error: BaseAppStateLoadingError) : BaseAppActions()
 
+    data class StartNewSession(val device: BluetoothDevice) : BaseAppActions()
+    data class SessionStarted(val device: BluetoothDevice) : BaseAppActions()
+    data class DeviceConnected(val device: BluetoothDevice, val socket: BluetoothSocket) : BaseAppActions()
+    data class DeviceConnectionFailed(val device: BluetoothDevice, val error: Throwable) : BaseAppActions()
+    data class RunningSetup(val device: BluetoothDevice) : BaseAppActions()
+    data class SetupCompleted(val device: BluetoothDevice) : BaseAppActions()
+    data class SetupFailed(val device: BluetoothDevice, val error: Throwable) : BaseAppActions()
+    data class LoadingVehicleInfo(val device: BluetoothDevice) : BaseAppActions()
+    data class VehicleInfoLoadingFailed(val device: BluetoothDevice, val error: Throwable) : BaseAppActions()
+    data class VehicleInfoLoaded(val device: BluetoothDevice, val info: Vehicle) : BaseAppActions()
+
 }
 
 
@@ -42,15 +53,5 @@ sealed class CommonAppAction {
     object AppStateLoaded : CommonAppAction()
     object BackPressed : CommonAppAction()
     object FinishView : CommonAppAction()
-    data class StartNewSession(val device: BluetoothDevice) : CommonAppAction()
-    data class SessionStarted(val device: BluetoothDevice) : CommonAppAction()
-    data class DeviceConnected(val device: BluetoothDevice, val socket: BluetoothSocket) : CommonAppAction()
-    data class DeviceConnectionFailed(val device: BluetoothDevice, val error: Throwable) : CommonAppAction()
-    data class RunningSetup(val device: BluetoothDevice) : CommonAppAction()
-    data class SetupCompleted(val device: BluetoothDevice) : CommonAppAction()
-    data class SetupFailed(val device: BluetoothDevice, val error: Throwable) : CommonAppAction()
-    data class LoadingVehicleInfo(val device: BluetoothDevice) : CommonAppAction()
-    data class VehicleInfoLoadingFailed(val device: BluetoothDevice, val error: Throwable) : CommonAppAction()
-    data class VehicleInfoLoaded(val device: BluetoothDevice, val info: Vehicle) : CommonAppAction()
 }
 

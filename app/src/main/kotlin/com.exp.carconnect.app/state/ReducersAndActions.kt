@@ -22,7 +22,7 @@ fun AppState.replaceViewAtStackTop(view: CarConnectView): AppState {
 
 
 sealed class NavigationActions {
-    data class ShowSplashScreen(val state: SplashScreenState)
+    data class ShowSplashScreen(val state: SplashScreenState): NavigationActions()
 }
 
 class AppStateNavigationReducer : Reducer<AppState> {
@@ -42,7 +42,7 @@ class AppStateNavigationReducer : Reducer<AppState> {
             CommonAppAction.BackPressed -> {
                 state.popViewFromBackStack()
             }
-            is CommonAppAction.SessionStarted -> {
+            is BaseAppActions.SessionStarted -> {
                 state.pushViewToBackState(ConnectionScreen(ConnectionScreenState.Connecting(action.device)))
             }
             else -> {

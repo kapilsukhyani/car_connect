@@ -30,6 +30,7 @@ import com.exp.carconnect.base.AppState
 import com.exp.carconnect.base.BaseAppContract
 import com.exp.carconnect.base.R
 import com.exp.carconnect.base.asCustomObservable
+import com.exp.carconnect.base.state.BaseAppActions
 import com.exp.carconnect.base.state.CommonAppAction
 import com.exp.carconnect.base.state.DeviceManagementScreen
 import com.exp.carconnect.base.state.DeviceManagementScreenState
@@ -229,7 +230,7 @@ class DeviceManagementVM(app: Application) : AndroidViewModel(app) {
     }
 
     fun onDeviceSelected(device: BluetoothDevice) {
-        store.dispatch(CommonAppAction.StartNewSession(device))
+        store.dispatch(BaseAppActions.StartNewSession(device))
     }
 
     fun onBluetoothErrorAcknowledged() {

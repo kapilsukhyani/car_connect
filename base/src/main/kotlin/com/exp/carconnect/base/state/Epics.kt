@@ -45,12 +45,12 @@ class OBDSessionManagementEpic(private val ioScheduler: Scheduler,
 
         return actions
                 .filter {
-                    it is CommonAppAction.StartNewSession
+                    it is BaseAppActions.StartNewSession
                 }
 
                 .flatMap {
-                    sessionManager.startNewSession((it as CommonAppAction.StartNewSession).device)
-                            .startWith(CommonAppAction.SessionStarted(it.device))
+                    sessionManager.startNewSession((it as BaseAppActions.StartNewSession).device)
+                            .startWith(BaseAppActions.SessionStarted(it.device))
                             .subscribeOn(ioScheduler)
                             .observeOn(mainThreadScheduler)
                 }

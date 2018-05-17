@@ -30,10 +30,7 @@ import com.exp.carconnect.base.AppState
 import com.exp.carconnect.base.BaseAppContract
 import com.exp.carconnect.base.R
 import com.exp.carconnect.base.asCustomObservable
-import com.exp.carconnect.base.state.BaseAppActions
-import com.exp.carconnect.base.state.CommonAppAction
-import com.exp.carconnect.base.state.DeviceManagementScreen
-import com.exp.carconnect.base.state.DeviceManagementScreenState
+import com.exp.carconnect.base.state.*
 import io.reactivex.disposables.Disposable
 import redux.api.Reducer
 
@@ -230,6 +227,9 @@ class DeviceManagementVM(app: Application) : AndroidViewModel(app) {
     }
 
     fun onDeviceSelected(device: BluetoothDevice) {
+        store.dispatch(CommonAppAction.PushViewToBackStack(ConnectionScreen(ConnectionScreenState
+                .ShowStatus(getApplication<Application>()
+                        .getString(R.string.connecting_message, device.name)))))
         store.dispatch(BaseAppActions.StartNewSession(device))
     }
 

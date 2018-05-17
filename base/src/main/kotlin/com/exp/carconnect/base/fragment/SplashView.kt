@@ -18,6 +18,8 @@ import com.exp.carconnect.base.LoadableState
 import com.exp.carconnect.base.R
 import com.exp.carconnect.base.asCustomObservable
 import com.exp.carconnect.base.state.CommonAppAction
+import com.exp.carconnect.base.state.DeviceManagementScreen
+import com.exp.carconnect.base.state.DeviceManagementScreenState
 import com.exp.carconnect.base.state.SplashScreenState
 import io.reactivex.disposables.CompositeDisposable
 
@@ -115,11 +117,11 @@ class SplashVM(app: Application) : AndroidViewModel(app) {
                                 return@map SplashScreenState.LoadingAppState
                             }
                             is LoadableState.LoadingError -> {
-                                return@map SplashScreenState.ShowingLoadingError
+                                return@map SplashScreenState.ShowLoadingError
                             }
                         }
                     }
-                    store.dispatch(CommonAppAction.AppStateLoaded)
+                    store.dispatch(CommonAppAction.ReplaceViewOnBackStackTop(DeviceManagementScreen(DeviceManagementScreenState.LoadingDevices)))
                     return@map SplashScreenState.LoadingAppState
                 }
                 .distinctUntilChanged()

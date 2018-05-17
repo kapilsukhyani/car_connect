@@ -5,12 +5,12 @@ import android.arch.lifecycle.AndroidViewModel
 import android.arch.lifecycle.LiveData
 import android.arch.lifecycle.MutableLiveData
 import com.exp.carconnect.app.CarConnectApp
-import com.exp.carconnect.app.state.NavigationActions
 import com.exp.carconnect.base.AppState
 import com.exp.carconnect.base.CarConnectUIState
 import com.exp.carconnect.base.CarConnectView
 import com.exp.carconnect.base.asCustomObservable
 import com.exp.carconnect.base.state.CommonAppAction
+import com.exp.carconnect.base.state.SplashScreen
 import com.exp.carconnect.base.state.SplashScreenState
 import io.reactivex.disposables.Disposable
 import redux.api.Store
@@ -29,8 +29,8 @@ class WindowVM(app: Application) : AndroidViewModel(app) {
             .store
 
     init {
-        store.dispatch(NavigationActions
-                .ShowSplashScreen(SplashScreenState.LoadingAppState))
+        store.dispatch(CommonAppAction
+                .PushViewToBackStack(SplashScreen(SplashScreenState.LoadingAppState)))
         stateSubscription = store
                 .asCustomObservable()
                 .map { it.uiState }

@@ -4,7 +4,6 @@ import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothSocket
 import com.exp.carconnect.Logger
 import com.exp.carconnect.base.state.BaseAppActions
-import com.exp.carconnect.base.state.CommonAppAction
 import com.exp.carconnect.base.state.Vehicle
 import com.exp.carconnect.obdlib.OBDEngine
 import com.exp.carconnect.obdlib.OBDMultiRequest
@@ -53,15 +52,17 @@ class OBDSession(val device: BluetoothDevice,
                 .fromCallable {
                     try {
                         val socket = device.connect()
-                        BaseAppActions.DeviceConnected(device, socket)
+                        val engine = OBDEngine(socket.inputStream, socket.outputStream,
+                                computationScheduler, ioScheduler)
+                        BaseAppActions.AddActiveSession(device, socket, engine)
                     } catch (e: Throwable) {
                         BaseAppActions.DeviceConnectionFailed(device, e)
                     }
 
                 }.flatMap {
                     when (it) {
-                        is BaseAppActions.DeviceConnected -> {
-                            startOBDSession(it.socket, it.device)
+                        is BaseAppActions.AddActiveSession -> {
+                            startOBDSession(it.socket, it.device, it.engine)
                                     .startWith(it)
 
                         }
@@ -73,9 +74,9 @@ class OBDSession(val device: BluetoothDevice,
     }
 
 
-    private fun startOBDSession(socket: BluetoothSocket, device: BluetoothDevice): Observable<BaseAppActions> {
-        val engine = OBDEngine(socket.inputStream, socket.outputStream,
-                computationScheduler, ioScheduler)
+    private fun startOBDSession(socket: BluetoothSocket,
+                                device: BluetoothDevice,
+                                engine: OBDEngine): Observable<BaseAppActions> {
         return Observable.concat(executeSetupCommands(engine), loadVehicleInfo(engine))
     }
 
@@ -124,7 +125,7 @@ class OBDSession(val device: BluetoothDevice,
                         }
                     }
 
-                    BaseAppActions.VehicleInfoLoaded(device,
+                    BaseAppActions.AddVehicleInfoToActiveSession(device,
                             Vehicle(vin!!, UnAvailableAvailableData.Available(availablePIDs),
                                     UnAvailableAvailableData.Available(fuelType!!))) as BaseAppActions
                 }

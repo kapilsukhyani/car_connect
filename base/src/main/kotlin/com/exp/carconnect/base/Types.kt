@@ -52,3 +52,19 @@ abstract class CarConnectError(val type: String) : Throwable(type) {
         super.initCause(error)
     }
 }
+
+
+fun AppState.pushViewToBackState(view: CarConnectView): AppState {
+    val uiState = this.uiState.copy(backStack = this.uiState.backStack + view)
+    return this.copy(uiState = uiState)
+}
+
+fun AppState.popViewFromBackStack(): AppState {
+    val uiState = this.uiState.copy(backStack = this.uiState.backStack.subList(0, this.uiState.backStack.size - 1))
+    return this.copy(uiState = uiState)
+}
+
+fun AppState.replaceViewAtStackTop(view: CarConnectView): AppState {
+    val uiState = this.uiState.copy(backStack = this.uiState.backStack.subList(0, this.uiState.backStack.size - 1) + view)
+    return this.copy(uiState = uiState)
+}

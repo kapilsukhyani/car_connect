@@ -3,6 +3,7 @@ package com.exp.carconnect.base.fragment
 import android.animation.ObjectAnimator
 import android.app.Application
 import android.arch.lifecycle.*
+import android.content.Context
 import android.os.Bundle
 import android.support.v4.app.Fragment
 import android.view.LayoutInflater
@@ -12,7 +13,9 @@ import com.exp.carconnect.base.AppState
 import com.exp.carconnect.base.BaseAppContract
 import com.exp.carconnect.base.R
 import com.exp.carconnect.base.asCustomObservable
-import com.exp.carconnect.base.state.*
+import com.exp.carconnect.base.state.BaseAppActions
+import com.exp.carconnect.base.state.ConnectionScreen
+import com.exp.carconnect.base.state.ConnectionScreenState
 import io.reactivex.disposables.Disposable
 import kotlinx.android.synthetic.main.view_device_connection.*
 import redux.api.Reducer
@@ -68,37 +71,14 @@ class DeviceConnectionView : Fragment() {
     private fun onNewState(it: ConnectionScreenState) {
 
         when (it) {
-            is ConnectionScreenState.Connecting -> {
-                setStatus("Connecting to ${it.device.name}")
+            is ConnectionScreenState.ShowStatus -> {
+                setStatus(it.status)
             }
 
-            is ConnectionScreenState.ShowingConnectionError -> {
-                setStatus("Connection error")
+            is ConnectionScreenState.ShowSetupError -> {
+                setStatus(it.error)
             }
 
-            is ConnectionScreenState.SetupCompleted -> {
-                setStatus("Setup Completed")
-            }
-
-            is ConnectionScreenState.RunningSetup -> {
-                setStatus("Running setup")
-            }
-
-            is ConnectionScreenState.ShwowingSetupError -> {
-                setStatus("Setup error")
-            }
-
-            is ConnectionScreenState.LoadinVehicleInfo -> {
-                setStatus("Loading Vehicle Info")
-            }
-
-            is ConnectionScreenState.VehicleInfoLoaded -> {
-                setStatus("Loaded Vehicle Info")
-            }
-
-            is ConnectionScreenState.VehicleLoadingFailed -> {
-                setStatus("Loaded Vehicle Failed")
-            }
         }
     }
 
@@ -137,30 +117,31 @@ class DeviceConnectionVM(app: Application) : AndroidViewModel(app) {
 }
 
 
-class DeviceConnectionScreenStateReducer : Reducer<AppState> {
+class DeviceConnectionScreenStateReducer(val context: Context) : Reducer<AppState> {
     override fun reduce(state: AppState, action: Any): AppState {
         return when (action) {
             is BaseAppActions.DeviceConnectionFailed -> {
                 updateState(state, ConnectionScreenState
-                        .ShowingConnectionError(ConnectionError.UnkownError(action.error)))
+                        .ShowSetupError(context.getString(R.string.connection_error_message, action.device.name, action.error.localizedMessage)))
             }
+            is BaseAppActions.SetupFailed -> {
+                updateState(state, ConnectionScreenState
+                        .ShowSetupError(context.getString(R.string.setup_error_message, action.device.name, action.error.localizedMessage)))
+            }
+
+            is BaseAppActions.VehicleInfoLoadingFailed -> {
+                updateState(state, ConnectionScreenState
+                        .ShowSetupError(context.getString(R.string.vehicle_info_loading_error_message, action.device.name, action.error.localizedMessage)))
+            }
+
 
             is BaseAppActions.RunningSetup -> {
-                updateState(state, ConnectionScreenState.RunningSetup)
+                updateState(state, ConnectionScreenState.ShowStatus(context.getString(R.string.running_setup_message, action.device.name)))
             }
 
-            is BaseAppActions.SetupFailed -> {
-                updateState(state, ConnectionScreenState.ShwowingSetupError(SetupError.UnkownError(action.error)))
-            }
 
-            is BaseAppActions.VehicleInfoLoaded -> {
-                updateState(state, ConnectionScreenState.VehicleInfoLoaded(action.info))
-            }
-            is BaseAppActions.VehicleInfoLoadingFailed -> {
-                updateState(state, ConnectionScreenState.VehicleLoadingFailed(OBDDataLoadError.UnkownError(action.error)))
-            }
             is BaseAppActions.LoadingVehicleInfo -> {
-                updateState(state, ConnectionScreenState.LoadinVehicleInfo)
+                updateState(state, ConnectionScreenState.ShowStatus(context.getString(R.string.loading_vehicle_info_message, action.device.name)))
             }
 
             else -> {

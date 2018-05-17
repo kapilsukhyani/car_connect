@@ -12,5 +12,4 @@ interface BaseAppContract {
     var newOBDConnectionComponent: NewOBDConnectionComponent?
     val store: Store<AppState>
 
-
 }

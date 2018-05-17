@@ -18,6 +18,18 @@ fun AppState.copyAndReplaceBaseAppState(state: LoadableState<BaseAppState, BaseA
     return this.copy(moduleStateMap = moduleStateMap + Pair(BaseAppState.STATE_KEY, state))
 }
 
+
+fun AppState.addActiveSession(activeSession: ActiveSession): AppState {
+    return this.copyAndReplaceBaseAppState(LoadableState.Loaded(this.findBaseAppState()
+            .copy(activeSession = UnAvailableAvailableData.Available(activeSession))))
+}
+
+fun AppState.findActiveSession(): ActiveSession {
+    return (this.findBaseAppState().activeSession as UnAvailableAvailableData.Available<ActiveSession>).data
+
+}
+
+
 data class BaseAppState(val mode: AppMode = AppMode.FullApp,
                         val appRunningMode: AppRunningMode = AppRunningMode.Foreground,
                         val baseAppPersistedState: BaseAppPersistedState = BaseAppPersistedState(),
@@ -154,29 +166,12 @@ sealed class SplashScreenState : CarConnectIndividualViewState {
     // load successful can lead to either ConnectingToLastConnectedDevice or ShowingDevices
     object LoadingAppState : SplashScreenState()
 
-    object ShowingLoadingError : SplashScreenState()
+    object ShowLoadingError : SplashScreenState()
 }
 
 sealed class ConnectionScreenState : CarConnectIndividualViewState {
-    //connected action will move the state to Running Setup, connection error will move the state to ConnectionError
-    data class Connecting(val device: BluetoothDevice) : ConnectionScreenState()
-
-    // successful setup leads to finishing setup
-    object RunningSetup : ConnectionScreenState()
-
-    // successful setup leads to finishing setup
-    data class ShowingConnectionError(val error: ConnectionError) : ConnectionScreenState()
-
-    data class ShwowingSetupError(val error: SetupError) : ConnectionScreenState()
-
-    object SetupCompleted : ConnectionScreenState()
-
-    object LoadinVehicleInfo : ConnectionScreenState()
-
-    data class VehicleInfoLoaded(val info: Vehicle) : ConnectionScreenState()
-
-    data class VehicleLoadingFailed(val error: OBDDataLoadError) : ConnectionScreenState()
-
+    data class ShowStatus(val status: String) : ConnectionScreenState()
+    data class ShowSetupError(val error: String) : ConnectionScreenState()
 
 }
 
@@ -204,14 +199,6 @@ sealed class SettignsScreenState : CarConnectIndividualViewState {
 sealed class BaseAppStateLoadingError : CarConnectError("BaseAppStateLoadingError") {
     data class UnkownError(override val error: Throwable) : BaseAppStateLoadingError()
     data class IOError(override val error: Throwable) : BaseAppStateLoadingError()
-}
-
-sealed class ConnectionError : CarConnectError("ConnectionError") {
-    data class UnkownError(override val error: Throwable) : ConnectionError()
-}
-
-sealed class SetupError : CarConnectError("SetupError") {
-    data class UnkownError(override val error: Throwable) : SetupError()
 }
 
 sealed class UpdateSettingsError : CarConnectError("UpdateSettingsError") {

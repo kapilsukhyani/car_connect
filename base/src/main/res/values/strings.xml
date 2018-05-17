@@ -9,4 +9,12 @@
     <string name="bluetooth_error_title">Bluetooth Error</string>
     <string name="bluetooth_not_available_message">Bluetooth not available.</string>
     <string name="setting_up">Setting Up</string>
+
+    <string name="connection_error_message">Connection to %1$s failed [%2$s] </string>
+    <string name="setup_error_message">%1$s Setup failed [%2$s] </string>
+    <string name="vehicle_info_loading_error_message">Loading %1$s vehicle info failed [%2$s] </string>
+    <string name="running_setup_message">Setting %1$s up</string>
+    <string name="loading_vehicle_info_message">[%1$s] Loading vehicle info</string>
+    <string name="connecting_message">Connecting to %1$s</string>
+
 </resources>

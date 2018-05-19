@@ -19,14 +19,14 @@ class BaseSateLoadingEpic(private val ioScheduler: Scheduler,
                 .take(1)
                 .flatMap {
                     Single.concat(
-                            Single.just(BaseAppActions.LoadingBaseAppState),
+                            Single.just(BaseAppAction.LoadingBaseAppState),
                             loadAppState()
-                                    .map<BaseAppActions> {
+                                    .map<BaseAppAction> {
                                         //todo add appmode and apprunning mode in BaseAppState
-                                        BaseAppActions.LoadedBaseAppState(BaseAppState(baseAppPersistedState = BaseAppPersistedState(it)))
+                                        BaseAppAction.LoadedBaseAppState(BaseAppState(baseAppPersistedState = BaseAppPersistedState(it)))
                                     }
                                     .onErrorReturn {
-                                        BaseAppActions.BaseAppStateLoadError(BaseAppStateLoadingError.UnkownError(it))
+                                        BaseAppAction.BaseAppStateLoadError(BaseAppStateLoadingError.UnkownError(it))
                                     }
                                     .subscribeOn(ioScheduler))
                             .observeOn(mainThreadScheduler)
@@ -45,11 +45,11 @@ class OBDSessionManagementEpic(private val ioScheduler: Scheduler,
 
         return actions
                 .filter {
-                    it is BaseAppActions.StartNewSession
+                    it is BaseAppAction.StartNewSession
                 }
 
                 .flatMap {
-                    sessionManager.startNewSession((it as BaseAppActions.StartNewSession).device)
+                    sessionManager.startNewSession((it as BaseAppAction.StartNewSession).device)
                             .subscribeOn(ioScheduler)
                             .observeOn(mainThreadScheduler)
                 }

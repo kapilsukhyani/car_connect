@@ -230,7 +230,7 @@ class DeviceManagementVM(app: Application) : AndroidViewModel(app) {
         store.dispatch(CommonAppAction.PushViewToBackStack(ConnectionScreen(ConnectionScreenState
                 .ShowStatus(getApplication<Application>()
                         .getString(R.string.connecting_message, device.name)))))
-        store.dispatch(BaseAppActions.StartNewSession(device))
+        store.dispatch(BaseAppAction.StartNewSession(device))
     }
 
     fun onBluetoothErrorAcknowledged() {

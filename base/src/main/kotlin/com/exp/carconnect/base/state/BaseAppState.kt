@@ -9,8 +9,8 @@ import com.exp.carconnect.obdlib.obdmessage.FuelType
 import java.util.concurrent.TimeUnit
 
 
-fun AppState.findBaseAppState(): BaseAppState {
-    return moduleStateMap[BaseAppState.STATE_KEY] as BaseAppState
+fun AppState.getBaseAppState(): BaseAppState {
+    return (moduleStateMap[BaseAppState.STATE_KEY] as LoadableState.Loaded<BaseAppState>).savedState
 }
 
 
@@ -20,12 +20,17 @@ fun AppState.copyAndReplaceBaseAppState(state: LoadableState<BaseAppState, BaseA
 
 
 fun AppState.addActiveSession(activeSession: ActiveSession): AppState {
-    return this.copyAndReplaceBaseAppState(LoadableState.Loaded(this.findBaseAppState()
+    return this.copyAndReplaceBaseAppState(LoadableState.Loaded(this.getBaseAppState()
             .copy(activeSession = UnAvailableAvailableData.Available(activeSession))))
 }
 
-fun AppState.findActiveSession(): ActiveSession {
-    return (this.findBaseAppState().activeSession as UnAvailableAvailableData.Available<ActiveSession>).data
+fun AppState.killActiveSession(): AppState {
+    return this.copyAndReplaceBaseAppState(LoadableState.Loaded(this.getBaseAppState()
+            .copy(activeSession = UnAvailableAvailableData.UnAvailable)))
+}
+
+fun AppState.getActiveSession(): ActiveSession {
+    return (this.getBaseAppState().activeSession as UnAvailableAvailableData.Available<ActiveSession>).data
 
 }
 

@@ -3,14 +3,14 @@ package com.exp.carconnect.base
 import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothSocket
 import com.exp.carconnect.Logger
-import com.exp.carconnect.base.state.BaseAppActions
+import com.exp.carconnect.base.state.BaseAppAction
+import com.exp.carconnect.base.state.MILStatus
 import com.exp.carconnect.base.state.Vehicle
 import com.exp.carconnect.obdlib.OBDEngine
 import com.exp.carconnect.obdlib.OBDMultiRequest
 import com.exp.carconnect.obdlib.obdmessage.*
 import io.reactivex.Observable
 import io.reactivex.Scheduler
-import redux.api.Reducer
 import java.util.concurrent.TimeUnit
 
 class OBDDeviceSessionManager(private val ioScheduler: Scheduler,
@@ -18,7 +18,7 @@ class OBDDeviceSessionManager(private val ioScheduler: Scheduler,
                               private val mainScheduler: Scheduler) {
 
 
-    fun startNewSession(device: BluetoothDevice): Observable<BaseAppActions> {
+    fun startNewSession(device: BluetoothDevice): Observable<BaseAppAction> {
         return OBDSession(device,
                 ioScheduler,
                 computationScheduler,
@@ -45,23 +45,39 @@ class OBDSession(val device: BluetoothDevice,
                 AvailablePidsCommand(PidCommand.ONE_TO_TWENTY),
                 AvailablePidsCommand(PidCommand.TWENTY_ONE_TO_FOURTY),
                 AvailablePidsCommand(PidCommand.FOURTY_ONE_TO_SIXTY)))
+
+
+        private const val FUEL_FACTOR = 100.0f
+        private const val RPM_FACTOR = 1000.0f
+        private val fuelLevelRequest = FuelLevelRequest(repeatable = IsRepeatable.Yes(1, TimeUnit.MINUTES))
+        private val temperatureRequest = OBDMultiRequest("Temperature", listOf(TemperatureRequest(TemperatureType.AIR_INTAKE),
+                TemperatureRequest(TemperatureType.AMBIENT_AIR)),
+                IsRepeatable.Yes(500, TimeUnit.MILLISECONDS))
+        private val restDataRequest = OBDMultiRequest("Dashboard",
+                listOf(SpeedRequest(),
+                        RPMRequest(),
+                        PendingTroubleCodesRequest(TroubleCodeCommandType.ALL),
+                        IgnitionMonitorRequest(),
+                        DTCNumberRequest()),
+                IsRepeatable.Yes(50, TimeUnit.MILLISECONDS))
+
     }
 
-    fun start(): Observable<BaseAppActions> {
+    fun start(): Observable<BaseAppAction> {
         return Observable
                 .fromCallable {
                     try {
                         val socket = device.connect()
                         val engine = OBDEngine(socket.inputStream, socket.outputStream,
                                 computationScheduler, ioScheduler)
-                        BaseAppActions.AddActiveSession(device, socket, engine)
+                        BaseAppAction.AddActiveSession(device, socket, engine)
                     } catch (e: Throwable) {
-                        BaseAppActions.DeviceConnectionFailed(device, e)
+                        BaseAppAction.DeviceConnectionFailed(device, e)
                     }
 
                 }.flatMap {
                     when (it) {
-                        is BaseAppActions.AddActiveSession -> {
+                        is BaseAppAction.AddActiveSession -> {
                             startOBDSession(it.socket, it.device, it.engine)
                                     .startWith(it)
 
@@ -76,12 +92,14 @@ class OBDSession(val device: BluetoothDevice,
 
     private fun startOBDSession(socket: BluetoothSocket,
                                 device: BluetoothDevice,
-                                engine: OBDEngine): Observable<BaseAppActions> {
-        return Observable.concat(executeSetupCommands(engine), loadVehicleInfo(engine))
+                                engine: OBDEngine): Observable<BaseAppAction> {
+        return Observable.concat(executeSetupCommands(engine),
+                loadVehicleInfo(engine),
+                loadVehicleData(engine))
     }
 
 
-    private fun executeSetupCommands(engine: OBDEngine): Observable<BaseAppActions> {
+    private fun executeSetupCommands(engine: OBDEngine): Observable<BaseAppAction> {
         return engine.submit<OBDResponse>(resetCommand)
                 .doOnNext {
                     Logger.log(TAG, "Got response ${it::class.java.simpleName}[${it.getFormattedResult()}]")
@@ -94,15 +112,15 @@ class OBDSession(val device: BluetoothDevice,
                 .lastOrError()
                 .toObservable()
                 .map {
-                    BaseAppActions.SetupCompleted(device) as BaseAppActions
+                    BaseAppAction.SetupCompleted(device) as BaseAppAction
                 }
-                .onErrorReturn { BaseAppActions.SetupFailed(device, it) }
-                .startWith(BaseAppActions.RunningSetup(device))
+                .onErrorReturn { BaseAppAction.SetupFailed(device, it) }
+                .startWith(BaseAppAction.RunningSetup(device))
 
     }
 
 
-    private fun loadVehicleInfo(engine: OBDEngine): Observable<BaseAppActions> {
+    private fun loadVehicleInfo(engine: OBDEngine): Observable<BaseAppAction> {
         return engine.submit<OBDResponse>(vehicleInfoRequest)
                 .doOnNext { Logger.log(TAG, "Got response ${it::class.java.simpleName}[${it.getFormattedResult()}]") }
                 .toList()
@@ -125,21 +143,50 @@ class OBDSession(val device: BluetoothDevice,
                         }
                     }
 
-                    BaseAppActions.AddVehicleInfoToActiveSession(device,
+                    BaseAppAction.AddVehicleInfoToActiveSession(device,
                             Vehicle(vin!!, UnAvailableAvailableData.Available(availablePIDs),
-                                    UnAvailableAvailableData.Available(fuelType!!))) as BaseAppActions
+                                    UnAvailableAvailableData.Available(fuelType!!))) as BaseAppAction
                 }
                 .toObservable()
-                .onErrorReturn { BaseAppActions.VehicleInfoLoadingFailed(device, it) }
-                .startWith(BaseAppActions.LoadingVehicleInfo(device))
+                .onErrorReturn { BaseAppAction.VehicleInfoLoadingFailed(device, it) }
+                .startWith(BaseAppAction.LoadingVehicleInfo(device))
     }
 
+    private fun loadVehicleData(engine: OBDEngine): Observable<BaseAppAction> {
+        return engine.submit<TemperatureResponse>(temperatureRequest)
+                .map<BaseAppAction> {
+                    if (it.type == TemperatureType.AIR_INTAKE) {
+                        BaseAppAction.AddAirIntakeTemperature(it.temperature.toFloat())
+                    } else {
+                        BaseAppAction.AddAmbientAirTemperature(it.temperature.toFloat())
+                    }
+                }
+//                .mergeWith(engine.submit<FuelLevelResponse>(fuelLevelRequest)
+//                        .map {
+//                            BaseAppAction.AddFuel(it.fuelLevel / FUEL_FACTOR)
+//                        })
+//
+//                .mergeWith(engine.submit<OBDResponse>(restDataRequest)
+//                        .map { response ->
+//                            if (response is SpeedResponse) {
+//                                BaseAppAction.AddSpeed(response.metricSpeed.toFloat())
+//                            } else if (response is RPMResponse) {
+//                                BaseAppAction.AddRPM(response.rpm / RPM_FACTOR)
+//                            } else if (response is IgnitionMonitorResponse) {
+//                                BaseAppAction.AddIgnition(response.ignitionOn)
+//                            } else {
+//                                if ((response as DTCNumberResponse).milOn) {
+//                                    //todo change this have proper list of dtcs
+//                                    BaseAppAction.AddMilStatus(MILStatus.On(emptyList(), UnAvailableAvailableData.UnAvailable))
+//                                } else {
+//                                    BaseAppAction.AddMilStatus(MILStatus.Off)
+//                                }
+//                            }
+//                        })
+                .onErrorReturn {
+                    BaseAppAction.AddVehicleDataLoadError(it)
+                }
 
-}
 
-class SessionReducer : Reducer<AppState> {
-    override fun reduce(state: AppState, action: Any): AppState {
-        return state
     }
-
 }

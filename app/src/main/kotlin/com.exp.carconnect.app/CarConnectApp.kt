@@ -66,7 +66,6 @@ class CarConnectApp : Application(),
         println("debugtag: creating store")
 
         store = createStore(reducers, initialState, applyMiddleware(appStateLoadingMiddleware, obdSessionManagementMiddleware))
-
         println("debugtag: created store")
 
     }

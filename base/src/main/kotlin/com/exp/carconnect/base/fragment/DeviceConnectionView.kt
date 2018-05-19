@@ -10,20 +10,15 @@ import android.support.v4.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import com.exp.carconnect.base.AppState
-import com.exp.carconnect.base.BaseAppContract
+import com.exp.carconnect.base.*
 import com.exp.carconnect.base.R
-import com.exp.carconnect.base.asCustomObservable
-import com.exp.carconnect.base.state.BaseAppActions
-import com.exp.carconnect.base.state.CommonAppAction
-import com.exp.carconnect.base.state.ConnectionScreen
-import com.exp.carconnect.base.state.ConnectionScreenState
-import io.reactivex.disposables.Disposable
+import com.exp.carconnect.base.state.*
+import io.reactivex.disposables.CompositeDisposable
 import kotlinx.android.synthetic.main.view_device_connection.*
 import redux.api.Reducer
 
 
-class DeviceConnectionView : Fragment() {
+class DeviceConnectionView : Fragment(), BackInterceptor {
     companion object {
         const val TAG = "DeviceConnectionView"
     }
@@ -53,6 +48,11 @@ class DeviceConnectionView : Fragment() {
         animateTrack()
     }
 
+    override fun interceptBack(): Boolean {
+        deviceConnectionVM.onBackPressed()
+        return false
+    }
+
     private fun animateTrack() {
         trackAnimator = ObjectAnimator()
         trackAnimator.setFloatValues(0.toFloat(), 360.toFloat())
@@ -69,6 +69,7 @@ class DeviceConnectionView : Fragment() {
         trackAnimator.cancel()
 
     }
+
 
     private fun onNewState(it: ConnectionScreenState) {
 
@@ -109,17 +110,27 @@ class DeviceConnectionView : Fragment() {
 class DeviceConnectionVM(app: Application) : AndroidViewModel(app) {
     private val deviceConnectionViewLiveData = MutableLiveData<ConnectionScreenState>()
     private val store = (app as BaseAppContract).store
-    private val storeSubscription: Disposable
+    private val storeSubscription: CompositeDisposable = CompositeDisposable()
+
 
     init {
-        storeSubscription = store
+        storeSubscription.add(store
                 .asCustomObservable()
                 .filter { it.uiState.currentView is ConnectionScreen }
                 .map { (it.uiState.currentView as ConnectionScreen).screenState }
                 .distinctUntilChanged()
                 .subscribe {
                     deviceConnectionViewLiveData.value = it
-                }
+                })
+
+        storeSubscription.add(store
+                .asCustomObservable()
+                .map { it.getBaseAppState().activeSession }
+                .filter { it is UnAvailableAvailableData.Available<ActiveSession> && it.data.vehicle is LoadableState.Loaded }
+                .take(1)
+                .subscribe {
+                    store.dispatch(CommonAppAction.ShowDataView)
+                })
     }
 
     override fun onCleared() {
@@ -134,6 +145,9 @@ class DeviceConnectionVM(app: Application) : AndroidViewModel(app) {
         store.dispatch(CommonAppAction.FinishCurrentView)
     }
 
+    fun onBackPressed() {
+        store.dispatch(BaseAppAction.KillActiveSession)
+    }
 
 }
 
@@ -141,27 +155,27 @@ class DeviceConnectionVM(app: Application) : AndroidViewModel(app) {
 class DeviceConnectionScreenStateReducer(val context: Context) : Reducer<AppState> {
     override fun reduce(state: AppState, action: Any): AppState {
         return when (action) {
-            is BaseAppActions.DeviceConnectionFailed -> {
+            is BaseAppAction.DeviceConnectionFailed -> {
                 updateState(state, ConnectionScreenState
                         .ShowSetupError(context.getString(R.string.connection_error_message, action.device.name, action.error.localizedMessage)))
             }
-            is BaseAppActions.SetupFailed -> {
+            is BaseAppAction.SetupFailed -> {
                 updateState(state, ConnectionScreenState
                         .ShowSetupError(context.getString(R.string.setup_error_message, action.device.name, action.error.localizedMessage)))
             }
 
-            is BaseAppActions.VehicleInfoLoadingFailed -> {
+            is BaseAppAction.VehicleInfoLoadingFailed -> {
                 updateState(state, ConnectionScreenState
                         .ShowSetupError(context.getString(R.string.vehicle_info_loading_error_message, action.device.name, action.error.localizedMessage)))
             }
 
 
-            is BaseAppActions.RunningSetup -> {
+            is BaseAppAction.RunningSetup -> {
                 updateState(state, ConnectionScreenState.ShowStatus(context.getString(R.string.running_setup_message, action.device.name)))
             }
 
 
-            is BaseAppActions.LoadingVehicleInfo -> {
+            is BaseAppAction.LoadingVehicleInfo -> {
                 updateState(state, ConnectionScreenState.ShowStatus(context.getString(R.string.loading_vehicle_info_message, action.device.name)))
             }
 

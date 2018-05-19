@@ -1,7 +1,7 @@
 package com.exp.carconnect.app.activity
 
-import android.arch.lifecycle.Observer
-import android.arch.lifecycle.ViewModelProviders
+import android.app.Application
+import android.arch.lifecycle.*
 import android.os.Bundle
 import android.support.v4.app.Fragment
 import android.support.v4.app.FragmentTransaction
@@ -11,18 +11,21 @@ import android.transition.ChangeTransform
 import android.transition.Fade
 import android.transition.TransitionSet
 import android.view.View
+import com.exp.carconnect.app.CarConnectApp
 import com.exp.carconnect.app.R
-import com.exp.carconnect.app.viewmodel.WindowVM
-import com.exp.carconnect.base.CarConnectView
+import com.exp.carconnect.base.*
 import com.exp.carconnect.base.fragment.DeviceConnectionView
 import com.exp.carconnect.base.fragment.DeviceManagementView
 import com.exp.carconnect.base.fragment.SplashView
-import com.exp.carconnect.base.state.ConnectionScreen
-import com.exp.carconnect.base.state.DeviceManagementScreen
-import com.exp.carconnect.base.state.SplashScreen
+import com.exp.carconnect.base.state.*
+import io.reactivex.disposables.Disposable
+import redux.api.Store
 
 
 class CarConnectWindow : AppCompatActivity() {
+    companion object {
+        private const val CURRENT_FRAGMENT_TAG = "CURRENT_FRAGMENT_TAG"
+    }
 
     private lateinit var windowContainer: View
     private lateinit var windowVM: WindowVM
@@ -89,12 +92,20 @@ class CarConnectWindow : AppCompatActivity() {
         supportFragmentManager
                 .beginTransaction()
                 .addShareElementTransitionIfNotEmpty(sharedElement, sharedElementTransitionName)
-                .replace(R.id.window_container, fragment)
+                .replace(R.id.window_container, fragment, CURRENT_FRAGMENT_TAG)
                 .commitNow()
     }
 
 
+    private fun getCurrentFragment(): Fragment? {
+        return supportFragmentManager.findFragmentByTag(CURRENT_FRAGMENT_TAG)
+    }
+
     override fun onBackPressed() {
+        val currentFragment = getCurrentFragment()
+        if (currentFragment is BackInterceptor && currentFragment.interceptBack()) {
+            return
+        }
         windowVM.onBackPressed()
     }
 }
@@ -107,3 +118,51 @@ class SharedElementTransition : TransitionSet() {
     }
 }
 
+class WindowVM(app: Application) : AndroidViewModel(app) {
+
+
+    companion object {
+        const val TAG = "WindowVM"
+    }
+
+    private val currentViewLiveData: MutableLiveData<CarConnectView> = MutableLiveData()
+    private val stateSubscription: Disposable
+    private val store: Store<AppState> = getApplication<CarConnectApp>()
+            .store
+
+    init {
+        stateSubscription = store
+                .asCustomObservable()
+                .map { it.uiState }
+                .distinctUntilChanged { carConnectUIState: CarConnectUIState, carConnectUIState1: CarConnectUIState ->
+                    carConnectUIState.currentView?.let { it::class.java } == carConnectUIState1.currentView?.let { it::class.java }
+
+                }
+                .subscribe({ uiState ->
+                    currentViewLiveData.value = uiState.currentView
+                }, { error ->
+                    //todo, think what should be done if subscribing to store errors out
+                })
+    }
+
+
+    override fun onCleared() {
+        stateSubscription.dispose()
+    }
+
+
+    fun getCurrentViewLiveData(): LiveData<CarConnectView> {
+        return currentViewLiveData
+    }
+
+    fun onBackPressed() {
+        store.dispatch(CommonAppAction.BackPressed)
+    }
+
+    fun init(savedInstanceState: Bundle?) {
+        if (null == savedInstanceState) {
+            store.dispatch(CommonAppAction.PushViewToBackStack(SplashScreen(SplashScreenState.LoadingAppState)))
+        }
+    }
+
+}

@@ -33,12 +33,14 @@ class CarConnectWindow : AppCompatActivity() {
         windowContainer = findViewById(R.id.window_container)
         windowVM = ViewModelProviders.of(this)
                 .get(WindowVM::class.java)
+        windowVM.init(savedInstanceState)
         windowVM.getCurrentViewLiveData()
                 .observe(this, Observer {
                     showView(it)
                 })
 
     }
+
 
     private fun showView(it: CarConnectView?) {
         when (it) {

@@ -17,4 +17,7 @@
     <string name="loading_vehicle_info_message">[%1$s] Loading vehicle info</string>
     <string name="connecting_message">Connecting to %1$s</string>
 
+
+    <string name="setup_error_title">Setup Error</string>
+
 </resources>

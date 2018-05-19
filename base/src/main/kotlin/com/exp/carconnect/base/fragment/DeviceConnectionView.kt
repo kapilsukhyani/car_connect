@@ -1,6 +1,7 @@
 package com.exp.carconnect.base.fragment
 
 import android.animation.ObjectAnimator
+import android.app.AlertDialog
 import android.app.Application
 import android.arch.lifecycle.*
 import android.content.Context
@@ -14,6 +15,7 @@ import com.exp.carconnect.base.BaseAppContract
 import com.exp.carconnect.base.R
 import com.exp.carconnect.base.asCustomObservable
 import com.exp.carconnect.base.state.BaseAppActions
+import com.exp.carconnect.base.state.CommonAppAction
 import com.exp.carconnect.base.state.ConnectionScreen
 import com.exp.carconnect.base.state.ConnectionScreenState
 import io.reactivex.disposables.Disposable
@@ -76,10 +78,25 @@ class DeviceConnectionView : Fragment() {
             }
 
             is ConnectionScreenState.ShowSetupError -> {
-                setStatus(it.error)
+                showSetupError(it.error)
             }
 
         }
+    }
+
+
+    private fun showSetupError(error: String) {
+        AlertDialog
+                .Builder(activity)
+                .setTitle(getString(R.string.setup_error_title))
+                .setMessage(error)
+                .setCancelable(false)
+                .setPositiveButton(android.R.string.ok) { dialog, which ->
+                    deviceConnectionVM.onSetupErrorAcknowledged()
+                    dialog.dismiss()
+                }
+                .create()
+                .show()
     }
 
     private fun setStatus(statusText: String) {
@@ -111,6 +128,10 @@ class DeviceConnectionVM(app: Application) : AndroidViewModel(app) {
 
     fun getScreenStateLiveData(): LiveData<ConnectionScreenState> {
         return deviceConnectionViewLiveData
+    }
+
+    fun onSetupErrorAcknowledged() {
+        store.dispatch(CommonAppAction.FinishCurrentView)
     }
 
 

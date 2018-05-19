@@ -4,6 +4,7 @@ import android.app.Application
 import android.arch.lifecycle.AndroidViewModel
 import android.arch.lifecycle.LiveData
 import android.arch.lifecycle.MutableLiveData
+import android.os.Bundle
 import com.exp.carconnect.app.CarConnectApp
 import com.exp.carconnect.base.AppState
 import com.exp.carconnect.base.CarConnectUIState
@@ -29,13 +30,11 @@ class WindowVM(app: Application) : AndroidViewModel(app) {
             .store
 
     init {
-        store.dispatch(CommonAppAction
-                .PushViewToBackStack(SplashScreen(SplashScreenState.LoadingAppState)))
         stateSubscription = store
                 .asCustomObservable()
                 .map { it.uiState }
                 .distinctUntilChanged { carConnectUIState: CarConnectUIState, carConnectUIState1: CarConnectUIState ->
-                    carConnectUIState?.currentView?.let { it::class.java } == carConnectUIState1?.currentView?.let { it::class.java }
+                    carConnectUIState.currentView?.let { it::class.java } == carConnectUIState1.currentView?.let { it::class.java }
 
                 }
                 .subscribe({ uiState ->
@@ -57,6 +56,13 @@ class WindowVM(app: Application) : AndroidViewModel(app) {
 
     fun onBackPressed() {
         store.dispatch(CommonAppAction.BackPressed)
+    }
+
+    fun init(savedInstanceState: Bundle?) {
+        if (null == savedInstanceState) {
+            store.dispatch(CommonAppAction
+                    .PushViewToBackStack(SplashScreen(SplashScreenState.LoadingAppState)))
+        }
     }
 
 }

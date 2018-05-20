@@ -153,7 +153,11 @@ class ActiveSessionReducer : Reducer<AppState> {
                 addNewSnapShot(state, vehicleData)
             }
             is BaseAppAction.AddVehicleDataLoadError -> {
-                state.addActiveSession(state.getActiveSession().copy(currentVehicleData = LoadableState.LoadingError(action.error)))
+                if (state.getBaseAppState().activeSession is UnAvailableAvailableData.Available<ActiveSession>) {
+                    state.addActiveSession(state.getActiveSession().copy(currentVehicleData = LoadableState.LoadingError(action.error)))
+                } else {
+                    state
+                }
             }
 
             else -> {

@@ -4,6 +4,7 @@ import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothSocket
 import com.exp.carconnect.Logger
 import com.exp.carconnect.base.state.BaseAppAction
+import com.exp.carconnect.base.state.FreezeFrame
 import com.exp.carconnect.base.state.MILStatus
 import com.exp.carconnect.base.state.Vehicle
 import com.exp.carconnect.obdlib.OBDEngine
@@ -11,6 +12,7 @@ import com.exp.carconnect.obdlib.OBDMultiRequest
 import com.exp.carconnect.obdlib.obdmessage.*
 import io.reactivex.Observable
 import io.reactivex.Scheduler
+import io.reactivex.functions.BiFunction
 import java.util.concurrent.TimeUnit
 
 class OBDDeviceSessionManager(private val ioScheduler: Scheduler,
@@ -53,13 +55,16 @@ class OBDSession(val device: BluetoothDevice,
         private val temperatureRequest = OBDMultiRequest("Temperature", listOf(TemperatureRequest(TemperatureType.AIR_INTAKE),
                 TemperatureRequest(TemperatureType.AMBIENT_AIR)),
                 IsRepeatable.Yes(500, TimeUnit.MILLISECONDS))
-        private val restDataRequest = OBDMultiRequest("Dashboard",
+        private val dtcNumberRequest = DTCNumberRequest(repeatable = IsRepeatable.Yes(1, TimeUnit.MINUTES))
+        private val pendingTroubleCodesRequest = PendingTroubleCodesRequest(TroubleCodeCommandType.ALL)
+        private val fastChangingDataRequest = OBDMultiRequest("Dashboard",
                 listOf(SpeedRequest(),
                         RPMRequest(),
-                        PendingTroubleCodesRequest(TroubleCodeCommandType.ALL),
-                        IgnitionMonitorRequest(),
-                        DTCNumberRequest()),
+                        IgnitionMonitorRequest()),
                 IsRepeatable.Yes(50, TimeUnit.MILLISECONDS))
+        private val freezeFrameRequest = OBDMultiRequest("Dashboard",
+                listOf(SpeedRequest(mode = OBDRequestMode.FREEZE_FRAME),
+                        RPMRequest(mode = OBDRequestMode.FREEZE_FRAME)))
 
     }
 
@@ -161,28 +166,54 @@ class OBDSession(val device: BluetoothDevice,
                         BaseAppAction.AddAmbientAirTemperature(it.temperature.toFloat())
                     }
                 }
-//                .mergeWith(engine.submit<FuelLevelResponse>(fuelLevelRequest)
-//                        .map {
-//                            BaseAppAction.AddFuel(it.fuelLevel / FUEL_FACTOR)
-//                        })
-//
-//                .mergeWith(engine.submit<OBDResponse>(restDataRequest)
-//                        .map { response ->
-//                            if (response is SpeedResponse) {
-//                                BaseAppAction.AddSpeed(response.metricSpeed.toFloat())
-//                            } else if (response is RPMResponse) {
-//                                BaseAppAction.AddRPM(response.rpm / RPM_FACTOR)
-//                            } else if (response is IgnitionMonitorResponse) {
-//                                BaseAppAction.AddIgnition(response.ignitionOn)
-//                            } else {
-//                                if ((response as DTCNumberResponse).milOn) {
-//                                    //todo change this have proper list of dtcs
-//                                    BaseAppAction.AddMilStatus(MILStatus.On(emptyList(), UnAvailableAvailableData.UnAvailable))
-//                                } else {
-//                                    BaseAppAction.AddMilStatus(MILStatus.Off)
-//                                }
-//                            }
-//                        })
+                .mergeWith(engine.submit<FuelLevelResponse>(fuelLevelRequest)
+                        .map {
+                            BaseAppAction.AddFuel(it.fuelLevel / FUEL_FACTOR)
+                        })
+
+                .mergeWith(engine.submit<OBDResponse>(fastChangingDataRequest)
+                        .map { response ->
+                            when (response) {
+                                is SpeedResponse -> BaseAppAction.AddSpeed(response.metricSpeed.toFloat())
+                                is RPMResponse -> BaseAppAction.AddRPM(response.rpm / RPM_FACTOR)
+                                else -> BaseAppAction.AddIgnition((response as IgnitionMonitorResponse).ignitionOn)
+                            }
+                        })
+                .mergeWith(
+                        engine.submit<DTCNumberResponse>(dtcNumberRequest)
+                                .flatMap { dtcResponse ->
+                                    if (dtcResponse.milOn) {
+                                        engine
+                                                .submit<PendingTroubleCodesResponse>(pendingTroubleCodesRequest)
+                                                .zipWith(engine.submit<OBDResponse>(freezeFrameRequest)
+                                                        .toList()
+                                                        .map {
+                                                            var rpm = 0
+                                                            var speed = 0
+                                                            for (response in it) {
+                                                                if (response is SpeedResponse) {
+                                                                    speed = response.metricSpeed
+                                                                } else if (response is RPMResponse) {
+                                                                    rpm = response.rpm
+                                                                }
+                                                            }
+
+                                                            FreezeFrame(rpm, speed)
+                                                        }.toObservable()
+                                                        , BiFunction<PendingTroubleCodesResponse, FreezeFrame, Pair<PendingTroubleCodesResponse, FreezeFrame>> { t1, t2 ->
+                                                    Pair(t1, t2)
+                                                })
+
+                                                .map {
+                                                    MILStatus.On(it.first.codes, UnAvailableAvailableData.Available(it.second))
+                                                }
+                                    } else {
+                                        Observable.just(MILStatus.Off)
+                                    }
+                                }.map {
+                                    BaseAppAction.AddMilStatus(it)
+                                }
+                )
                 .onErrorReturn {
                     BaseAppAction.AddVehicleDataLoadError(it)
                 }
@@ -190,3 +221,4 @@ class OBDSession(val device: BluetoothDevice,
 
     }
 }
+

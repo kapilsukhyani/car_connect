@@ -129,7 +129,7 @@ class DeviceConnectionVM(app: Application) : AndroidViewModel(app) {
                 .filter { it is UnAvailableAvailableData.Available<ActiveSession> && it.data.vehicle is LoadableState.Loaded }
                 .take(1)
                 .subscribe {
-                    store.dispatch(CommonAppAction.ShowDataView)
+                    store.dispatch(CommonAppAction.FinishCurrentView)
                 })
     }
 

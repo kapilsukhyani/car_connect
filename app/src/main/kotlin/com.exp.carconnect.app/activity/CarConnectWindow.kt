@@ -18,6 +18,8 @@ import com.exp.carconnect.base.fragment.DeviceConnectionView
 import com.exp.carconnect.base.fragment.DeviceManagementView
 import com.exp.carconnect.base.fragment.SplashView
 import com.exp.carconnect.base.state.*
+import com.exp.carconnect.dashboard.fragment.DashboardView
+import com.exp.carconnect.dashboard.state.DashboardScreen
 import io.reactivex.disposables.Disposable
 import redux.api.Store
 
@@ -63,6 +65,10 @@ class CarConnectWindow : AppCompatActivity() {
 
             is ConnectionScreen -> {
                 replaceFragment(DeviceConnectionView())
+            }
+
+            is DashboardScreen -> {
+                replaceFragment(DashboardView())
             }
         }
     }

@@ -1,3 +1,4 @@
 <resources>
 
+    <string name="data_load_error">Data load error [%1$s]</string>
 </resources>

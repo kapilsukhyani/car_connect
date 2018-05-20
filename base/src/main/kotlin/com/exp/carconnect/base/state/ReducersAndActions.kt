@@ -187,7 +187,5 @@ sealed class CommonAppAction {
     object FinishCurrentView : CommonAppAction()
     data class PushViewToBackStack(val view: CarConnectView) : CommonAppAction()
     data class ReplaceViewOnBackStackTop(val view: CarConnectView) : CommonAppAction()
-    object ShowDataView : CommonAppAction()
-
 }
 

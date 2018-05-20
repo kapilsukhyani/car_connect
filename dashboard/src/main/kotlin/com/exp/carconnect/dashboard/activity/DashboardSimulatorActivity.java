@@ -14,7 +14,7 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.Toast;
 
-import com.exp.carconnect.base.R;
+import com.exp.carconnect.dashboard.R;
 import com.exp.carconnect.dashboard.view.Dashboard;
 
 import java.util.Random;

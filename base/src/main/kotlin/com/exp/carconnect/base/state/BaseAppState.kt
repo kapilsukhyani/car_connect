@@ -13,6 +13,9 @@ fun AppState.getBaseAppState(): BaseAppState {
     return (moduleStateMap[BaseAppState.STATE_KEY] as LoadableState.Loaded<BaseAppState>).savedState
 }
 
+fun AppState.isBaseStateLoaded(): Boolean {
+    return (moduleStateMap[BaseAppState.STATE_KEY] is LoadableState.Loaded)
+}
 
 fun AppState.copyAndReplaceBaseAppState(state: LoadableState<BaseAppState, BaseAppStateLoadingError>): AppState {
     return this.copy(moduleStateMap = moduleStateMap + Pair(BaseAppState.STATE_KEY, state))

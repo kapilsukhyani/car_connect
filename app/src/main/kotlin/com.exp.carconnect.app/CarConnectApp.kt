@@ -12,6 +12,8 @@ import com.exp.carconnect.base.state.*
 import com.exp.carconnect.dashboard.DashboardAppContract
 import com.exp.carconnect.dashboard.di.DashboardComponent
 import com.exp.carconnect.dashboard.di.DashboardModule
+import com.exp.carconnect.dashboard.state.DashboardScreen
+import com.exp.carconnect.dashboard.state.DashboardScreenState
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
 import redux.api.Store
@@ -66,6 +68,22 @@ class CarConnectApp : Application(),
         println("debugtag: creating store")
 
         store = createStore(reducers, initialState, applyMiddleware(appStateLoadingMiddleware, obdSessionManagementMiddleware))
+        store
+                .asCustomObservable()
+                .filter { it.isBaseStateLoaded() }
+                .map { it.getBaseAppState().activeSession }
+                .filter {
+                    it is UnAvailableAvailableData.Available<ActiveSession>
+                            && it.data.vehicle is LoadableState.Loaded
+                }
+                .take(1)
+                .map {
+                    val activeSession = (it as UnAvailableAvailableData.Available).data
+                    Pair((activeSession.vehicle as LoadableState.Loaded).savedState, VehicleData())
+                }
+                .subscribe {
+                    store.dispatch(CommonAppAction.PushViewToBackStack(DashboardScreen(DashboardScreenState.ShowNewSnapshot(it.first, it.second))))
+                }
         println("debugtag: created store")
 
     }

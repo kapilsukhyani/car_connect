@@ -81,6 +81,7 @@ class CarConnectApp : Application(),
                     val activeSession = (it as UnAvailableAvailableData.Available).data
                     Pair((activeSession.vehicle as LoadableState.Loaded).savedState, VehicleData())
                 }
+                .observeOn(AndroidSchedulers.mainThread())
                 .subscribe {
                     store.dispatch(CommonAppAction.PushViewToBackStack(DashboardScreen(DashboardScreenState.ShowNewSnapshot(it.first, it.second))))
                 }

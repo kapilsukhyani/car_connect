@@ -4,6 +4,8 @@ import android.animation.Animator
 import android.animation.ValueAnimator
 import android.app.Application
 import android.arch.lifecycle.*
+import android.content.Context
+import android.content.pm.ActivityInfo
 import android.os.Bundle
 import android.support.constraint.ConstraintLayout
 import android.support.constraint.ConstraintSet
@@ -50,6 +52,11 @@ class SplashView : Fragment() {
         Log.d(TAG, "Received status $it")
     }
 
+    override fun onAttach(context: Context?) {
+        super.onAttach(context)
+        activity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+    }
+
     override fun onCreateView(inflater: LayoutInflater?, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val view = layoutInflater.inflate(R.layout.view_splash, null)
         appLogo = view.findViewById(R.id.app_logo)
@@ -57,7 +64,6 @@ class SplashView : Fragment() {
         constraintSet.clone(containerLayout)
         return view
     }
-
 
 
     fun animateView() {

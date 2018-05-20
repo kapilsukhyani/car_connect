@@ -5,6 +5,7 @@ import android.app.AlertDialog
 import android.app.Application
 import android.arch.lifecycle.*
 import android.content.Context
+import android.content.pm.ActivityInfo
 import android.os.Bundle
 import android.support.v4.app.Fragment
 import android.view.LayoutInflater
@@ -26,6 +27,11 @@ class DeviceConnectionView : Fragment(), BackInterceptor {
     private lateinit var deviceConnectionVM: DeviceConnectionVM
     private lateinit var trackAnimator: ObjectAnimator
 
+
+    override fun onAttach(context: Context?) {
+        super.onAttach(context)
+        activity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+    }
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 

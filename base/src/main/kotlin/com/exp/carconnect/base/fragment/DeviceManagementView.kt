@@ -10,6 +10,7 @@ import android.arch.lifecycle.*
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
 import android.content.Context
+import android.content.pm.ActivityInfo
 import android.os.Bundle
 import android.support.constraint.ConstraintLayout
 import android.support.constraint.ConstraintSet
@@ -56,9 +57,10 @@ class DeviceManagementView : Fragment() {
 
     }
 
+
     override fun onAttach(context: Context?) {
         super.onAttach(context)
-//        animateDeviceContainer { }
+        activity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
     }
 
 

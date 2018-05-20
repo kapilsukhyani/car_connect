@@ -2,6 +2,8 @@ package com.exp.carconnect.dashboard.fragment
 
 import android.app.Application
 import android.arch.lifecycle.*
+import android.content.Context
+import android.content.pm.ActivityInfo
 import android.os.Bundle
 import android.support.v4.app.Fragment
 import android.view.LayoutInflater
@@ -18,6 +20,11 @@ import io.reactivex.disposables.CompositeDisposable
 class DashboardView : Fragment(), BackInterceptor {
     lateinit var dashboard: Dashboard
     lateinit var dashboardVM: DashboardVM
+
+    override fun onAttach(context: Context?) {
+        super.onAttach(context)
+        activity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
+    }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val view = inflater.inflate(R.layout.activity_dashboard, null)

@@ -9,6 +9,7 @@ import com.exp.carconnect.base.di.OBDConnectionModule
 import com.exp.carconnect.base.fragment.DeviceConnectionScreenStateReducer
 import com.exp.carconnect.base.fragment.DeviceManagementScreenStateReducer
 import com.exp.carconnect.base.state.*
+import com.exp.carconnect.base.store.BaseStore
 import com.exp.carconnect.dashboard.DashboardAppContract
 import com.exp.carconnect.dashboard.di.DashboardComponent
 import com.exp.carconnect.dashboard.di.DashboardModule
@@ -57,6 +58,7 @@ class CarConnectApp : Application(),
         globalComponent.inject(this)
         //        Fabric.with(this, Crashlytics())
 
+
         val reducers = combineReducers(AppStateNavigationReducer(),
                 BaseAppStateReducer(), DeviceManagementScreenStateReducer(), DeviceConnectionScreenStateReducer(this), ActiveSessionReducer())
         val initialState = AppState(mapOf(Pair(BaseAppState.STATE_KEY, LoadableState.NotLoaded)),
@@ -86,6 +88,7 @@ class CarConnectApp : Application(),
                     store.dispatch(CommonAppAction.PushViewToBackStack(DashboardScreen(DashboardScreenState.ShowNewSnapshot(it.first, it.second))))
                 }
         println("debugtag: created store")
+        val basePersistenceStore = BaseStore(this, store, Schedulers.io())
 
     }
 

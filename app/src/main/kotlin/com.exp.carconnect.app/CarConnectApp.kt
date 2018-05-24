@@ -39,6 +39,7 @@ class CarConnectApp : Application(),
 
     lateinit var globalComponent: CarConnectGlobalComponent
     override lateinit var store: Store<AppState>
+    override lateinit var persistenceStore: BaseStore
 
     @Inject
     lateinit var newConnectionComponentBuilder: NewOBDConnectionComponent.Builder
@@ -63,7 +64,7 @@ class CarConnectApp : Application(),
                 BaseAppStateReducer(), DeviceManagementScreenStateReducer(), DeviceConnectionScreenStateReducer(this), ActiveSessionReducer())
         val initialState = AppState(mapOf(Pair(BaseAppState.STATE_KEY, LoadableState.NotLoaded)),
                 CarConnectUIState(Stack()))
-        val appStateLoadingMiddleware = createEpicMiddleware(BaseSateLoadingEpic(Schedulers.io(), AndroidSchedulers.mainThread()))
+        val appStateLoadingMiddleware = createEpicMiddleware(BaseSateLoadingEpic(Schedulers.io(), AndroidSchedulers.mainThread(), this))
         val obdSessionManagementMiddleware = createEpicMiddleware(OBDSessionManagementEpic(Schedulers.io(), AndroidSchedulers.mainThread()
                 , OBDDeviceSessionManager(Schedulers.io(), Schedulers.computation(), AndroidSchedulers.mainThread())))
 
@@ -88,7 +89,7 @@ class CarConnectApp : Application(),
                     store.dispatch(CommonAppAction.PushViewToBackStack(DashboardScreen(DashboardScreenState.ShowNewSnapshot(it.first, it.second))))
                 }
         println("debugtag: created store")
-        val basePersistenceStore = BaseStore(this, store, Schedulers.io())
+        persistenceStore = BaseStore(this, store, Schedulers.io())
 
     }
 

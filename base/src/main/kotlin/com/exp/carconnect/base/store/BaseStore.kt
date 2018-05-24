@@ -20,15 +20,7 @@ data class PersistedAppState(val knownDongles: Set<Dongle> = hashSetOf(),
                              val lastConnectedVehicle: Vehicle? = null,
                              val appSettings: AppSettings = AppSettings())
 
-internal fun loadAppState(): Single<PersistedAppState> {
 
-    return Single.fromCallable {
-        //todo implement this
-        Thread.sleep(3000)
-        PersistedAppState()
-    }
-
-}
 
 class BaseStore(val context: Context,
                 val store: Store<AppState>,
@@ -86,6 +78,21 @@ class BaseStore(val context: Context,
                     Logger.log(TAG, "persisting new vehicle")
                     baseAppStateDao.insertVehicle(it.toEntity())
                 }
+    }
+
+    internal fun loadAppState(): Single<PersistedAppState> {
+
+        return Single.fromCallable {
+            baseAppStateDao.
+                    getAllDonglesAndComplete()
+                    .onErrorReturn { listOf() }.map { it.toHashSet() }
+            
+
+            //todo implement this
+            Thread.sleep(3000)
+            PersistedAppState()
+        }
+
     }
 
 }

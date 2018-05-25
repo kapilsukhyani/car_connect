@@ -59,6 +59,7 @@ class CarConnectApp : Application(),
         globalComponent.inject(this)
         //        Fabric.with(this, Crashlytics())
 
+        persistenceStore = BaseStore(this, Schedulers.io())
 
         val reducers = combineReducers(AppStateNavigationReducer(),
                 BaseAppStateReducer(), DeviceManagementScreenStateReducer(), DeviceConnectionScreenStateReducer(this), ActiveSessionReducer())
@@ -89,7 +90,7 @@ class CarConnectApp : Application(),
                     store.dispatch(CommonAppAction.PushViewToBackStack(DashboardScreen(DashboardScreenState.ShowNewSnapshot(it.first, it.second))))
                 }
         println("debugtag: created store")
-        persistenceStore = BaseStore(this, store, Schedulers.io())
+        persistenceStore.startListening(store)
 
     }
 

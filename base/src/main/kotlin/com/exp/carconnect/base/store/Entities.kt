@@ -6,7 +6,7 @@ import com.exp.carconnect.base.UnAvailableAvailableData
 import com.exp.carconnect.base.state.*
 import com.exp.carconnect.obdlib.obdmessage.FuelType
 import io.reactivex.Flowable
-import io.reactivex.Maybe
+import io.reactivex.Single
 import java.util.concurrent.TimeUnit
 
 fun Dongle.toEntity(recentlyUsed: Boolean = true): DongleEntity {
@@ -187,7 +187,7 @@ abstract class BaseAppStateDao {
     abstract fun getAllDongles(): Flowable<List<DongleEntity>>
 
     @Query("SELECT * FROM DongleEntity")
-    abstract fun getAllDonglesAndComplete(): Maybe<List<DongleEntity>>
+    abstract fun getAllDonglesAndComplete(): Single<List<DongleEntity>>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     abstract fun insertDongle(dongle: DongleEntity)
@@ -211,7 +211,7 @@ abstract class BaseAppStateDao {
     abstract fun getAllVehicles(): Flowable<List<VehicleEntity>>
 
     @Query("SELECT * FROM VehicleEntity")
-    abstract fun getAllVehiclesAndComplete(): Maybe<List<VehicleEntity>>
+    abstract fun getAllVehiclesAndComplete(): Single<List<VehicleEntity>>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     abstract fun insertVehicle(dongle: VehicleEntity)
@@ -235,7 +235,7 @@ abstract class BaseAppStateDao {
     abstract fun getAppSettings(): Flowable<AppSettingEntity>
 
     @Query("SELECT * FROM AppSettingEntity WHERE id='1' LIMIT 1")
-    abstract fun getAppSettingsAndComplete(): Maybe<AppSettingEntity>
+    abstract fun getAppSettingsAndComplete(): Single<AppSettingEntity>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     abstract fun updateAppSettings(settings: AppSettingEntity)

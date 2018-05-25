@@ -21,7 +21,9 @@ class BaseSateLoadingEpic(private val ioScheduler: Scheduler,
                 .flatMap {
                     Single.concat(
                             Single.just(BaseAppAction.LoadingBaseAppState),
-                            baseAppContract.persistenceStore.loadAppState()
+                            baseAppContract
+                                    .persistenceStore
+                                    .loadAppState()
                                     .map<BaseAppAction> {
                                         //todo add appmode and apprunning mode in BaseAppState
                                         BaseAppAction.LoadedBaseAppState(BaseAppState(baseAppPersistedState = BaseAppPersistedState(it)))

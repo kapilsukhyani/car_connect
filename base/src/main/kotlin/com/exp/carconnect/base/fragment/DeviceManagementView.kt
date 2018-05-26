@@ -50,6 +50,7 @@ class DeviceManagementView : Fragment() {
     private lateinit var appLogo: ImageView
     private lateinit var bondedDeviceList: RecyclerView
     private lateinit var containerLayout: ConstraintLayout
+    private lateinit var settingsIcon: View
     private val constraintSet = ConstraintSet()
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -70,6 +71,7 @@ class DeviceManagementView : Fragment() {
         bondedDeviceList = rootView.findViewById(R.id.bonded_devices_list)
         containerLayout = rootView.findViewById(R.id.container)
         appLogo = rootView.findViewById(R.id.app_logo)
+        settingsIcon = rootView.findViewById(R.id.settings_icon)
 
         bondedDeviceList.layoutManager = LinearLayoutManager(activity)
         bondedDeviceList.itemAnimator = DefaultItemAnimator()
@@ -85,6 +87,9 @@ class DeviceManagementView : Fragment() {
                 .observe(this, Observer {
                     onNewState(it!!)
                 })
+        settingsIcon.setOnClickListener {
+            deviceManagementVM.onSettingsIconClicked()
+        }
     }
 
     private fun onNewState(it: DeviceManagementScreenState) {
@@ -237,6 +242,10 @@ class DeviceManagementVM(app: Application) : AndroidViewModel(app) {
 
     fun onBluetoothErrorAcknowledged() {
         store.dispatch(CommonAppAction.BackPressed)
+    }
+
+    fun onSettingsIconClicked() {
+        store.dispatch(CommonAppAction.PushViewToBackStack(SettingsScreen(SettignsScreenState.ShowingSettings)))
     }
 }
 

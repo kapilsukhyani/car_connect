@@ -20,4 +20,107 @@
 
     <string name="setup_error_title">Setup Error</string>
 
+
+    <!-- Settings -->
+    <string name="settings">Settings</string>
+    <string name="background_connection_pref_key" translatable="false">background_connection</string>
+    <string name="auto_connect_pref_key" translatable="false">auto_connect</string>
+    <string name="data_settings_pref_key" translatable="false">data_settings</string>
+    <string name="unit_system_pref_key" translatable="false">unit_system</string>
+    <string name="fuel_level_pull_frequency_pref_key" translatable="false">fuel_level_pull_frequency</string>
+    <string name="fast_changing_data_pull_frequency__pref_key" translatable="false">fast_changing_data_pull_frequency</string>
+    <string name="pressure_pull_frequency_pref_key" translatable="false">pressure_pull_frequency</string>
+    <string name="temperature_pull_frequency_pref_key" translatable="false">temperature_pull_frequency</string>
+    <string name="notifications_settings_pref_key" translatable="false">notification_settings</string>
+    <string name="speed_notifications_pref_key" translatable="false">speed_notification</string>
+    <string name="speed_notification_threshold_pref_key" translatable="false">speed_notification_threshold</string>
+    <string name="fuel_level_notification_pref_key" translatable="false">fuel_level_notification</string>
+    <string name="fuel_level_notification_threshold_pref_key" translatable="false">fuel_level_notification_threshold</string>
+    <string name="display_settings_pref_key" translatable="false">display_settings</string>
+    <string name="dashboard_settings_pref_key" translatable="false">dashboard_theme</string>
+    <string name="data_settings" translatable="false">OBD Data Settings</string>
+    <string name="notifications_settings" translatable="false">Notifications Settings</string>
+    <string name="display_settings" translatable="false">Display Settings</string>
+    <string name="Maintain_background_connection" translatable="false">Maintain Background Connection</string>
+    <string name="auto_connect_to_last_connected" translatable="false">Auto Connect To Recent Device</string>
+
+    <string name="unit_system">Unit System</string>
+    <string name="matrix">Matrix</string>
+    <string name="imperial">Imperial</string>
+
+
+    <string name="fuel_level_frequency_text">Fuel Level Refresh Frequency</string>
+    <string name="temperature_frequency_text">Temperature Refresh Frequency</string>
+    <string name="fast_changing_data_frequency_text">Fast Changing Data Refresh Frequency</string>
+    <string name="pressure_frequency_text">Pressure Refresh Frequency</string>
+    <string name="speed_notification">Speed Notification</string>
+    <string name="fuel_level_notification">Fuel Level Notification</string>
+
+
+    <string name="speed_notification_threshold">Speed Notification Threshold</string>
+    <string name="fuel_level_notification_threshold">Fuel Level Notification Threshold</string>
+    <string name="dashboard_theme">Dashboard Theme</string>
+
+
+    <string name="default_fast_changing_data_pull_frequency">50 ms</string>
+    <string name="default_fuel_level_pull_frequency">1 min</string>
+    <string name="default_temp_pull_frequency">500 ms</string>
+    <string name="default_pressure_pull_frequency">1 min</string>
+    <string name="default_speed_notification_threshold">70 km/h</string>
+    <string name="default_fuel_level_notification_threshold">30%</string>
+    <string name="dark_dashboard_theme">Dark</string>
+    <string name="light_dashboard_theme">Light</string>
+
+
+    <string-array name="unit_systems">
+        <item>@string/matrix</item>
+        <item>@string/imperial</item>
+    </string-array>
+
+
+    <string-array name="fast_changing_data_pull_frequency_options">
+        <item>@string/default_fast_changing_data_pull_frequency</item>
+        <item>100 ms</item>
+        <item>150 ms</item>
+    </string-array>
+
+    <string-array name="fuel_level_pull_frequency_options">
+        <item>@string/default_fuel_level_pull_frequency</item>
+        <item>2 min</item>
+        <item>3 min</item>
+    </string-array>
+
+    <string-array name="temp_pull_frequency_options">
+        <item>@string/default_temp_pull_frequency</item>
+        <item>1000 ms</item>
+        <item>1500 ms</item>
+    </string-array>
+
+    <string-array name="pressure_pull_frequency_options">
+        <item>@string/default_pressure_pull_frequency</item>
+        <item>2 min</item>
+        <item>3 min</item>
+    </string-array>
+
+    <string-array name="speed_notification_threshold_options">
+        <item>@string/default_speed_notification_threshold</item>
+        <item>80 km/h</item>
+        <item>90 km/h</item>
+        <item>100 km/h</item>
+        <item>110 km/h</item>
+        <item>120 km/h</item>
+    </string-array>
+
+    <string-array name="fuel_level_notification_threshold_options">
+        <item>@string/default_fuel_level_notification_threshold</item>
+        <item>20%</item>
+        <item>10%</item>
+        <item>5%</item>
+    </string-array>
+    <string-array name="dashboard_theme_options">
+        <item>@string/dark_dashboard_theme</item>
+        <item>@string/light_dashboard_theme</item>
+    </string-array>
+
+
 </resources>

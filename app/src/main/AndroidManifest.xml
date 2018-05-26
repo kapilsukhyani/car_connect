@@ -8,7 +8,7 @@
         tools:replace="android:name">
         <activity
             android:name=".activity.CarConnectWindow"
-            android:theme="@style/Theme.AppCompat.DayNight.NoActionBar">
+            android:theme="@style/AppTheme">
 
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

@@ -16,6 +16,7 @@ import com.exp.carconnect.app.R
 import com.exp.carconnect.base.*
 import com.exp.carconnect.base.fragment.DeviceConnectionView
 import com.exp.carconnect.base.fragment.DeviceManagementView
+import com.exp.carconnect.base.fragment.SettingsView
 import com.exp.carconnect.base.fragment.SplashView
 import com.exp.carconnect.base.state.*
 import com.exp.carconnect.dashboard.fragment.DashboardView
@@ -70,6 +71,10 @@ class CarConnectWindow : AppCompatActivity() {
 
             is DashboardScreen -> {
                 replaceFragment(DashboardView())
+            }
+
+            is SettingsScreen -> {
+                replaceFragment(SettingsView())
             }
         }
     }

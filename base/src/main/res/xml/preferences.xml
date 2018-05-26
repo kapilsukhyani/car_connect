@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <CheckBoxPreference
+        android:defaultValue="false"
+        android:key="@string/background_connection_pref_key"
+        android:title="@string/Maintain_background_connection" />
+    <CheckBoxPreference
+        android:defaultValue="true"
+        android:key="@string/auto_connect_pref_key"
+        android:title="@string/auto_connect_to_last_connected" />
+
+
+    <PreferenceCategory
+        android:key="@string/data_settings_pref_key"
+        android:title="@string/data_settings">
+
+        <ListPreference
+            android:defaultValue="@string/matrix"
+            android:dialogTitle="@string/unit_system"
+            android:entries="@array/unit_systems"
+            android:entryValues="@array/unit_systems"
+            android:key="@string/unit_system_pref_key"
+            android:title="@string/unit_system" />
+
+
+        <ListPreference
+            android:defaultValue="@string/default_fuel_level_pull_frequency"
+            android:dialogTitle="@string/fuel_level_frequency_text"
+            android:entries="@array/fuel_level_pull_frequency_options"
+            android:entryValues="@array/fuel_level_pull_frequency_options"
+            android:key="@string/fuel_level_pull_frequency_pref_key"
+            android:title="@string/fuel_level_frequency_text" />
+
+        <ListPreference
+            android:defaultValue="@string/default_fast_changing_data_pull_frequency"
+            android:dialogTitle="@string/fast_changing_data_frequency_text"
+            android:entries="@array/fast_changing_data_pull_frequency_options"
+            android:entryValues="@array/fast_changing_data_pull_frequency_options"
+            android:key="@string/fast_changing_data_pull_frequency__pref_key"
+            android:title="@string/fast_changing_data_frequency_text" />
+
+        <ListPreference
+            android:defaultValue="@string/default_pressure_pull_frequency"
+            android:dialogTitle="@string/pressure_frequency_text"
+            android:entries="@array/pressure_pull_frequency_options"
+            android:entryValues="@array/pressure_pull_frequency_options"
+            android:key="@string/pressure_pull_frequency_pref_key"
+            android:title="@string/pressure_frequency_text" />
+
+        <ListPreference
+            android:defaultValue="@string/default_temp_pull_frequency"
+            android:dialogTitle="@string/temperature_frequency_text"
+            android:entries="@array/temp_pull_frequency_options"
+            android:entryValues="@array/temp_pull_frequency_options"
+            android:key="@string/temperature_pull_frequency_pref_key"
+            android:title="@string/temperature_frequency_text" />
+
+    </PreferenceCategory>
+
+
+    <PreferenceCategory
+        android:key="@string/notifications_settings_pref_key"
+        android:title="@string/notifications_settings">
+
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:key="@string/speed_notifications_pref_key"
+            android:title="@string/speed_notification" />
+
+        <ListPreference
+            android:defaultValue="@string/default_speed_notification_threshold"
+            android:dependency="speed_notification"
+            android:dialogTitle="@string/speed_notification_threshold"
+            android:entries="@array/speed_notification_threshold_options"
+            android:entryValues="@array/speed_notification_threshold_options"
+            android:key="@string/speed_notification_threshold_pref_key"
+            android:title="@string/speed_notification_threshold" />
+
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:key="@string/fuel_level_notification_pref_key"
+            android:title="@string/fuel_level_notification" />
+
+        <ListPreference
+            android:defaultValue="@string/default_fuel_level_notification_threshold"
+            android:dependency="fuel_level_notification"
+            android:dialogTitle="@string/fuel_level_notification_threshold"
+            android:entries="@array/fuel_level_notification_threshold_options"
+            android:entryValues="@array/fuel_level_notification_threshold_options"
+            android:key="@string/fuel_level_notification_threshold_pref_key"
+            android:title="@string/fuel_level_notification_threshold" />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:key="@string/display_settings_pref_key"
+        android:title="@string/display_settings">
+        <ListPreference
+            android:defaultValue="@string/dark_dashboard_theme"
+            android:dialogTitle="@string/dashboard_theme"
+            android:entries="@array/dashboard_theme_options"
+            android:entryValues="@array/dashboard_theme_options"
+            android:key="@string/dashboard_settings_pref_key"
+            android:title="@string/dashboard_theme" />
+
+    </PreferenceCategory>
+
+</PreferenceScreen>
+

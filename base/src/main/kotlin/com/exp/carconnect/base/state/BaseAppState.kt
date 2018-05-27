@@ -195,9 +195,12 @@ data class FreezeFrame(val rpm: Int, val speed: Int)
 
 
 data class SplashScreen(override val screenState: SplashScreenState) : CarConnectView
+
 data class DeviceManagementScreen(override val screenState: DeviceManagementScreenState) : CarConnectView
+
 data class ConnectionScreen(override val screenState: ConnectionScreenState) : CarConnectView
-data class SettingsScreen(override val screenState: SettignsScreenState) : CarConnectView
+
+data class SettingsScreen(override val screenState: SettingsScreenState) : CarConnectView
 
 
 sealed class SplashScreenState : CarConnectIndividualViewState {
@@ -224,10 +227,10 @@ sealed class DeviceManagementScreenState : CarConnectIndividualViewState {
 }
 
 
-sealed class SettignsScreenState : CarConnectIndividualViewState {
-    object ShowingSettings : SettignsScreenState()
-    object UpdatingSettigns : SettignsScreenState()
-    data class ShowingUpdateSettingsError(val error: UpdateSettingsError) : SettignsScreenState()
+sealed class SettingsScreenState : CarConnectIndividualViewState {
+    object ShowingSettings : SettingsScreenState()
+    object UpdatingSettigns : SettingsScreenState()
+    data class ShowingUpdateSettingsError(val error: UpdateSettingsError) : SettingsScreenState()
 
 }
 

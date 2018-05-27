@@ -42,7 +42,7 @@ class SettingsView : Fragment() {
                 val animator = ViewAnimationUtils.createCircularReveal(settings_view,
                         settings_view.width, 0,
                         0f,
-                        Math.hypot( settings_view.width.toDouble(), settings_view.height.toDouble()).toFloat())
+                        Math.hypot(settings_view.width.toDouble(), settings_view.height.toDouble()).toFloat())
 
 
                 settings_view.visibility = View.VISIBLE
@@ -52,13 +52,6 @@ class SettingsView : Fragment() {
             }
         })
     }
-
-
-    override fun onResume() {
-        super.onResume()
-
-    }
-
 
 }
 

@@ -204,25 +204,42 @@ class DeviceManagementVM(app: Application) : AndroidViewModel(app) {
         storeSubscription = store
                 .asCustomObservable()
                 .filter { it.uiState.currentView is DeviceManagementScreen }
-                .map { (it.uiState.currentView as DeviceManagementScreen).screenState }
+                .map {
+                    (it.uiState.currentView as DeviceManagementScreen).screenState
+                }
                 .distinctUntilChanged()
                 .subscribe {
                     deviceManagementViewLiveData.value = it
                 }
 
+        loadDevices()
+    }
+
+    private fun loadDevices() {
         BluetoothAdapter
-                .getDefaultAdapter()?.let {
-                    if (it.isEnabled) {
-                        store.dispatch(DeviceManagementViewAction
-                                .ShowBondedDevices(it
-                                        .bondedDevices))
+                .getDefaultAdapter()?.let { bluetoothAdapter ->
+                    if (bluetoothAdapter.isEnabled) {
+
+                        store.asCustomObservable()
+                                .take(1)
+                                .map { Pair(it.getBaseAppState().baseAppPersistedState, it.uiState.isRestoringCurrentViewFromBackStack()) }
+                                .subscribe {
+                                    if (it.first.lastConnectedDongle != null && !it.second) {
+                                        onDeviceSelected(bluetoothAdapter.getRemoteDevice((it.first as BaseAppPersistedState).lastConnectedDongle!!.address))
+                                    } else {
+                                        store.dispatch(DeviceManagementViewAction
+                                                .ShowBondedDevices(bluetoothAdapter
+                                                        .bondedDevices))
+                                    }
+                                }
+
+
                     } else {
                         store.dispatch(DeviceManagementViewAction
                                 .ShowBluetoothError)
                     }
                 } ?: store.dispatch(DeviceManagementViewAction
                 .ShowBluetoothError)
-
     }
 
     override fun onCleared() {
@@ -245,7 +262,7 @@ class DeviceManagementVM(app: Application) : AndroidViewModel(app) {
     }
 
     fun onSettingsIconClicked() {
-        store.dispatch(CommonAppAction.PushViewToBackStack(SettingsScreen(SettignsScreenState.ShowingSettings)))
+        store.dispatch(CommonAppAction.PushViewToBackStack(SettingsScreen(SettingsScreenState.ShowingSettings)))
     }
 }
 

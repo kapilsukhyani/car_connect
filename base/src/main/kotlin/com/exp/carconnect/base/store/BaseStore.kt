@@ -4,16 +4,16 @@ import android.arch.persistence.db.SupportSQLiteDatabase
 import android.arch.persistence.room.Room
 import android.arch.persistence.room.RoomDatabase
 import android.content.Context
+import android.preference.PreferenceManager
 import com.exp.carconnect.Logger
-import com.exp.carconnect.base.AppState
-import com.exp.carconnect.base.LoadableState
-import com.exp.carconnect.base.UnAvailableAvailableData
+import com.exp.carconnect.base.*
 import com.exp.carconnect.base.state.*
 import io.reactivex.Scheduler
 import io.reactivex.Single
 import io.reactivex.functions.BiFunction
 import redux.api.Store
 import redux.asObservable
+import java.util.concurrent.TimeUnit
 
 data class PersistedAppState(val knownDongles: Set<Dongle> = hashSetOf(),
                              val knownVehicles: Set<Vehicle> = hashSetOf(),
@@ -55,7 +55,7 @@ class BaseStore(val context: Context, val ioScheduler: Scheduler) {
             recentlyUsedDongleObservable
                     .subscribe {
                         Logger.log(TAG, "persisting new dongle")
-                        baseAppStateDao.insertDongleAsRecenltyUsed(it.toEntity())
+                        baseAppStateDao.insertDongleAsRecentlyUsed(it.toEntity())
                     }
             recentlyUsedVehicleObservable
                     .subscribe {
@@ -101,13 +101,6 @@ class BaseStore(val context: Context, val ioScheduler: Scheduler) {
             }
 
 
-    private val loadAppSettings = baseAppStateDao
-            .getAppSettingsAndComplete()
-            .map { it.toAppSettings() }
-            .onErrorReturn {
-                AppSettings()
-            }
-
     init {
         db.openHelper.writableDatabase
     }
@@ -125,9 +118,64 @@ class BaseStore(val context: Context, val ioScheduler: Scheduler) {
                             lastConnectedDongle = t1.first,
                             lastConnectedVehicle = t2.first)
                 })
-                .zipWith(loadAppSettings, BiFunction<PersistedAppState, AppSettings, PersistedAppState> { t1, t2 ->
-                    t1.copy(appSettings = t2)
-                })
+                .map {
+
+                    val defaultSharedPref = PreferenceManager.getDefaultSharedPreferences(context)
+
+                    val backgroundConnectionEnabled = defaultSharedPref
+                            .getBoolean(context.getString(R.string.background_connection_pref_key), AppSettings.DEFAULT_BACKGROND_OPERATION_ENABLED)
+                    val autoConnectEnabled = defaultSharedPref
+                            .getBoolean(context.getString(R.string.auto_connect_pref_key), AppSettings.DEFAULT_AUTO_CONNECTED_ENABLED)
+
+                    val unitSystem = if (defaultSharedPref.getString(context.getString(R.string.unit_system_pref_key), context.getString(R.string.matrix))
+                            == context.getString(R.string.matrix)) {
+                        UnitSystem.Matrix
+                    } else {
+                        UnitSystem.Imperial
+                    }
+                    val fuelLevelPullFrequency = Frequency(defaultSharedPref
+                            .getString(context.getString(R.string.fuel_level_pull_frequency_pref_key), DataSettings.DEFAULT_FUEL_LEVEL_REFRESH_FREQUENCY.toString()).toLong(), TimeUnit.MINUTES)
+                    val fastChangingDataFrequency = Frequency(defaultSharedPref
+                            .getString(context.getString(R.string.fast_changing_data_pull_frequency_pref_key), DataSettings.DEFAULT_FAST_CHANGING_DATA_REFRESH_FREQUENCY.toString()).toLong(), TimeUnit.MILLISECONDS)
+                    val temperaturePullFrequency = Frequency(defaultSharedPref
+                            .getString(context.getString(R.string.temperature_pull_frequency_pref_key), DataSettings.DEFAULT_TEMPERATURE_REFRESH_FREQUENCY.toString()).toLong(), TimeUnit.MILLISECONDS)
+                    val pressurePullFrequency = Frequency(defaultSharedPref
+                            .getString(context.getString(R.string.pressure_pull_frequency_pref_key), DataSettings.DEFAULT_PRESSURE_REFRESH_FREQUENCY.toString()).toLong(), TimeUnit.MINUTES)
+
+                    val fuelLevelNotificationSettings =
+                            if (defaultSharedPref.getBoolean(context.getString(R.string.fuel_level_notification_pref_key), true)) {
+                                FuelNotificationSettings.On(defaultSharedPref.getString(context.getString(R.string.fuel_level_notification_threshold_pref_key),
+                                        FuelNotificationSettings.DEFAULT_FUEL_PERCENTAGE_LEVEL.toString()).toFloat() / 100)
+                            } else {
+                                FuelNotificationSettings.Off
+                            }
+
+                    val speedNotificationSettings =
+                            if (defaultSharedPref.getBoolean(context.getString(R.string.speed_notifications_pref_key), true)) {
+                                SpeedNotificationSettings.On(defaultSharedPref.getString(context.getString(R.string.speed_notification_threshold_pref_key), SpeedNotificationSettings.DEFAULT_MAX_SPEED_THRESHOLD.toString()).toInt())
+                            } else {
+                                SpeedNotificationSettings.Off
+                            }
+
+                    val theme = if (defaultSharedPref.getString(context.getString(R.string.dashboard_settings_pref_key), context.getString(R.string.dark_dashboard_theme))
+                            == context.getString(R.string.dark_dashboard_theme)) {
+                        DashboardTheme.Dark
+                    } else {
+                        DashboardTheme.Light
+                    }
+
+                    it.copy(appSettings = AppSettings(dataSettings = DataSettings(unitSystem = unitSystem,
+                            fuelLevelRefreshFrequency = fuelLevelPullFrequency,
+                            fastChangingDataRefreshFrequency = fastChangingDataFrequency,
+                            temperatureRefreshFrequency = temperaturePullFrequency,
+                            pressureRefreshFrequency = pressurePullFrequency),
+                            notificationSettings = NotificationSettings(fuelNotificationSettings = fuelLevelNotificationSettings,
+                                    speedNotificationSettings = speedNotificationSettings),
+                            displaySettings = DisplaySettings(dashboardTheme = theme),
+                            backgroundConnectionEnabled = backgroundConnectionEnabled,
+                            autoConnectToLastConnectedDongleOnLaunch = autoConnectEnabled))
+
+                }
                 .onErrorReturn {
                     Logger.log(TAG, "unexpected error while loading state", it)
                     PersistedAppState()

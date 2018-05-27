@@ -73,12 +73,12 @@ class SettingsVM(app: Application) : AndroidViewModel(app), SharedPreferences.On
             app.getString(R.string.background_connection_pref_key) -> {
                 updatedSettings = appSettings
                         .copy(backgroundConnectionEnabled = defaultSharedPref
-                                .getBoolean(key, false))
+                                .getBoolean(key, AppSettings.DEFAULT_BACKGROND_OPERATION_ENABLED))
             }
             app.getString(R.string.auto_connect_pref_key) -> {
                 updatedSettings = appSettings
                         .copy(autoConnectToLastConnectedDongleOnLaunch = defaultSharedPref
-                                .getBoolean(key, true))
+                                .getBoolean(key, AppSettings.DEFAULT_AUTO_CONNECTED_ENABLED))
             }
             app.getString(R.string.unit_system_pref_key) -> {
                 val unitSystem = if (defaultSharedPref.getString(key, app.getString(R.string.matrix))
@@ -90,31 +90,31 @@ class SettingsVM(app: Application) : AndroidViewModel(app), SharedPreferences.On
                 updatedSettings = appSettings.copy(dataSettings = appSettings.dataSettings.copy(unitSystem = unitSystem))
             }
             app.getString(R.string.fuel_level_pull_frequency_pref_key) -> {
-                val fuelLevelPullFrequency = defaultSharedPref.getString(key, "1").toLong()
+                val fuelLevelPullFrequency = defaultSharedPref.getString(key, DataSettings.DEFAULT_FUEL_LEVEL_REFRESH_FREQUENCY.toString()).toLong()
                 updatedSettings = appSettings.copy(dataSettings = appSettings
                         .dataSettings.copy(fuelLevelRefreshFrequency = Frequency(fuelLevelPullFrequency, TimeUnit.MINUTES)))
             }
 
             app.getString(R.string.fast_changing_data_pull_frequency_pref_key) -> {
-                val fastChangingDataFrequency = defaultSharedPref.getString(key, "50").toLong()
+                val fastChangingDataFrequency = defaultSharedPref.getString(key, DataSettings.DEFAULT_FAST_CHANGING_DATA_REFRESH_FREQUENCY.toString()).toLong()
                 updatedSettings = appSettings.copy(dataSettings = appSettings
                         .dataSettings.copy(fastChangingDataRefreshFrequency = Frequency(fastChangingDataFrequency, TimeUnit.MILLISECONDS)))
 
             }
             app.getString(R.string.temperature_pull_frequency_pref_key) -> {
-                val temperaturePullFrequency = defaultSharedPref.getString(key, "500").toLong()
+                val temperaturePullFrequency = defaultSharedPref.getString(key, DataSettings.DEFAULT_TEMPERATURE_REFRESH_FREQUENCY.toString()).toLong()
                 updatedSettings = appSettings.copy(dataSettings = appSettings
                         .dataSettings.copy(temperatureRefreshFrequency = Frequency(temperaturePullFrequency, TimeUnit.MILLISECONDS)))
 
             }
             app.getString(R.string.pressure_pull_frequency_pref_key) -> {
-                val pressurePullFrequency = defaultSharedPref.getString(key, "1").toLong()
+                val pressurePullFrequency = defaultSharedPref.getString(key, DataSettings.DEFAULT_PRESSURE_REFRESH_FREQUENCY.toString()).toLong()
                 updatedSettings = appSettings.copy(dataSettings = appSettings
                         .dataSettings.copy(pressureRefreshFrequency = Frequency(pressurePullFrequency, TimeUnit.MINUTES)))
             }
             app.getString(R.string.fuel_level_notification_pref_key) -> {
                 updatedSettings = if (defaultSharedPref.getBoolean(key, true)) {
-                    appSettings.copy(notificationSettings = appSettings.notificationSettings.copy(fuelNotificationSettings = FuelNotificationSettings.On(.3f)))
+                    appSettings.copy(notificationSettings = appSettings.notificationSettings.copy(fuelNotificationSettings = FuelNotificationSettings.On(FuelNotificationSettings.DEFAULT_FUEL_PERCENTAGE_LEVEL.toFloat() / 100)))
                 } else {
                     appSettings.copy(notificationSettings = appSettings.notificationSettings.copy(fuelNotificationSettings = FuelNotificationSettings.Off))
                 }
@@ -122,19 +122,19 @@ class SettingsVM(app: Application) : AndroidViewModel(app), SharedPreferences.On
 
             }
             app.getString(R.string.fuel_level_notification_threshold_pref_key) -> {
-                val fuelLevelNotificationThreshold = defaultSharedPref.getString(key, "30").toFloat() / 100
+                val fuelLevelNotificationThreshold = defaultSharedPref.getString(key, FuelNotificationSettings.DEFAULT_FUEL_PERCENTAGE_LEVEL.toString()).toFloat() / 100
                 updatedSettings = appSettings.copy(notificationSettings = appSettings.notificationSettings.copy(fuelNotificationSettings = FuelNotificationSettings.On(fuelLevelNotificationThreshold)))
             }
 
             app.getString(R.string.speed_notifications_pref_key) -> {
                 updatedSettings = if (defaultSharedPref.getBoolean(key, true)) {
-                    appSettings.copy(notificationSettings = appSettings.notificationSettings.copy(speedNotificationSettings = SpeedNotificationSettings.On(70)))
+                    appSettings.copy(notificationSettings = appSettings.notificationSettings.copy(speedNotificationSettings = SpeedNotificationSettings.On(SpeedNotificationSettings.DEFAULT_MAX_SPEED_THRESHOLD)))
                 } else {
                     appSettings.copy(notificationSettings = appSettings.notificationSettings.copy(speedNotificationSettings = SpeedNotificationSettings.Off))
                 }
             }
             app.getString(R.string.speed_notification_threshold_pref_key) -> {
-                val speedNotificationThreshold = defaultSharedPref.getString(key, "70").toInt()
+                val speedNotificationThreshold = defaultSharedPref.getString(key, SpeedNotificationSettings.DEFAULT_MAX_SPEED_THRESHOLD.toString()).toInt()
                 updatedSettings = appSettings.copy(notificationSettings = appSettings.notificationSettings.copy(speedNotificationSettings = SpeedNotificationSettings.On(speedNotificationThreshold)))
 
             }

@@ -102,32 +102,57 @@ enum class DashboardTheme {
 }
 
 sealed class FuelNotificationSettings {
-    data class On(val minFuelPercentageThreshold: Float = .3f) : FuelNotificationSettings()
+    companion object {
+        const val DEFAULT_FUEL_PERCENTAGE_LEVEL = 30 // in percent
+    }
+
+    data class On(val minFuelPercentageThreshold: Float = (DEFAULT_FUEL_PERCENTAGE_LEVEL.toFloat() / 100)) : FuelNotificationSettings()
     object Off : FuelNotificationSettings()
 }
 
 sealed class SpeedNotificationSettings {
-    data class On(val maxSpeedThreshold: Int = 70) : SpeedNotificationSettings()
+    companion object {
+        const val DEFAULT_MAX_SPEED_THRESHOLD = 70
+    }
+
+    data class On(val maxSpeedThreshold: Int = DEFAULT_MAX_SPEED_THRESHOLD) : SpeedNotificationSettings()
     object Off : SpeedNotificationSettings()
 }
 
 data class NotificationSettings(val fuelNotificationSettings: FuelNotificationSettings = FuelNotificationSettings.On(),
                                 val speedNotificationSettings: SpeedNotificationSettings = SpeedNotificationSettings.On())
 
-data class DisplaySettings(val dashboardTheme: DashboardTheme = DashboardTheme.Dark)
+data class DisplaySettings(val dashboardTheme: DashboardTheme = DEFAULT_THEME) {
+    companion object {
+        val DEFAULT_THEME = DashboardTheme.Dark
+    }
+}
 
-data class DataSettings(val unitSystem: UnitSystem = UnitSystem.Matrix,
+data class DataSettings(val unitSystem: UnitSystem = DEFAULT_MATRIX_SYSTEM,
         //rpm, speed, throttle, ignition, pendingtroublecodes, dtc(mil)
-                        val fastChangingDataRefreshFrequency: Frequency = Frequency(50, TimeUnit.MILLISECONDS),
-                        val temperatureRefreshFrequency: Frequency = Frequency(500, TimeUnit.MILLISECONDS),
-                        val fuelLevelRefreshFrequency: Frequency = Frequency(1, TimeUnit.MINUTES),
-                        val pressureRefreshFrequency: Frequency = Frequency(1, TimeUnit.MINUTES))
+                        val fastChangingDataRefreshFrequency: Frequency = Frequency(DEFAULT_FAST_CHANGING_DATA_REFRESH_FREQUENCY, TimeUnit.MILLISECONDS),
+                        val temperatureRefreshFrequency: Frequency = Frequency(DEFAULT_TEMPERATURE_REFRESH_FREQUENCY, TimeUnit.MILLISECONDS),
+                        val fuelLevelRefreshFrequency: Frequency = Frequency(DEFAULT_FUEL_LEVEL_REFRESH_FREQUENCY, TimeUnit.MINUTES),
+                        val pressureRefreshFrequency: Frequency = Frequency(DEFAULT_PRESSURE_REFRESH_FREQUENCY, TimeUnit.MINUTES)) {
+    companion object {
+        val DEFAULT_MATRIX_SYSTEM = UnitSystem.Matrix
+        const val DEFAULT_FAST_CHANGING_DATA_REFRESH_FREQUENCY: Long = 50
+        const val DEFAULT_TEMPERATURE_REFRESH_FREQUENCY: Long = 500
+        const val DEFAULT_FUEL_LEVEL_REFRESH_FREQUENCY: Long = 1
+        const val DEFAULT_PRESSURE_REFRESH_FREQUENCY: Long = 1
+    }
+}
 
 data class AppSettings(val dataSettings: DataSettings = DataSettings(),
                        val notificationSettings: NotificationSettings = NotificationSettings(),
                        val displaySettings: DisplaySettings = DisplaySettings(),
-                       val backgroundConnectionEnabled: Boolean = true,
-                       val autoConnectToLastConnectedDongleOnLaunch: Boolean = true)
+                       val backgroundConnectionEnabled: Boolean = DEFAULT_BACKGROND_OPERATION_ENABLED,
+                       val autoConnectToLastConnectedDongleOnLaunch: Boolean = DEFAULT_AUTO_CONNECTED_ENABLED) {
+    companion object {
+        const val DEFAULT_BACKGROND_OPERATION_ENABLED = false
+        const val DEFAULT_AUTO_CONNECTED_ENABLED = true
+    }
+}
 
 
 data class ActiveSession(val dongle: Dongle,

@@ -74,7 +74,7 @@ class CarConnectWindow : AppCompatActivity() {
             }
 
             is SettingsScreen -> {
-                replaceFragment(SettingsView())
+                replaceFragment(fragment = SettingsView(), viewTransition = false)
             }
         }
     }

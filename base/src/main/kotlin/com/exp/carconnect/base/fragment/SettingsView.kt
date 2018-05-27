@@ -8,13 +8,12 @@ import android.os.Bundle
 import android.support.v4.app.Fragment
 import android.support.v7.preference.PreferenceFragmentCompat
 import android.support.v7.preference.PreferenceManager
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
 import com.exp.carconnect.base.BaseAppContract
 import com.exp.carconnect.base.Frequency
 import com.exp.carconnect.base.R
 import com.exp.carconnect.base.state.*
+import kotlinx.android.synthetic.main.view_settings.*
 import java.util.concurrent.TimeUnit
 
 class SettingsView : Fragment() {
@@ -31,14 +30,35 @@ class SettingsView : Fragment() {
     }
 
 
-    override fun onViewCreated(view: View?, savedInstanceState: Bundle?) {
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         settingVM = ViewModelProviders.of(this).get(SettingsVM::class.java)
         childFragmentManager
                 .beginTransaction()
                 .replace(R.id.settings_container, Settings())
                 .commitNow()
+        view.viewTreeObserver.addOnGlobalLayoutListener(object : ViewTreeObserver.OnGlobalLayoutListener {
+            override fun onGlobalLayout() {
+                val animator = ViewAnimationUtils.createCircularReveal(settings_view,
+                        settings_view.width, 0,
+                        0f,
+                        Math.hypot( settings_view.width.toDouble(), settings_view.height.toDouble()).toFloat())
+
+
+                settings_view.visibility = View.VISIBLE
+                animator.duration = 400
+                animator.start()
+                view.viewTreeObserver.removeOnGlobalLayoutListener(this)
+            }
+        })
     }
+
+
+    override fun onResume() {
+        super.onResume()
+
+    }
+
 
 }
 

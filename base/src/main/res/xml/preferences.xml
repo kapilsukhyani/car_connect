@@ -28,7 +28,7 @@
             android:defaultValue="@string/default_fuel_level_pull_frequency"
             android:dialogTitle="@string/fuel_level_frequency_text"
             android:entries="@array/fuel_level_pull_frequency_options"
-            android:entryValues="@array/fuel_level_pull_frequency_options"
+            android:entryValues="@array/fuel_level_pull_frequency_values"
             android:key="@string/fuel_level_pull_frequency_pref_key"
             android:title="@string/fuel_level_frequency_text" />
 
@@ -36,15 +36,15 @@
             android:defaultValue="@string/default_fast_changing_data_pull_frequency"
             android:dialogTitle="@string/fast_changing_data_frequency_text"
             android:entries="@array/fast_changing_data_pull_frequency_options"
-            android:entryValues="@array/fast_changing_data_pull_frequency_options"
-            android:key="@string/fast_changing_data_pull_frequency__pref_key"
+            android:entryValues="@array/fast_changing_data_pull_frequency_values"
+            android:key="@string/fast_changing_data_pull_frequency_pref_key"
             android:title="@string/fast_changing_data_frequency_text" />
 
         <ListPreference
             android:defaultValue="@string/default_pressure_pull_frequency"
             android:dialogTitle="@string/pressure_frequency_text"
             android:entries="@array/pressure_pull_frequency_options"
-            android:entryValues="@array/pressure_pull_frequency_options"
+            android:entryValues="@array/pressure_pull_frequency_values"
             android:key="@string/pressure_pull_frequency_pref_key"
             android:title="@string/pressure_frequency_text" />
 
@@ -52,7 +52,7 @@
             android:defaultValue="@string/default_temp_pull_frequency"
             android:dialogTitle="@string/temperature_frequency_text"
             android:entries="@array/temp_pull_frequency_options"
-            android:entryValues="@array/temp_pull_frequency_options"
+            android:entryValues="@array/temp_pull_frequency_values"
             android:key="@string/temperature_pull_frequency_pref_key"
             android:title="@string/temperature_frequency_text" />
 
@@ -73,7 +73,7 @@
             android:dependency="speed_notification"
             android:dialogTitle="@string/speed_notification_threshold"
             android:entries="@array/speed_notification_threshold_options"
-            android:entryValues="@array/speed_notification_threshold_options"
+            android:entryValues="@array/speed_notification_threshold_values"
             android:key="@string/speed_notification_threshold_pref_key"
             android:title="@string/speed_notification_threshold" />
 
@@ -87,7 +87,7 @@
             android:dependency="fuel_level_notification"
             android:dialogTitle="@string/fuel_level_notification_threshold"
             android:entries="@array/fuel_level_notification_threshold_options"
-            android:entryValues="@array/fuel_level_notification_threshold_options"
+            android:entryValues="@array/fuel_level_notification_threshold_values"
             android:key="@string/fuel_level_notification_threshold_pref_key"
             android:title="@string/fuel_level_notification_threshold" />
 

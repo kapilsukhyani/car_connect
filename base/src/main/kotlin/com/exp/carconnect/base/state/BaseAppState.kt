@@ -37,6 +37,11 @@ fun AppState.getActiveSession(): ActiveSession {
 
 }
 
+fun AppState.copyAndReplaceAppSettings(appSettings: AppSettings): AppState {
+    return this.copyAndReplaceBaseAppState(LoadableState.Loaded(this.getBaseAppState().copy(baseAppPersistedState =
+    this.getBaseAppState().baseAppPersistedState.copy(appSettings = appSettings))))
+}
+
 
 data class BaseAppState(val mode: AppMode = AppMode.FullApp,
                         val appRunningMode: AppRunningMode = AppRunningMode.Foreground,

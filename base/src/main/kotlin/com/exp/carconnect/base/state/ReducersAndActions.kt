@@ -37,6 +37,8 @@ sealed class BaseAppAction {
     data class AddVehicleDataLoadError(val error: Throwable) : BaseAppAction()
     object KillActiveSession : BaseAppAction()
 
+    data class UpdateAppSettings(val appSettings: AppSettings) : BaseAppAction()
+
 
 }
 
@@ -53,6 +55,10 @@ class BaseAppStateReducer : Reducer<AppState> {
 
             is BaseAppAction.BaseAppStateLoadError -> {
                 state.copyAndReplaceBaseAppState(LoadableState.LoadingError(action.error))
+            }
+
+            is BaseAppAction.UpdateAppSettings -> {
+                state.copyAndReplaceAppSettings(action.appSettings)
             }
             else -> {
                 state

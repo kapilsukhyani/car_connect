@@ -107,6 +107,14 @@ abstract class BaseAppStateDao {
         insertVehicle(vehicle)
     }
 
+    @Transaction
+    open fun insertVehicleAndDongleAsRecentlyUser(vehicle: VehicleEntity, dongle: DongleEntity) {
+        unsetRecentlyUsedVehicle()
+        unsetRecentlyUsedDongle()
+        insertDongle(dongle)
+        insertVehicle(vehicle)
+    }
+
     @Query("DELETE FROM VehicleEntity")
     abstract fun deleteAllVehicles()
 

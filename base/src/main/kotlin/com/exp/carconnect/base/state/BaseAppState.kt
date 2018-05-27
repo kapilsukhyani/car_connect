@@ -42,6 +42,17 @@ fun AppState.copyAndReplaceAppSettings(appSettings: AppSettings): AppState {
     this.getBaseAppState().baseAppPersistedState.copy(appSettings = appSettings))))
 }
 
+fun AppState.copyAndReplaceRecentlyUsedDongle(dongle: Dongle): AppState {
+    val originalPersistedAppState = this.getBaseAppState().baseAppPersistedState
+    val updatedPersistedState = originalPersistedAppState.copy(lastConnectedDongle = dongle, knownDongles = originalPersistedAppState.knownDongles.plus(dongle))
+    return this.copyAndReplaceBaseAppState(LoadableState.Loaded(this.getBaseAppState().copy(baseAppPersistedState = updatedPersistedState)))
+}
+
+fun AppState.copyAndReplaceRecentlyUsedDVehicle(vehicle: Vehicle): AppState {
+    val originalPersistedAppState = this.getBaseAppState().baseAppPersistedState
+    val updatedPersistedState = originalPersistedAppState.copy(lastConnectedVehicle = vehicle, knownVehicles = originalPersistedAppState.knownVehicles.plus(vehicle))
+    return this.copyAndReplaceBaseAppState(LoadableState.Loaded(this.getBaseAppState().copy(baseAppPersistedState = updatedPersistedState)))
+}
 
 data class BaseAppState(val mode: AppMode = AppMode.FullApp,
                         val appRunningMode: AppRunningMode = AppRunningMode.Foreground,

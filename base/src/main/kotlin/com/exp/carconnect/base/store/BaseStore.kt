@@ -28,8 +28,8 @@ class BaseStore(val context: Context, val ioScheduler: Scheduler) {
     }
 
     class StateListener(val store: Store<AppState>,
-                        val ioScheduler: Scheduler,
-                        val baseAppStateDao: BaseAppStateDao) {
+                        private val ioScheduler: Scheduler,
+                        private val baseAppStateDao: BaseAppStateDao) {
 
         private val activeSessionObservable = store.asObservable()
                 .filter { it.isBaseStateLoaded() }
@@ -39,12 +39,18 @@ class BaseStore(val context: Context, val ioScheduler: Scheduler) {
         private val recentlyUsedDongleObservable = activeSessionObservable
                 .map { it.dongle }
                 .distinctUntilChanged()
+                .doOnNext {
+                    store.dispatch(BaseAppAction.AddNewConnectedDongle(it))
+                }
                 .observeOn(ioScheduler)
 
         private val recentlyUsedVehicleObservable = activeSessionObservable
                 .filter { it.vehicle is LoadableState.Loaded }
                 .map { (it.vehicle as LoadableState.Loaded).savedState }
                 .distinctUntilChanged()
+                .doOnNext {
+                    store.dispatch(BaseAppAction.AddNewVehicle(it))
+                }
                 .observeOn(ioScheduler)
 
         init {
@@ -60,7 +66,7 @@ class BaseStore(val context: Context, val ioScheduler: Scheduler) {
             recentlyUsedVehicleObservable
                     .subscribe {
                         Logger.log(TAG, "persisting new vehicle")
-                        baseAppStateDao.insertVehicle(it.toEntity())
+                        baseAppStateDao.insertVehicleAsRecentlyUsed(it.toEntity())
                     }
         }
     }

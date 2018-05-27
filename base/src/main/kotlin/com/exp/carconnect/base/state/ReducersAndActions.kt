@@ -38,6 +38,8 @@ sealed class BaseAppAction {
     object KillActiveSession : BaseAppAction()
 
     data class UpdateAppSettings(val appSettings: AppSettings) : BaseAppAction()
+    data class AddNewConnectedDongle(val dongle: Dongle) : BaseAppAction()
+    data class AddNewVehicle(val vehicle: Vehicle) : BaseAppAction()
 
 
 }
@@ -59,6 +61,14 @@ class BaseAppStateReducer : Reducer<AppState> {
 
             is BaseAppAction.UpdateAppSettings -> {
                 state.copyAndReplaceAppSettings(action.appSettings)
+            }
+
+            is BaseAppAction.AddNewConnectedDongle -> {
+                state.copyAndReplaceRecentlyUsedDongle(action.dongle)
+            }
+
+            is BaseAppAction.AddNewVehicle -> {
+                state.copyAndReplaceRecentlyUsedDVehicle(action.vehicle)
             }
             else -> {
                 state

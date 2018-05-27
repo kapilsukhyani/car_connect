@@ -222,10 +222,14 @@ class DeviceManagementVM(app: Application) : AndroidViewModel(app) {
 
                         store.asCustomObservable()
                                 .take(1)
-                                .map { Pair(it.getBaseAppState().baseAppPersistedState, it.uiState.isRestoringCurrentViewFromBackStack()) }
+                                .map {
+                                    Pair(it.getBaseAppState().baseAppPersistedState, it.uiState.isRestoringCurrentViewFromBackStack())
+                                }
                                 .subscribe {
-                                    if (it.first.lastConnectedDongle != null && !it.second) {
-                                        onDeviceSelected(bluetoothAdapter.getRemoteDevice((it.first as BaseAppPersistedState).lastConnectedDongle!!.address))
+                                    val persistedState = it.first
+                                    val isViewRestoredFromBackStack = it.second
+                                    if (persistedState.lastConnectedDongle != null && !isViewRestoredFromBackStack && persistedState.appSettings.autoConnectToLastConnectedDongleOnLaunch) {
+                                        onDeviceSelected(bluetoothAdapter.getRemoteDevice(persistedState.lastConnectedDongle.address))
                                     } else {
                                         store.dispatch(DeviceManagementViewAction
                                                 .ShowBondedDevices(bluetoothAdapter

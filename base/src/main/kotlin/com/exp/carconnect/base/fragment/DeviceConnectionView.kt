@@ -32,6 +32,7 @@ class DeviceConnectionView : Fragment(), BackInterceptor {
         super.onAttach(context)
         activity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
     }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -131,11 +132,12 @@ class DeviceConnectionVM(app: Application) : AndroidViewModel(app) {
 
         storeSubscription.add(store
                 .asCustomObservable()
-                .map { it.getBaseAppState().activeSession }
-                .filter { it is UnAvailableAvailableData.Available<ActiveSession> && it.data.vehicle is LoadableState.Loaded }
+                .filter { it.isVehicleInfoLoaded() }
                 .take(1)
                 .subscribe {
                     store.dispatch(CommonAppAction.FinishCurrentView)
+                    (getApplication<Application>() as BaseAppContract)
+                            .onDataLoadingStartedFor(it.getCurrentVehicleInfo())
                 })
     }
 

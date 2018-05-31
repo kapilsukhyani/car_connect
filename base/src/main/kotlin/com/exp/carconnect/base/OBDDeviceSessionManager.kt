@@ -203,9 +203,11 @@ class OBDSession(val device: BluetoothDevice,
                                                         , BiFunction<PendingTroubleCodesResponse, FreezeFrame, Pair<PendingTroubleCodesResponse, FreezeFrame>> { t1, t2 ->
                                                     Pair(t1, t2)
                                                 })
-
                                                 .map {
                                                     MILStatus.On(it.first.codes, UnAvailableAvailableData.Available(it.second))
+                                                }
+                                                .onErrorReturn {
+                                                    MILStatus.On(listOf(), UnAvailableAvailableData.UnAvailable)
                                                 }
                                     } else {
                                         Observable.just(MILStatus.Off)

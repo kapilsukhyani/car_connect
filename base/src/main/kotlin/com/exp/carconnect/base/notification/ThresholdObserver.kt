@@ -24,6 +24,7 @@ class ThresholdObserver(private val context: Context,
 
     private val speedNotificationPlaybackPlayer = MediaPlayer.create(context, R.raw.speed_limit_notification_sev2)
     private val fuelNotificationPlaybackPlayer = MediaPlayer.create(context, R.raw.fuel_limit_notification)
+    private val egineLightNotificationPlaybackPlayer = MediaPlayer.create(context, R.raw.engine_light_is_on_notification)
 
     private val vehicleDataAvailableObservable = stateObservable
             .observeOn(ioScheduler)
@@ -60,7 +61,7 @@ class ThresholdObserver(private val context: Context,
             .filter { it == ThresholdState.MOVING_ABOVE_THRESHOLD }
 
 
-    private val fuelLimitThresholdObserver = vehicleDataAvailableObservable
+    private val fuelLimitThresholdObservable = vehicleDataAvailableObservable
             .filter {
                 it.isActiveVehicleFuelLoaded() &&
                         it.isFuelNotificationOn()
@@ -88,6 +89,31 @@ class ThresholdObserver(private val context: Context,
             .filter { it == ThresholdState.MOVING_ABOVE_THRESHOLD }
 
 
+    private val milStatusObservable = vehicleDataAvailableObservable
+            .filter {
+                it.isActiveVehicleMilStatusLoaded()
+            }
+            .map {
+                it.getMisStatus()
+            }
+            .map { it is MILStatus.On }
+            .buffer(2, 1)
+            .map {
+                val thresholdState = if (it[0] == false && it[1] == false) {
+                    ThresholdState.BELOW_THRESHOLD
+                } else if (it[0] == false && it[1] == true) {
+                    ThresholdState.MOVING_ABOVE_THRESHOLD
+                } else if (it[0] == true && it[1] == true) {
+                    ThresholdState.ABOVE_THRESHOLD
+                } else {
+                    ThresholdState.MOVING_BELOW_THRESHOLD
+                }
+                thresholdState
+            }
+            .distinctUntilChanged()
+            .startWith(ThresholdState.UNKNOWN)
+            .filter { it == ThresholdState.MOVING_ABOVE_THRESHOLD }
+
 
     init {
         speedLimitThresholdObservable.subscribe {
@@ -95,9 +121,14 @@ class ThresholdObserver(private val context: Context,
             speedNotificationPlaybackPlayer.start()
         }
 
-        fuelLimitThresholdObserver.subscribe {
+        fuelLimitThresholdObservable.subscribe {
             fuelNotificationPlaybackPlayer.seekTo(0)
             fuelNotificationPlaybackPlayer.start()
+        }
+
+        milStatusObservable.subscribe {
+            egineLightNotificationPlaybackPlayer.seekTo(0)
+            egineLightNotificationPlaybackPlayer.start()
         }
 
     }

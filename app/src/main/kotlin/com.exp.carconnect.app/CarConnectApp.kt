@@ -71,27 +71,12 @@ class CarConnectApp : Application(),
                 , OBDDeviceSessionManager(Schedulers.io(), Schedulers.computation(), AndroidSchedulers.mainThread())))
 
         println("debugtag: creating store")
-
         store = createStore(reducers, initialState, applyMiddleware(appStateLoadingMiddleware, obdSessionManagementMiddleware))
-        store
-                .asCustomObservable()
-                .filter { it.isBaseStateLoaded() }
-                .map { it.getBaseAppState().activeSession }
-                .filter {
-                    it is UnAvailableAvailableData.Available<ActiveSession>
-                            && it.data.vehicle is LoadableState.Loaded
-                }
-                .take(1)
-                .map {
-                    val activeSession = (it as UnAvailableAvailableData.Available).data
-                    Pair((activeSession.vehicle as LoadableState.Loaded).savedState, VehicleData())
-                }
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe {
-                    store.dispatch(CommonAppAction.PushViewToBackStack(DashboardScreen(DashboardScreenState.ShowNewSnapshot(it.first, it.second))))
-                }
         println("debugtag: created store")
+
+
         persistenceStore.startListening(store)
+
         ThresholdObserver(this,
                 store.asCustomObservable(),
                 Schedulers.io(),
@@ -120,5 +105,8 @@ class CarConnectApp : Application(),
         return dashboardComponent!!
     }
 
+    override fun onDataLoadingStartedFor(info: Vehicle) {
+        store.dispatch(CommonAppAction.PushViewToBackStack(DashboardScreen(DashboardScreenState.ShowNewSnapshot(info, VehicleData()))))
+    }
 
 }

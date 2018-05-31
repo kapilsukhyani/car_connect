@@ -127,7 +127,7 @@
             android:layout_gravity="center"
             android:fontFamily="@font/atomic_age"
             android:text="@string/car_connect"
-            android:textColor="#f43b47"
+            android:textColor="@color/primaryColor"
             android:textSize="35dp"
             android:textStyle="bold" />
     </com.facebook.shimmer.ShimmerFrameLayout>

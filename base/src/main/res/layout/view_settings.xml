@@ -15,7 +15,7 @@
         android:paddingLeft="8dp"
         android:text="@string/settings"
         android:textAppearance="@style/TextAppearance.AppCompat.Widget.ActionBar.Title"
-        android:textColor="#f43b47"
+        android:textColor="@color/primaryColor"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toTopOf="parent" />

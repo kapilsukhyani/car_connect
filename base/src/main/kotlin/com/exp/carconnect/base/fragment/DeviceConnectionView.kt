@@ -51,7 +51,10 @@ class DeviceConnectionView : Fragment(), BackInterceptor {
                 .observe(this, Observer {
                     onNewState(it!!)
                 })
+    }
 
+    override fun onStart() {
+        super.onStart()
         animateTrack()
     }
 

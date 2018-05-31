@@ -200,7 +200,7 @@ class Dashboard @JvmOverloads constructor(context: Context,
 
     private val vinOnlineColor = context.getColor(android.R.color.holo_orange_dark)
     private val vinOfflineColor = context.getColor(android.R.color.white)
-    private val labelColor = context.getColor(android.R.color.holo_blue_dark)
+    private val labelColor = context.getColor(R.color.primaryColor)
     private val gaugeBGPaint = Paint(Paint.ANTI_ALIAS_FLAG)
     private val vinPaint = TextPaint(Paint.ANTI_ALIAS_FLAG)
     private val labelPaint = TextPaint(Paint.ANTI_ALIAS_FLAG)

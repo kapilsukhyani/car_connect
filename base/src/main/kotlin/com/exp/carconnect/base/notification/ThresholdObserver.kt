@@ -56,8 +56,9 @@ class ThresholdObserver(private val context: Context,
                 thresholdState
             }
             .distinctUntilChanged()
-            .filter { it == ThresholdState.MOVING_ABOVE_THRESHOLD }
             .startWith(ThresholdState.UNKNOWN)
+            .filter { it == ThresholdState.MOVING_ABOVE_THRESHOLD }
+
 
     private val fuelLimitThresholdObserver = vehicleDataAvailableObservable
             .filter {
@@ -83,8 +84,9 @@ class ThresholdObserver(private val context: Context,
                 thresholdState
             }
             .distinctUntilChanged()
-            .filter { it == ThresholdState.MOVING_ABOVE_THRESHOLD }
             .startWith(ThresholdState.UNKNOWN)
+            .filter { it == ThresholdState.MOVING_ABOVE_THRESHOLD }
+
 
 
     init {

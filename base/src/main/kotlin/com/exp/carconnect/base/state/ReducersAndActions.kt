@@ -115,58 +115,12 @@ class ActiveSessionReducer : Reducer<AppState> {
                 state.addActiveSession(state.getActiveSession().copy(vehicle = LoadableState.Loaded(action.info)))
             }
             is BaseAppAction.KillActiveSession -> {
-                val session = state.getBaseAppState().activeSession
-                if (session is UnAvailableAvailableData.Available<ActiveSession>) {
-                    session.data.socket.close()
+                if (state.isAnActiveSessionAvailable()) {
+                    state.getActiveSession().socket.close()
                     state.killActiveSession()
                 } else {
                     state
                 }
-            }
-            is BaseAppAction.AddAirIntakeTemperature -> {
-                val vehicleData = getCurrentVehicleData(state)
-                        .copy(currentAirIntakeTemp = UnAvailableAvailableData.Available(action.temp))
-                addNewSnapShot(state, vehicleData)
-            }
-            is BaseAppAction.AddAmbientAirTemperature -> {
-                val vehicleData = getCurrentVehicleData(state)
-                        .copy(currentAmbientTemp = UnAvailableAvailableData.Available(action.temp))
-                addNewSnapShot(state, vehicleData)
-            }
-            is BaseAppAction.AddRPM -> {
-                val vehicleData = getCurrentVehicleData(state)
-                        .copy(rpm = UnAvailableAvailableData.Available(action.rpm))
-                addNewSnapShot(state, vehicleData)
-            }
-            is BaseAppAction.AddSpeed -> {
-                val vehicleData = getCurrentVehicleData(state)
-                        .copy(speed = UnAvailableAvailableData.Available(action.speed))
-                addNewSnapShot(state, vehicleData)
-            }
-            is BaseAppAction.AddThrottlePosition -> {
-                val vehicleData = getCurrentVehicleData(state)
-                        .copy(throttlePosition = UnAvailableAvailableData.Available(action.throttle))
-                addNewSnapShot(state, vehicleData)
-            }
-            is BaseAppAction.AddFuel -> {
-                val vehicleData = getCurrentVehicleData(state)
-                        .copy(fuel = UnAvailableAvailableData.Available(action.fuel))
-                addNewSnapShot(state, vehicleData)
-            }
-            is BaseAppAction.AddMilStatus -> {
-                val vehicleData = getCurrentVehicleData(state)
-                        .copy(milStatus = UnAvailableAvailableData.Available(action.milStatus))
-                addNewSnapShot(state, vehicleData)
-            }
-            is BaseAppAction.AddIgnition -> {
-                val vehicleData = getCurrentVehicleData(state)
-                        .copy(ignition = UnAvailableAvailableData.Available(action.ignition))
-                addNewSnapShot(state, vehicleData)
-            }
-            is BaseAppAction.AddFuelConsumptionRate -> {
-                val vehicleData = getCurrentVehicleData(state)
-                        .copy(fuelConsumptionRate = UnAvailableAvailableData.Available(action.fuelConsumptionRate))
-                addNewSnapShot(state, vehicleData)
             }
             is BaseAppAction.AddVehicleDataLoadError -> {
                 if (state.getBaseAppState().activeSession is UnAvailableAvailableData.Available<ActiveSession>) {
@@ -177,7 +131,64 @@ class ActiveSessionReducer : Reducer<AppState> {
             }
 
             else -> {
-                state
+                if (state.isAnActiveSessionAvailable()) {
+                    when (action) {
+
+                        is BaseAppAction.AddAirIntakeTemperature -> {
+                            val vehicleData = getCurrentVehicleData(state)
+                                    .copy(currentAirIntakeTemp = UnAvailableAvailableData.Available(action.temp))
+                            addNewSnapShot(state, vehicleData)
+                        }
+                        is BaseAppAction.AddAmbientAirTemperature -> {
+                            val vehicleData = getCurrentVehicleData(state)
+                                    .copy(currentAmbientTemp = UnAvailableAvailableData.Available(action.temp))
+                            addNewSnapShot(state, vehicleData)
+                        }
+                        is BaseAppAction.AddRPM -> {
+                            val vehicleData = getCurrentVehicleData(state)
+                                    .copy(rpm = UnAvailableAvailableData.Available(action.rpm))
+                            addNewSnapShot(state, vehicleData)
+                        }
+
+                        is BaseAppAction.AddSpeed -> {
+                            val vehicleData = getCurrentVehicleData(state)
+                                    .copy(speed = UnAvailableAvailableData.Available(action.speed))
+                            addNewSnapShot(state, vehicleData)
+                        }
+                        is BaseAppAction.AddThrottlePosition -> {
+                            val vehicleData = getCurrentVehicleData(state)
+                                    .copy(throttlePosition = UnAvailableAvailableData.Available(action.throttle))
+                            addNewSnapShot(state, vehicleData)
+                        }
+                        is BaseAppAction.AddFuel -> {
+                            val vehicleData = getCurrentVehicleData(state)
+                                    .copy(fuel = UnAvailableAvailableData.Available(action.fuel))
+                            addNewSnapShot(state, vehicleData)
+                        }
+                        is BaseAppAction.AddMilStatus -> {
+                            val vehicleData = getCurrentVehicleData(state)
+                                    .copy(milStatus = UnAvailableAvailableData.Available(action.milStatus))
+                            addNewSnapShot(state, vehicleData)
+                        }
+                        is BaseAppAction.AddIgnition -> {
+                            val vehicleData = getCurrentVehicleData(state)
+                                    .copy(ignition = UnAvailableAvailableData.Available(action.ignition))
+                            addNewSnapShot(state, vehicleData)
+                        }
+                        is BaseAppAction.AddFuelConsumptionRate -> {
+                            val vehicleData = getCurrentVehicleData(state)
+                                    .copy(fuelConsumptionRate = UnAvailableAvailableData.Available(action.fuelConsumptionRate))
+                            addNewSnapShot(state, vehicleData)
+                        }
+                        else -> {
+                            state
+                        }
+                    }
+                } else {
+                    state
+                }
+
+
             }
         }
     }

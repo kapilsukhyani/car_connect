@@ -8,6 +8,7 @@ import com.exp.carconnect.base.di.NewOBDConnectionComponent
 import com.exp.carconnect.base.di.OBDConnectionModule
 import com.exp.carconnect.base.fragment.DeviceConnectionScreenStateReducer
 import com.exp.carconnect.base.fragment.DeviceManagementScreenStateReducer
+import com.exp.carconnect.base.notification.ThresholdObserver
 import com.exp.carconnect.base.state.*
 import com.exp.carconnect.base.store.BaseStore
 import com.exp.carconnect.dashboard.DashboardAppContract
@@ -91,6 +92,11 @@ class CarConnectApp : Application(),
                 }
         println("debugtag: created store")
         persistenceStore.startListening(store)
+        ThresholdObserver(this,
+                store.asCustomObservable(),
+                Schedulers.io(),
+                AndroidSchedulers.mainThread(),
+                Schedulers.computation())
 
     }
 

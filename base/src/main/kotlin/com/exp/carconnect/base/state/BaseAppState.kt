@@ -20,7 +20,33 @@ fun AppState.isBaseStateLoaded(): Boolean {
 fun AppState.copyAndReplaceBaseAppState(state: LoadableState<BaseAppState, BaseAppStateLoadingError>): AppState {
     return this.copy(moduleStateMap = moduleStateMap + Pair(BaseAppState.STATE_KEY, state))
 }
+fun AppState.isAnActiveSessionAvailable() : Boolean{
+   return this.isBaseStateLoaded() &&
+            this.getBaseAppState().activeSession is UnAvailableAvailableData.Available
+}
 
+fun AppState.isVehicleDataLoaded(): Boolean {
+   return this.isAnActiveSessionAvailable() &&
+           (this.getBaseAppState().activeSession as UnAvailableAvailableData.Available<ActiveSession>).data.currentVehicleData is LoadableState.Loaded
+}
+
+fun AppState.isActiveVehicleSpeedLoaded() : Boolean {
+  return  ((this.getBaseAppState().activeSession as UnAvailableAvailableData.Available<ActiveSession>)
+            .data.currentVehicleData as LoadableState.Loaded).savedState.speed is UnAvailableAvailableData.Available
+}
+
+fun AppState.isActiveVehicleFuelLoaded() : Boolean {
+    return  ((this.getBaseAppState().activeSession as UnAvailableAvailableData.Available<ActiveSession>)
+            .data.currentVehicleData as LoadableState.Loaded).savedState.fuel is UnAvailableAvailableData.Available
+}
+
+fun AppState.isSpeedNotificationOn(): Boolean{
+    return  this.getBaseAppState().baseAppPersistedState.appSettings.notificationSettings.speedNotificationSettings is SpeedNotificationSettings.On
+}
+
+fun AppState.isFuelNotificationOn(): Boolean{
+    return  this.getBaseAppState().baseAppPersistedState.appSettings.notificationSettings.fuelNotificationSettings is FuelNotificationSettings.On
+}
 
 fun AppState.addActiveSession(activeSession: ActiveSession): AppState {
     return this.copyAndReplaceBaseAppState(LoadableState.Loaded(this.getBaseAppState()
@@ -30,6 +56,26 @@ fun AppState.addActiveSession(activeSession: ActiveSession): AppState {
 fun AppState.killActiveSession(): AppState {
     return this.copyAndReplaceBaseAppState(LoadableState.Loaded(this.getBaseAppState()
             .copy(activeSession = UnAvailableAvailableData.UnAvailable)))
+}
+
+fun AppState.getActiveVehicleSpeed(): Float {
+    return (((this.getBaseAppState().activeSession as UnAvailableAvailableData.Available<ActiveSession>)
+            .data.currentVehicleData as LoadableState.Loaded).savedState.speed as UnAvailableAvailableData.Available).data
+}
+
+fun AppState.getActiveVehicleFuelLevel(): Float {
+    return (((this.getBaseAppState().activeSession as UnAvailableAvailableData.Available<ActiveSession>)
+            .data.currentVehicleData as LoadableState.Loaded).savedState.fuel as UnAvailableAvailableData.Available).data
+}
+
+fun AppState.getMaxSpeedThresholdFromSettings() : Int {
+    return (this.getBaseAppState().baseAppPersistedState
+            .appSettings.notificationSettings.speedNotificationSettings as SpeedNotificationSettings.On).maxSpeedThreshold
+}
+
+fun AppState.getMinFuelThresholdFromSettings() : Float {
+    return (this.getBaseAppState().baseAppPersistedState
+            .appSettings.notificationSettings.fuelNotificationSettings as FuelNotificationSettings.On).minFuelPercentageThreshold
 }
 
 fun AppState.getActiveSession(): ActiveSession {

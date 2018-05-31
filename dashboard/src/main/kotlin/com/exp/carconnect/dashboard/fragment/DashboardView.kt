@@ -16,6 +16,7 @@ import com.exp.carconnect.dashboard.state.DashboardScreen
 import com.exp.carconnect.dashboard.state.DashboardScreenState
 import com.exp.carconnect.dashboard.view.Dashboard
 import io.reactivex.disposables.CompositeDisposable
+import kotlinx.android.synthetic.main.view_dashboard.*
 
 class DashboardView : Fragment(), BackInterceptor {
     lateinit var dashboard: Dashboard
@@ -27,7 +28,7 @@ class DashboardView : Fragment(), BackInterceptor {
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        val view = inflater.inflate(R.layout.activity_dashboard, null)
+        val view = inflater.inflate(R.layout.view_dashboard, null)
         return view
     }
 
@@ -39,6 +40,9 @@ class DashboardView : Fragment(), BackInterceptor {
                 .observe(this, Observer {
                     onNewState(it!!)
                 })
+        settings_icon.setOnClickListener {
+            dashboardVM.onSettingsIconClicked()
+        }
     }
 
     private fun onNewState(it: DashboardScreenState) {
@@ -138,5 +142,9 @@ class DashboardVM(app: Application) : AndroidViewModel(app) {
 
     fun onBackPressed() {
         store.dispatch(BaseAppAction.KillActiveSession)
+    }
+
+    fun onSettingsIconClicked() {
+        store.dispatch(CommonAppAction.PushViewToBackStack(SettingsScreen(SettingsScreenState.ShowingSettings)))
     }
 }

@@ -26,7 +26,7 @@ class DashboardActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_dashboard)
+        setContentView(R.layout.view_dashboard)
         setupView()
         startActivityForResult(Intent(this, SetupActivity::class.java), SETUP_REQUEST_CODE)
 

@@ -36,23 +36,31 @@ fun AppState.isVehicleInfoLoaded(): Boolean {
             (this.getBaseAppState().activeSession as UnAvailableAvailableData.Available<ActiveSession>).data.vehicle is LoadableState.Loaded
 }
 
+fun AppState.getCurrentVehicleData(): VehicleData {
+    return ((this.getBaseAppState().activeSession as UnAvailableAvailableData.Available<ActiveSession>).data.currentVehicleData as LoadableState.Loaded).savedState
+}
+
 fun AppState.getCurrentVehicleInfo(): Vehicle {
     return ((this.getBaseAppState().activeSession as UnAvailableAvailableData.Available<ActiveSession>).data.vehicle as LoadableState.Loaded).savedState
 }
 
 fun AppState.isActiveVehicleSpeedLoaded(): Boolean {
-    return ((this.getBaseAppState().activeSession as UnAvailableAvailableData.Available<ActiveSession>)
+    return this.isVehicleDataLoaded() && ((this.getBaseAppState().activeSession as UnAvailableAvailableData.Available<ActiveSession>)
             .data.currentVehicleData as LoadableState.Loaded).savedState.speed is UnAvailableAvailableData.Available
 }
 
+fun AppState.isActiveVehcilesMILOn(): Boolean {
+    return this.isVehicleDataLoaded() && this.isActiveVehicleMilStatusLoaded() && this.getMilStatus() is MILStatus.On
+}
+
 fun AppState.isActiveVehicleMilStatusLoaded(): Boolean {
-    return ((this.getBaseAppState().activeSession as UnAvailableAvailableData.Available<ActiveSession>)
+    return this.isVehicleDataLoaded() && ((this.getBaseAppState().activeSession as UnAvailableAvailableData.Available<ActiveSession>)
             .data.currentVehicleData as LoadableState.Loaded).savedState.milStatus is UnAvailableAvailableData.Available
 }
 
 
 fun AppState.isActiveVehicleFuelLoaded(): Boolean {
-    return ((this.getBaseAppState().activeSession as UnAvailableAvailableData.Available<ActiveSession>)
+    return this.isVehicleDataLoaded() && ((this.getBaseAppState().activeSession as UnAvailableAvailableData.Available<ActiveSession>)
             .data.currentVehicleData as LoadableState.Loaded).savedState.fuel is UnAvailableAvailableData.Available
 }
 
@@ -60,7 +68,7 @@ fun AppState.isSpeedNotificationOn(): Boolean {
     return this.getBaseAppState().baseAppPersistedState.appSettings.notificationSettings.speedNotificationSettings is SpeedNotificationSettings.On
 }
 
-fun AppState.getAppSettings(): AppSettings{
+fun AppState.getAppSettings(): AppSettings {
     return this.getBaseAppState().baseAppPersistedState.appSettings
 }
 
@@ -312,6 +320,11 @@ sealed class DeviceManagementScreenState : CarConnectIndividualViewState {
 sealed class SettingsScreenState : CarConnectIndividualViewState {
     object ShowingSettings : SettingsScreenState()
     object UpdatingSettigns : SettingsScreenState()
+    object HidingClearDTCButton : SettingsScreenState()
+    object ShowingClearDTCButton : SettingsScreenState()
+    object ClearingDTCs : SettingsScreenState()
+    object ClearingDTCsSuccessful : SettingsScreenState()
+    object ClearingDtcsFailed : SettingsScreenState()
     data class ShowingUpdateSettingsError(val error: UpdateSettingsError) : SettingsScreenState()
 
 }

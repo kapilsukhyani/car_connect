@@ -70,6 +70,7 @@
     <string name="default_fuel_level_notification_threshold">30</string>
     <string name="dark_dashboard_theme">Dark</string>
     <string name="light_dashboard_theme">Light</string>
+    <string name="clear_dtcs">Clear DTCs</string>
 
 
     <string-array name="unit_systems">

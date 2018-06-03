@@ -1,8 +1,7 @@
 package com.exp.carconnect.base.fragment
 
 import android.app.Application
-import android.arch.lifecycle.AndroidViewModel
-import android.arch.lifecycle.ViewModelProviders
+import android.arch.lifecycle.*
 import android.content.SharedPreferences
 import android.os.Bundle
 import android.support.v4.app.Fragment
@@ -12,7 +11,12 @@ import android.view.*
 import com.exp.carconnect.base.BaseAppContract
 import com.exp.carconnect.base.Frequency
 import com.exp.carconnect.base.R
+import com.exp.carconnect.base.asCustomObservable
 import com.exp.carconnect.base.state.*
+import com.exp.carconnect.obdlib.obdmessage.OBDResponse
+import com.exp.carconnect.obdlib.obdmessage.ResetTroubleCodesCommand
+import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.disposables.CompositeDisposable
 import kotlinx.android.synthetic.main.view_settings.*
 import java.util.concurrent.TimeUnit
 
@@ -51,6 +55,26 @@ class SettingsView : Fragment() {
                 view.viewTreeObserver.removeOnGlobalLayoutListener(this)
             }
         })
+        clear_dtc_button.setOnClickListener {
+            settingVM.clearDtcs()
+        }
+
+        settingVM.getSettingsScreenStateLiveData().observe(this, Observer {
+            onNewState(it!!)
+        })
+    }
+
+    private fun onNewState(newState: SettingsScreenState) {
+        println("Settings New State $newState")
+        when (newState) {
+            SettingsScreenState.ShowingClearDTCButton -> {
+                clear_dtc_button.visibility = View.VISIBLE
+            }
+
+            SettingsScreenState.HidingClearDTCButton -> {
+                clear_dtc_button.visibility = View.GONE
+            }
+        }
     }
 
 }
@@ -68,15 +92,65 @@ class SettingsVM(app: Application) : AndroidViewModel(app), SharedPreferences.On
     private val app = getApplication<Application>()
     private val store = (app as BaseAppContract).store
     private val defaultSharedPref: SharedPreferences = PreferenceManager.getDefaultSharedPreferences(app)
+    private val subscriptions: CompositeDisposable = CompositeDisposable()
+    private val settingsScreenStateLiveData: MutableLiveData<SettingsScreenState> = MutableLiveData()
 
+    class NoActiveSessionAvailable : Throwable()
 
     init {
         defaultSharedPref.registerOnSharedPreferenceChangeListener(this)
+        val subscription = store.asCustomObservable()
+                .filter { it.isActiveVehicleMilStatusLoaded() }
+                .map { it.getMilStatus() }
+                .distinctUntilChanged()
+                .subscribe {
+                    if (it is MILStatus.On) {
+                        settingsScreenStateLiveData.value = SettingsScreenState.ShowingClearDTCButton
+                    } else {
+                        settingsScreenStateLiveData.value = SettingsScreenState.HidingClearDTCButton
+                    }
+                }
+        subscriptions.add(subscription)
     }
 
     override fun onCleared() {
         defaultSharedPref
                 .unregisterOnSharedPreferenceChangeListener(this)
+        subscriptions.dispose()
+    }
+
+    fun getSettingsScreenStateLiveData(): LiveData<SettingsScreenState> {
+        return settingsScreenStateLiveData
+    }
+
+    fun clearDtcs() {
+        val subscription = store.asCustomObservable()
+                .map {
+                    if (!it.isAnActiveSessionAvailable()) {
+                        throw NoActiveSessionAvailable()
+                    }
+                    it.getActiveSession().engine
+                }
+                .take(1)
+                .flatMap {
+                    it.submit<OBDResponse>(ResetTroubleCodesCommand())
+                }
+                .map {
+                    SettingsScreenState.ClearingDTCsSuccessful as SettingsScreenState
+                }
+                .onErrorReturn {
+                    SettingsScreenState.ClearingDtcsFailed
+                }
+                .observeOn(AndroidSchedulers.mainThread())
+                .doOnSubscribe {
+                    settingsScreenStateLiveData.value = SettingsScreenState.ClearingDTCs
+                }
+                .subscribe {
+                    settingsScreenStateLiveData.value = it
+                }
+
+        subscriptions.add(subscription)
+
     }
 
     override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences, key: String) {

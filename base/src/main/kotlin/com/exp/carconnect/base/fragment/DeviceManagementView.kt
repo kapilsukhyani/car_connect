@@ -313,7 +313,7 @@ class DeviceManagementScreenStateReducer : Reducer<AppState> {
 private class BondedDeviceAdapter(val context: Context, val bondedDevices: List<BluetoothDevice>, val itemClickListener: (BluetoothDevice) -> Unit) : RecyclerView.Adapter<BondedDeviceRowViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup?, viewType: Int): BondedDeviceRowViewHolder {
-        return BondedDeviceRowViewHolder(LayoutInflater.from(context).inflate(android.R.layout.simple_list_item_1, null) as TextView, itemClickListener)
+        return BondedDeviceRowViewHolder(LayoutInflater.from(context).inflate(R.layout.view_available_devices_row, null) as TextView, itemClickListener)
     }
 
     override fun getItemCount(): Int {

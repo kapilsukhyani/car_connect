@@ -71,6 +71,10 @@
     <string name="dark_dashboard_theme">Dark</string>
     <string name="light_dashboard_theme">Light</string>
     <string name="clear_dtcs">Clear DTCs</string>
+    <string name="operation_failed">Operation Failed</string>
+    <string name="clear_dtc_error_message">Something went wrong while clearing DTCs</string>
+    <string name="please_wait">Please Wait</string>
+    <string name="clearing_dtcs">Clearing DTCs</string>
 
 
     <string-array name="unit_systems">

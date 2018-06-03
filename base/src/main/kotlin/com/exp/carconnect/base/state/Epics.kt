@@ -52,7 +52,6 @@ class OBDSessionManagementEpic(private val ioScheduler: Scheduler,
                             it === BaseAppAction.KillActiveSession ||
                             it is BaseAppAction.RefreshActiveSessionDataFetchRate
                 }
-
                 .switchMap {
                     when (it) {
                         is BaseAppAction.StartNewSession -> {
@@ -72,9 +71,9 @@ class OBDSessionManagementEpic(private val ioScheduler: Scheduler,
                                 val activeSession = store.state.getActiveSession()
                                 sessionManager
                                         .updateDataLoadFrequencyForActiveSession(activeSession.engine, it.settings)
-                                        ?.subscribeOn(ioScheduler)
-                                        ?.observeOn(mainThreadScheduler)
-                                        ?: Observable.empty()
+                                        .subscribeOn(ioScheduler)
+                                        .observeOn(mainThreadScheduler)
+
                             }
                         }
                         else -> {
@@ -86,3 +85,26 @@ class OBDSessionManagementEpic(private val ioScheduler: Scheduler,
     }
 
 }
+
+class ClearDTCsEpic(private val ioScheduler: Scheduler,
+                    private val mainThreadScheduler: Scheduler,
+                    private val sessionManager: OBDDeviceSessionManager) : Epic<AppState> {
+
+    override fun map(actions: Observable<out Any>, store: Store<AppState>): Observable<out Any> {
+        return actions
+                .filter {
+                    it == BaseAppAction.ClearDTCs
+                }
+                .flatMap {
+                    if (!store.state.isAnActiveSessionAvailable() ||
+                            store.state.getActiveSession().clearDTCsOperationState == ClearDTCOperationState.Clearing) {
+                        Observable.empty()
+                    } else {
+                        sessionManager.clearDTCs(store.state.getActiveSession().engine)
+                                .subscribeOn(ioScheduler)
+                                .observeOn(mainThreadScheduler)
+                    }
+                }
+    }
+}
+

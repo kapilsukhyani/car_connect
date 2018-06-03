@@ -39,10 +39,17 @@ class OBDDeviceSessionManager(private val ioScheduler: Scheduler,
     }
 
     fun updateDataLoadFrequencyForActiveSession(engine: OBDEngine,
-                                                settings: AppSettings): Observable<BaseAppAction>? {
+                                                settings: AppSettings): Observable<BaseAppAction> {
         return activeSession
                 ?.loadVehicleData(engine, settings)
                 ?.doOnDispose { Logger.log(TAG, "Active session data loading stopped") }
+                ?: Observable.empty()
+    }
+
+    fun clearDTCs(engine: OBDEngine): Observable<BaseAppAction> {
+        return activeSession
+                ?.clearDTCs(engine)
+                ?: Observable.empty()
     }
 
 
@@ -258,5 +265,16 @@ class OBDSession(val device: BluetoothDevice,
 
 
     }
+
+    internal fun clearDTCs(engine: OBDEngine): Observable<BaseAppAction> {
+        return engine.submit<OBDResponse>(ResetTroubleCodesCommand())
+                .flatMap {
+                    Observable.fromArray<BaseAppAction>(BaseAppAction.AddMilStatus(MILStatus.Off),
+                            BaseAppAction.UpdateClearDTCsOperationStateToSuccessful)
+                }
+                .onErrorReturn { BaseAppAction.UpdateClearDTCsOperationStateToFailed(ClearDTCError.UnkownError(it)) }
+                .startWith(BaseAppAction.UpdateClearDTCsOperationStateToClearing)
+    }
+
 }
 

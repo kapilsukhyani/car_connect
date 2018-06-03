@@ -1,6 +1,8 @@
 package com.exp.carconnect.base.fragment
 
+import android.app.AlertDialog
 import android.app.Application
+import android.app.ProgressDialog
 import android.arch.lifecycle.*
 import android.content.SharedPreferences
 import android.os.Bundle
@@ -8,16 +10,12 @@ import android.support.v4.app.Fragment
 import android.support.v7.preference.PreferenceFragmentCompat
 import android.support.v7.preference.PreferenceManager
 import android.view.*
-import com.exp.carconnect.base.BaseAppContract
-import com.exp.carconnect.base.Frequency
+import com.exp.carconnect.base.*
 import com.exp.carconnect.base.R
-import com.exp.carconnect.base.asCustomObservable
 import com.exp.carconnect.base.state.*
-import com.exp.carconnect.obdlib.obdmessage.OBDResponse
-import com.exp.carconnect.obdlib.obdmessage.ResetTroubleCodesCommand
-import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import kotlinx.android.synthetic.main.view_settings.*
+import redux.api.Reducer
 import java.util.concurrent.TimeUnit
 
 class SettingsView : Fragment() {
@@ -27,6 +25,8 @@ class SettingsView : Fragment() {
     }
 
     lateinit var settingVM: SettingsVM
+
+    var progressDialog: ProgressDialog? = null
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         super.onCreateView(inflater, container, savedInstanceState)
@@ -74,7 +74,44 @@ class SettingsView : Fragment() {
             SettingsScreenState.HidingClearDTCButton -> {
                 clear_dtc_button.visibility = View.GONE
             }
+
+            SettingsScreenState.ShowingClearingDTCsProgress -> {
+                showClearingDTCProgress()
+            }
+
+            SettingsScreenState.ClearingDtcsFailed -> {
+                hideProgressDialog()
+                showCLearDTCError()
+            }
+
+            SettingsScreenState.ClearingDTCsSuccessful -> {
+                hideProgressDialog()
+            }
         }
+    }
+
+
+    private fun showClearingDTCProgress() {
+        progressDialog = ProgressDialog.show(activity, getString(R.string.please_wait), getString(R.string.clearing_dtcs))
+        progressDialog?.show()
+
+    }
+
+    private fun hideProgressDialog() {
+        progressDialog?.dismiss()
+    }
+
+    private fun showCLearDTCError() {
+        AlertDialog
+                .Builder(activity)
+                .setTitle(getString(R.string.operation_failed))
+                .setMessage(getString(R.string.clear_dtc_error_message))
+                .setCancelable(false)
+                .setPositiveButton(android.R.string.ok) { dialog, which ->
+                    dialog.dismiss()
+                }
+                .create()
+                .show()
     }
 
 }
@@ -95,22 +132,17 @@ class SettingsVM(app: Application) : AndroidViewModel(app), SharedPreferences.On
     private val subscriptions: CompositeDisposable = CompositeDisposable()
     private val settingsScreenStateLiveData: MutableLiveData<SettingsScreenState> = MutableLiveData()
 
-    class NoActiveSessionAvailable : Throwable()
 
     init {
         defaultSharedPref.registerOnSharedPreferenceChangeListener(this)
-        val subscription = store.asCustomObservable()
-                .filter { it.isActiveVehicleMilStatusLoaded() }
-                .map { it.getMilStatus() }
+
+        val screenStateSubscription = store.asCustomObservable()
+                .map { (it.uiState.currentView as SettingsScreen).screenState }
                 .distinctUntilChanged()
-                .subscribe {
-                    if (it is MILStatus.On) {
-                        settingsScreenStateLiveData.value = SettingsScreenState.ShowingClearDTCButton
-                    } else {
-                        settingsScreenStateLiveData.value = SettingsScreenState.HidingClearDTCButton
-                    }
-                }
-        subscriptions.add(subscription)
+                .subscribe { settingsScreenStateLiveData.value = it}
+        subscriptions.add(screenStateSubscription)
+
+        listenForActiveSessionMilStatus()
     }
 
     override fun onCleared() {
@@ -119,37 +151,52 @@ class SettingsVM(app: Application) : AndroidViewModel(app), SharedPreferences.On
         subscriptions.dispose()
     }
 
+
+    private fun listenForActiveSessionMilStatus() {
+        val subscription = store.asCustomObservable()
+                .filter { it.isActiveVehicleMilStatusLoaded() }
+                .map { it.getMilStatus() }
+                .distinctUntilChanged()
+                .subscribe {
+                    if (it is MILStatus.On) {
+                        store.dispatch(SettingsViewAction.ShowClearDTCButton)
+                    } else {
+                        store.dispatch(SettingsViewAction.HideClearDTCButton)
+                    }
+                }
+        subscriptions.add(subscription)
+    }
+
+
     fun getSettingsScreenStateLiveData(): LiveData<SettingsScreenState> {
         return settingsScreenStateLiveData
     }
 
     fun clearDtcs() {
         val subscription = store.asCustomObservable()
-                .map {
-                    if (!it.isAnActiveSessionAvailable()) {
-                        throw NoActiveSessionAvailable()
-                    }
-                    it.getActiveSession().engine
-                }
-                .take(1)
-                .flatMap {
-                    it.submit<OBDResponse>(ResetTroubleCodesCommand())
-                }
-                .map {
-                    SettingsScreenState.ClearingDTCsSuccessful as SettingsScreenState
-                }
-                .onErrorReturn {
-                    SettingsScreenState.ClearingDtcsFailed
-                }
-                .observeOn(AndroidSchedulers.mainThread())
-                .doOnSubscribe {
-                    settingsScreenStateLiveData.value = SettingsScreenState.ClearingDTCs
-                }
+                .filter { it.isAnActiveSessionAvailable() }
+                .map { it.getActiveSession().clearDTCsOperationState }
+                .filter { it != ClearDTCOperationState.None }
+                .distinctUntilChanged()
                 .subscribe {
-                    settingsScreenStateLiveData.value = it
-                }
+                    when (it) {
+                        is ClearDTCOperationState.Clearing -> {
+                            store.dispatch(SettingsViewAction.ShowClearingDTCInProgressState)
+                        }
 
+                        is ClearDTCOperationState.Error -> {
+                            store.dispatch(SettingsViewAction.ShowClearDTCFailedErrorState)
+                            store.dispatch(BaseAppAction.UpdateClearDTCsOperationStateToNone)
+                        }
+
+                        is ClearDTCOperationState.Successful -> {
+                            store.dispatch(SettingsViewAction.ShowClearDTCSuccessfulState)
+                            store.dispatch(BaseAppAction.UpdateClearDTCsOperationStateToNone)
+                        }
+                    }
+                }
         subscriptions.add(subscription)
+        store.dispatch(BaseAppAction.ClearDTCs)
 
     }
 
@@ -243,4 +290,49 @@ class SettingsVM(app: Application) : AndroidViewModel(app), SharedPreferences.On
         }
 
     }
+}
+
+private sealed class SettingsViewAction {
+    object ShowClearDTCButton : SettingsViewAction()
+    object HideClearDTCButton : SettingsViewAction()
+    object ShowClearingDTCInProgressState : SettingsViewAction()
+    object ShowClearDTCSuccessfulState : SettingsViewAction()
+    object ShowClearDTCFailedErrorState : SettingsViewAction()
+}
+
+class SettingsScreenStateReducer : Reducer<AppState> {
+    override fun reduce(state: AppState, action: Any?): AppState {
+        return when (action) {
+            SettingsViewAction.ShowClearDTCButton -> {
+                updateSettingsScreenUIStateTo(state, SettingsScreenState.ShowingClearDTCButton)
+            }
+            SettingsViewAction.HideClearDTCButton -> {
+                updateSettingsScreenUIStateTo(state, SettingsScreenState.HidingClearDTCButton)
+            }
+            SettingsViewAction.ShowClearingDTCInProgressState -> {
+                updateSettingsScreenUIStateTo(state, SettingsScreenState.ShowingClearingDTCsProgress)
+            }
+            SettingsViewAction.ShowClearDTCSuccessfulState -> {
+                updateSettingsScreenUIStateTo(state, SettingsScreenState.ClearingDTCsSuccessful)
+            }
+            SettingsViewAction.ShowClearDTCFailedErrorState -> {
+                updateSettingsScreenUIStateTo(state, SettingsScreenState.ClearingDtcsFailed)
+            }
+            else -> {
+                state
+            }
+        }
+    }
+
+    private fun updateSettingsScreenUIStateTo(state: AppState, newState: SettingsScreenState): AppState {
+        return state.copy(uiState = state
+                .uiState
+                .copy(backStack = state
+                        .uiState
+                        .backStack
+                        .subList(0, state.uiState.backStack.size - 1) +
+                        SettingsScreen(newState)))
+    }
+
+
 }

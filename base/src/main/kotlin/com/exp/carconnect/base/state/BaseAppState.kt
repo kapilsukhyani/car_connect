@@ -250,7 +250,19 @@ data class ActiveSession(val dongle: Dongle,
                          val engine: OBDEngine,
                          val vehicle: LoadableState<Vehicle, Throwable> = LoadableState.NotLoaded,
                          val currentVehicleData: LoadableState<VehicleData, Throwable>
-                         = LoadableState.NotLoaded)
+                         = LoadableState.NotLoaded,
+                         val clearDTCsOperationState: ClearDTCOperationState = ClearDTCOperationState.None)
+
+sealed class ClearDTCOperationState {
+
+    object None : ClearDTCOperationState()
+
+    object Clearing : ClearDTCOperationState()
+
+    object Successful : ClearDTCOperationState()
+
+    data class Error(val error: ClearDTCError) : ClearDTCOperationState()
+}
 
 data class VehicleData(val rpm: UnAvailableAvailableData<Float>
                        = UnAvailableAvailableData.UnAvailable,
@@ -322,7 +334,7 @@ sealed class SettingsScreenState : CarConnectIndividualViewState {
     object UpdatingSettigns : SettingsScreenState()
     object HidingClearDTCButton : SettingsScreenState()
     object ShowingClearDTCButton : SettingsScreenState()
-    object ClearingDTCs : SettingsScreenState()
+    object ShowingClearingDTCsProgress : SettingsScreenState()
     object ClearingDTCsSuccessful : SettingsScreenState()
     object ClearingDtcsFailed : SettingsScreenState()
     data class ShowingUpdateSettingsError(val error: UpdateSettingsError) : SettingsScreenState()
@@ -344,6 +356,10 @@ sealed class UpdateSettingsError : CarConnectError("UpdateSettingsError") {
 
 sealed class OBDDataLoadError : CarConnectError("OBDDataLoadError") {
     data class UnkownError(override val error: Throwable) : OBDDataLoadError()
+}
+
+sealed class ClearDTCError : CarConnectError("ClearDTCError") {
+    data class UnkownError(override val error: Throwable) : ClearDTCError()
 }
 
 

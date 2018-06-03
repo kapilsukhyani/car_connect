@@ -8,6 +8,7 @@ import com.exp.carconnect.base.di.NewOBDConnectionComponent
 import com.exp.carconnect.base.di.OBDConnectionModule
 import com.exp.carconnect.base.fragment.DeviceConnectionScreenStateReducer
 import com.exp.carconnect.base.fragment.DeviceManagementScreenStateReducer
+import com.exp.carconnect.base.fragment.SettingsScreenStateReducer
 import com.exp.carconnect.base.notification.ThresholdObserver
 import com.exp.carconnect.base.state.*
 import com.exp.carconnect.base.store.BaseStore
@@ -62,16 +63,20 @@ class CarConnectApp : Application(),
 
         persistenceStore = BaseStore(this, Schedulers.io())
 
+        val sessionManager = OBDDeviceSessionManager(Schedulers.io(), Schedulers.computation(), AndroidSchedulers.mainThread())
+
         val reducers = combineReducers(AppStateNavigationReducer(),
-                BaseAppStateReducer(), DeviceManagementScreenStateReducer(), DeviceConnectionScreenStateReducer(this), ActiveSessionReducer())
+                BaseAppStateReducer(), DeviceManagementScreenStateReducer(), DeviceConnectionScreenStateReducer(this), ActiveSessionReducer(), SettingsScreenStateReducer())
         val initialState = AppState(mapOf(Pair(BaseAppState.STATE_KEY, LoadableState.NotLoaded)),
                 CarConnectUIState(Stack()))
         val appStateLoadingMiddleware = createEpicMiddleware(BaseSateLoadingEpic(Schedulers.io(), AndroidSchedulers.mainThread(), this))
         val obdSessionManagementMiddleware = createEpicMiddleware(OBDSessionManagementEpic(Schedulers.io(), AndroidSchedulers.mainThread()
-                , OBDDeviceSessionManager(Schedulers.io(), Schedulers.computation(), AndroidSchedulers.mainThread())))
+                , sessionManager))
+        val clearDTCsMiddleware = createEpicMiddleware(ClearDTCsEpic(Schedulers.io(), AndroidSchedulers.mainThread()
+                , sessionManager))
 
         println("debugtag: creating store")
-        store = createStore(reducers, initialState, applyMiddleware(appStateLoadingMiddleware, obdSessionManagementMiddleware))
+        store = createStore(reducers, initialState, applyMiddleware(appStateLoadingMiddleware, obdSessionManagementMiddleware, clearDTCsMiddleware))
         println("debugtag: created store")
 
 

@@ -43,6 +43,12 @@ sealed class BaseAppAction {
     data class AddNewConnectedDongle(val dongle: Dongle) : BaseAppAction()
     data class AddNewVehicle(val vehicle: Vehicle) : BaseAppAction()
 
+    object ClearDTCs : BaseAppAction()
+    object UpdateClearDTCsOperationStateToClearing : BaseAppAction()
+    object UpdateClearDTCsOperationStateToSuccessful : BaseAppAction()
+    object UpdateClearDTCsOperationStateToNone : BaseAppAction()
+    data class UpdateClearDTCsOperationStateToFailed(val error: ClearDTCError) : BaseAppAction()
+
 
 }
 
@@ -182,6 +188,20 @@ class ActiveSessionReducer : Reducer<AppState> {
                                     .copy(fuelConsumptionRate = UnAvailableAvailableData.Available(action.fuelConsumptionRate))
                             addNewSnapShot(state, vehicleData)
                         }
+
+                        is BaseAppAction.UpdateClearDTCsOperationStateToClearing -> {
+                            state.addActiveSession(state.getActiveSession().copy(clearDTCsOperationState = ClearDTCOperationState.Clearing))
+                        }
+                        is BaseAppAction.UpdateClearDTCsOperationStateToSuccessful -> {
+                            state.addActiveSession(state.getActiveSession().copy(clearDTCsOperationState = ClearDTCOperationState.Successful))
+                        }
+                        is BaseAppAction.UpdateClearDTCsOperationStateToFailed -> {
+                            state.addActiveSession(state.getActiveSession().copy(clearDTCsOperationState = ClearDTCOperationState.Error(action.error)))
+                        }
+                        is BaseAppAction.UpdateClearDTCsOperationStateToNone -> {
+                            state.addActiveSession(state.getActiveSession().copy(clearDTCsOperationState = ClearDTCOperationState.None))
+                        }
+
                         else -> {
                             state
                         }

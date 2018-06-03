@@ -60,7 +60,11 @@ fun AppState.isSpeedNotificationOn(): Boolean {
     return this.getBaseAppState().baseAppPersistedState.appSettings.notificationSettings.speedNotificationSettings is SpeedNotificationSettings.On
 }
 
-fun AppState.getMisStatus(): MILStatus {
+fun AppState.getAppSettings(): AppSettings{
+    return this.getBaseAppState().baseAppPersistedState.appSettings
+}
+
+fun AppState.getMilStatus(): MILStatus {
     return (((this.getBaseAppState().activeSession as UnAvailableAvailableData.Available<ActiveSession>)
             .data.currentVehicleData as LoadableState.Loaded).savedState.milStatus as UnAvailableAvailableData.Available).data
 }
@@ -74,7 +78,7 @@ fun AppState.addActiveSession(activeSession: ActiveSession): AppState {
             .copy(activeSession = UnAvailableAvailableData.Available(activeSession))))
 }
 
-fun AppState.killActiveSession(): AppState {
+fun AppState.clearActiveSessionState(): AppState {
     return this.copyAndReplaceBaseAppState(LoadableState.Loaded(this.getBaseAppState()
             .copy(activeSession = UnAvailableAvailableData.UnAvailable)))
 }

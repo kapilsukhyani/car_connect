@@ -36,6 +36,8 @@ sealed class BaseAppAction {
     data class AddFuelConsumptionRate(val fuelConsumptionRate: Float) : BaseAppAction()
     data class AddVehicleDataLoadError(val error: Throwable) : BaseAppAction()
     object KillActiveSession : BaseAppAction()
+    object CloseSocketAndClearActiveSessionState : BaseAppAction()
+    data class RefreshActiveSessionDataFetchRate(val settings: AppSettings) : BaseAppAction()
 
     data class UpdateAppSettings(val appSettings: AppSettings) : BaseAppAction()
     data class AddNewConnectedDongle(val dongle: Dongle) : BaseAppAction()
@@ -114,10 +116,10 @@ class ActiveSessionReducer : Reducer<AppState> {
             is BaseAppAction.AddVehicleInfoToActiveSession -> {
                 state.addActiveSession(state.getActiveSession().copy(vehicle = LoadableState.Loaded(action.info)))
             }
-            is BaseAppAction.KillActiveSession -> {
+            is BaseAppAction.CloseSocketAndClearActiveSessionState -> {
                 if (state.isAnActiveSessionAvailable()) {
                     state.getActiveSession().socket.close()
-                    state.killActiveSession()
+                    state.clearActiveSessionState()
                 } else {
                     state
                 }

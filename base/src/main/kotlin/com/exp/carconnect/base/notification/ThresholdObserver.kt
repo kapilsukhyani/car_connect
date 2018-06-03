@@ -94,7 +94,7 @@ class ThresholdObserver(private val context: Context,
                 it.isActiveVehicleMilStatusLoaded()
             }
             .map {
-                it.getMisStatus()
+                it.getMilStatus()
             }
             .map { it is MILStatus.On }
             .buffer(2, 1)

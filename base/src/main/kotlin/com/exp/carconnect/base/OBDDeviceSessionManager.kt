@@ -3,10 +3,7 @@ package com.exp.carconnect.base
 import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothSocket
 import com.exp.carconnect.Logger
-import com.exp.carconnect.base.state.BaseAppAction
-import com.exp.carconnect.base.state.FreezeFrame
-import com.exp.carconnect.base.state.MILStatus
-import com.exp.carconnect.base.state.Vehicle
+import com.exp.carconnect.base.state.*
 import com.exp.carconnect.obdlib.OBDEngine
 import com.exp.carconnect.obdlib.OBDMultiRequest
 import com.exp.carconnect.obdlib.obdmessage.*
@@ -18,14 +15,36 @@ import java.util.concurrent.TimeUnit
 class OBDDeviceSessionManager(private val ioScheduler: Scheduler,
                               private val computationScheduler: Scheduler,
                               private val mainScheduler: Scheduler) {
+    companion object {
+        const val TAG = "OBDDeviceSessionManager"
+    }
 
+    private var activeSession: OBDSession? = null
 
-    fun startNewSession(device: BluetoothDevice): Observable<BaseAppAction> {
-        return OBDSession(device,
+    fun startNewSession(device: BluetoothDevice,
+                        settings: AppSettings): Observable<BaseAppAction> {
+        activeSession = OBDSession(device,
                 ioScheduler,
                 computationScheduler,
-                mainScheduler).start()
+                mainScheduler)
+
+        return activeSession!!
+                .start(settings)
+                .doOnDispose { Logger.log(TAG, "Active session data loading stopped") }
     }
+
+    fun killActiveSession() {
+        Logger.log(TAG, "Killing an active session")
+        activeSession = null
+    }
+
+    fun updateDataLoadFrequencyForActiveSession(engine: OBDEngine,
+                                                settings: AppSettings): Observable<BaseAppAction>? {
+        return activeSession
+                ?.loadVehicleData(engine, settings)
+                ?.doOnDispose { Logger.log(TAG, "Active session data loading stopped") }
+    }
+
 
 }
 
@@ -38,6 +57,12 @@ class OBDSession(val device: BluetoothDevice,
         const val TAG = "OBDSession"
         private const val INITIALIZATION = "Initialization"
         private const val VEHICLE_INFO = "Vehicle Info"
+        private const val FAST_CHANGING_DATA = "Fast Changing Data"
+        private const val TEMPERATURE = "Temperature"
+        private const val FREEZE_FRAME = "Freeze Frame"
+        private const val FUEL_FACTOR = 100.0f
+        private const val RPM_FACTOR = 1000.0f
+
         private val setupRequest = OBDMultiRequest(INITIALIZATION,
                 listOf(EchoOffCommand(), EchoOffCommand(), LineFeedOffCommand(), TimeoutCommand(62)))
         private val resetCommand = OBDResetCommand()
@@ -48,27 +73,16 @@ class OBDSession(val device: BluetoothDevice,
                 AvailablePidsCommand(PidCommand.TWENTY_ONE_TO_FOURTY),
                 AvailablePidsCommand(PidCommand.FOURTY_ONE_TO_SIXTY)))
 
-
-        private const val FUEL_FACTOR = 100.0f
-        private const val RPM_FACTOR = 1000.0f
-        private val fuelLevelRequest = FuelLevelRequest(repeatable = IsRepeatable.Yes(1, TimeUnit.MINUTES))
-        private val temperatureRequest = OBDMultiRequest("Temperature", listOf(TemperatureRequest(TemperatureType.AIR_INTAKE),
-                TemperatureRequest(TemperatureType.AMBIENT_AIR)),
-                IsRepeatable.Yes(500, TimeUnit.MILLISECONDS))
         private val dtcNumberRequest = DTCNumberRequest(repeatable = IsRepeatable.Yes(1, TimeUnit.MINUTES))
         private val pendingTroubleCodesRequest = PendingTroubleCodesRequest(TroubleCodeCommandType.ALL)
-        private val fastChangingDataRequest = OBDMultiRequest("Dashboard",
-                listOf(SpeedRequest(),
-                        RPMRequest(),
-                        IgnitionMonitorRequest()),
-                IsRepeatable.Yes(50, TimeUnit.MILLISECONDS))
-        private val freezeFrameRequest = OBDMultiRequest("Dashboard",
+        private val freezeFrameRequest = OBDMultiRequest(FREEZE_FRAME,
                 listOf(SpeedRequest(mode = OBDRequestMode.FREEZE_FRAME),
                         RPMRequest(mode = OBDRequestMode.FREEZE_FRAME)))
 
+
     }
 
-    fun start(): Observable<BaseAppAction> {
+    fun start(settings: AppSettings): Observable<BaseAppAction> {
         return Observable
                 .fromCallable {
                     try {
@@ -83,7 +97,7 @@ class OBDSession(val device: BluetoothDevice,
                 }.flatMap {
                     when (it) {
                         is BaseAppAction.AddActiveSession -> {
-                            startOBDSession(it.socket, it.device, it.engine)
+                            startOBDSession(it.socket, it.device, it.engine, settings)
                                     .startWith(it)
 
                         }
@@ -97,10 +111,12 @@ class OBDSession(val device: BluetoothDevice,
 
     private fun startOBDSession(socket: BluetoothSocket,
                                 device: BluetoothDevice,
-                                engine: OBDEngine): Observable<BaseAppAction> {
+                                engine: OBDEngine,
+                                settings: AppSettings): Observable<BaseAppAction> {
         return Observable.concat(executeSetupCommands(engine),
                 loadVehicleInfo(engine),
-                loadVehicleData(engine))
+                loadVehicleData(engine,
+                        settings))
     }
 
 
@@ -157,7 +173,27 @@ class OBDSession(val device: BluetoothDevice,
                 .startWith(BaseAppAction.LoadingVehicleInfo(device))
     }
 
-    private fun loadVehicleData(engine: OBDEngine): Observable<BaseAppAction> {
+    internal fun loadVehicleData(engine: OBDEngine, settings: AppSettings): Observable<BaseAppAction> {
+        val dataSettings = settings.dataSettings
+
+        val fuelLevelRequest = FuelLevelRequest(repeatable = IsRepeatable.Yes(dataSettings.fuelLevelRefreshFrequency.frequency,
+                dataSettings.fuelLevelRefreshFrequency.unit))
+
+        val temperatureRequest = OBDMultiRequest(TEMPERATURE, listOf(TemperatureRequest(TemperatureType.AIR_INTAKE),
+                TemperatureRequest(TemperatureType.AMBIENT_AIR)),
+                IsRepeatable.Yes(dataSettings.temperatureRefreshFrequency.frequency, dataSettings.temperatureRefreshFrequency.unit))
+
+
+        val fastChangingDataRequest = OBDMultiRequest(FAST_CHANGING_DATA,
+                listOf(SpeedRequest(),
+                        RPMRequest(),
+                        IgnitionMonitorRequest()),
+                IsRepeatable.Yes(dataSettings.fastChangingDataRefreshFrequency.frequency,
+                        dataSettings.fastChangingDataRefreshFrequency.unit))
+
+
+
+
         return engine.submit<TemperatureResponse>(temperatureRequest)
                 .map<BaseAppAction> {
                     if (it.type == TemperatureType.AIR_INTAKE) {

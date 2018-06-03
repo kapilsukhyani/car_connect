@@ -48,13 +48,40 @@ class OBDSessionManagementEpic(private val ioScheduler: Scheduler,
 
         return actions
                 .filter {
-                    it is BaseAppAction.StartNewSession
+                    it is BaseAppAction.StartNewSession ||
+                            it === BaseAppAction.KillActiveSession ||
+                            it is BaseAppAction.RefreshActiveSessionDataFetchRate
                 }
 
-                .flatMap {
-                    sessionManager.startNewSession((it as BaseAppAction.StartNewSession).device)
-                            .subscribeOn(ioScheduler)
-                            .observeOn(mainThreadScheduler)
+                .switchMap {
+                    when (it) {
+                        is BaseAppAction.StartNewSession -> {
+                            sessionManager.startNewSession(it.device,
+                                    store.state.getAppSettings())
+                                    .subscribeOn(ioScheduler)
+                                    .observeOn(mainThreadScheduler)
+                        }
+                        BaseAppAction.KillActiveSession -> {
+                            sessionManager.killActiveSession()
+                            Observable.just(BaseAppAction.CloseSocketAndClearActiveSessionState)
+                        }
+                        is BaseAppAction.RefreshActiveSessionDataFetchRate -> {
+                            if (!store.state.isAnActiveSessionAvailable()) {
+                                Observable.empty()
+                            } else {
+                                val activeSession = store.state.getActiveSession()
+                                sessionManager
+                                        .updateDataLoadFrequencyForActiveSession(activeSession.engine, it.settings)
+                                        ?.subscribeOn(ioScheduler)
+                                        ?.observeOn(mainThreadScheduler)
+                                        ?: Observable.empty()
+                            }
+                        }
+                        else -> {
+                            Observable.just(it)
+                        }
+                    }
+
                 }
     }
 

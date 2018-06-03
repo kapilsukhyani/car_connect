@@ -25,7 +25,7 @@ internal class OBDRequestPipe(private val ioScheduler: Scheduler,
                     obdRequestPipe.onNext(Item(request, emitter))
                 }
                 .map {
-                    // this is just a small trick to return strongly typed values instead os letting callers typecast each time
+                    // this is just a small trick to return strongly typed values instead of letting callers typecast each time
                     it as T
                 }
                 .repeatWhen { completionObservable ->

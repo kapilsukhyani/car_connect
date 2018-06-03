@@ -165,6 +165,7 @@ class SettingsVM(app: Application) : AndroidViewModel(app), SharedPreferences.On
 
         updatedSettings?.let {
             store.dispatch(BaseAppAction.UpdateAppSettings(it))
+            store.dispatch(BaseAppAction.RefreshActiveSessionDataFetchRate(it))
         }
 
     }

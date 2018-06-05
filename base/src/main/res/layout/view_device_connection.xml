@@ -22,7 +22,7 @@
         android:fontFamily="@font/atomic_age"
         android:gravity="center"
         android:text="@string/car_connect"
-        android:textColor="@color/primaryColor"
+        android:textColor="@color/primaryAccent"
         android:textSize="35dp"
         android:textStyle="bold"
         app:layout_constraintBottom_toTopOf="@+id/fixed_vertical_guideline"
@@ -70,7 +70,7 @@
                     android:fontFamily="@font/atomic_age"
                     android:gravity="center"
                     android:text="@string/setting_up"
-                    android:textColor="@color/primaryColor"
+                    android:textColor="@color/primaryAccent"
                     android:textSize="20dp"
                     android:textStyle="bold" />
             </com.facebook.shimmer.ShimmerFrameLayout>
@@ -82,7 +82,7 @@
                 android:layout_gravity="center"
                 android:gravity="center"
                 android:text="Connecting"
-                android:textColor="@color/primaryColor"
+                android:textColor="@color/primaryAccent"
                 android:textSize="12dp"
                 android:textStyle="bold" />
 

@@ -15,6 +15,14 @@ class ThresholdObserver(private val context: Context,
                         private val mainScheduler: Scheduler,
                         private val computationScheduler: Scheduler) {
 
+    companion object {
+        const val DEFAULT_LEFT_SPEAKER_SOUND_LEVEL = 0.6f
+        const val DEFAULT_RIGHT_SPEAKER_SOUND_LEVEL = 0.6f
+        const val SPEED_NOTIFICATION_PRIORITY = 1
+        const val FUEL_NOTIFICATION_PRIORITY = 2
+        const val ENGINE_LIGHT_NOTIFICATION_PRIORITY = 3
+    }
+
     enum class ThresholdState {
         UNKNOWN,
         BELOW_THRESHOLD,
@@ -132,19 +140,22 @@ class ThresholdObserver(private val context: Context,
         val engineLightNotificationSoundId = notificationSoundPool.load(context, R.raw.engine_light_is_on_notification, 3)
 
         speedLimitThresholdObservable.subscribe {
-            notificationSoundPool.stop(currentStreamId)
-            currentStreamId = notificationSoundPool.play(speedNotificationSoundId, .5f, .5f, 1, 0, 1f)
+            playNotification(speedNotificationSoundId, SPEED_NOTIFICATION_PRIORITY)
         }
 
         fuelLimitThresholdObservable.subscribe {
-            notificationSoundPool.stop(currentStreamId)
-            currentStreamId = notificationSoundPool.play(fuelNotificationSoundId, .5f, .5f, 2, 0, 1f)
+            playNotification(fuelNotificationSoundId, FUEL_NOTIFICATION_PRIORITY)
         }
 
         milStatusObservable.subscribe {
-            notificationSoundPool.stop(currentStreamId)
-            currentStreamId = notificationSoundPool.play(engineLightNotificationSoundId, .5f, .5f, 3, 0, 1f)
+            playNotification(engineLightNotificationSoundId, ENGINE_LIGHT_NOTIFICATION_PRIORITY)
         }
 
+    }
+
+
+    private fun playNotification(soundID: Int, priority: Int) {
+        notificationSoundPool.stop(currentStreamId)
+        currentStreamId = notificationSoundPool.play(soundID, DEFAULT_LEFT_SPEAKER_SOUND_LEVEL, DEFAULT_RIGHT_SPEAKER_SOUND_LEVEL, priority, 0, 1f)
     }
 }

@@ -92,7 +92,15 @@ class DashboardView : Fragment(), BackInterceptor {
         dashboard.online = true
         dashboard.rpmDribbleEnabled = true
         dashboard.speedDribbleEnabled = true
+        dashboard.addOnLayoutChangeListener(object : View.OnLayoutChangeListener {
+            override fun onLayoutChange(v: View?, left: Int, top: Int, right: Int, bottom: Int, oldLeft: Int, oldTop: Int, oldRight: Int, oldBottom: Int) {
+                dashboard.showSideGauges = false
+                dashboard.postDelayed(Runnable { dashboard.showSideGauges = true }, 1000)
+                dashboard.removeOnLayoutChangeListener(this)
+            }
+        })
     }
+
 
     override fun interceptBack(): Boolean {
         dashboardVM.onBackPressed()

@@ -1,7 +1,8 @@
 package com.exp.carconnect.base.notification
 
 import android.content.Context
-import android.media.MediaPlayer
+import android.media.AudioAttributes
+import android.media.SoundPool
 import com.exp.carconnect.base.AppState
 import com.exp.carconnect.base.R
 import com.exp.carconnect.base.state.*
@@ -22,9 +23,7 @@ class ThresholdObserver(private val context: Context,
         MOVING_ABOVE_THRESHOLD
     }
 
-    private val speedNotificationPlaybackPlayer = MediaPlayer.create(context, R.raw.speed_limit_notification_sev2)
-    private val fuelNotificationPlaybackPlayer = MediaPlayer.create(context, R.raw.fuel_limit_notification)
-    private val egineLightNotificationPlaybackPlayer = MediaPlayer.create(context, R.raw.engine_light_is_on_notification)
+    private val notificationSoundPool: SoundPool
 
     private val vehicleDataAvailableObservable = stateObservable
             .observeOn(ioScheduler)
@@ -116,19 +115,31 @@ class ThresholdObserver(private val context: Context,
 
 
     init {
+        val attributes = AudioAttributes
+                .Builder()
+                .setContentType(AudioAttributes.CONTENT_TYPE_SPEECH)
+                .setUsage(AudioAttributes.USAGE_NOTIFICATION_EVENT)
+                .setFlags(AudioAttributes.FLAG_AUDIBILITY_ENFORCED)
+                .build()
+
+        notificationSoundPool = SoundPool
+                .Builder()
+                .setMaxStreams(3)
+                .setAudioAttributes(attributes).build()
+        val speedNotificationSoundId = notificationSoundPool.load(context, R.raw.speed_limit_notification_sev2, 1)
+        val fuelNotificationSoundId = notificationSoundPool.load(context, R.raw.fuel_limit_notification, 2)
+        val engineLightNotificationSoundId = notificationSoundPool.load(context, R.raw.engine_light_is_on_notification, 3)
+
         speedLimitThresholdObservable.subscribe {
-            speedNotificationPlaybackPlayer.seekTo(0)
-            speedNotificationPlaybackPlayer.start()
+            notificationSoundPool.play(speedNotificationSoundId, .5f, .5f, 1, 0, 1f)
         }
 
         fuelLimitThresholdObservable.subscribe {
-            fuelNotificationPlaybackPlayer.seekTo(0)
-            fuelNotificationPlaybackPlayer.start()
+            notificationSoundPool.play(fuelNotificationSoundId, .5f, .5f, 2, 0, 1f)
         }
 
         milStatusObservable.subscribe {
-            egineLightNotificationPlaybackPlayer.seekTo(0)
-            egineLightNotificationPlaybackPlayer.start()
+            notificationSoundPool.play(engineLightNotificationSoundId, .5f, .5f, 3, 0, 1f)
         }
 
     }

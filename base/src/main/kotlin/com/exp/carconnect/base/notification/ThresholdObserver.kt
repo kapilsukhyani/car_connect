@@ -24,6 +24,7 @@ class ThresholdObserver(private val context: Context,
     }
 
     private val notificationSoundPool: SoundPool
+    private var currentStreamId = 0
 
     private val vehicleDataAvailableObservable = stateObservable
             .observeOn(ioScheduler)
@@ -131,15 +132,18 @@ class ThresholdObserver(private val context: Context,
         val engineLightNotificationSoundId = notificationSoundPool.load(context, R.raw.engine_light_is_on_notification, 3)
 
         speedLimitThresholdObservable.subscribe {
-            notificationSoundPool.play(speedNotificationSoundId, .5f, .5f, 1, 0, 1f)
+            notificationSoundPool.stop(currentStreamId)
+            currentStreamId = notificationSoundPool.play(speedNotificationSoundId, .5f, .5f, 1, 0, 1f)
         }
 
         fuelLimitThresholdObservable.subscribe {
-            notificationSoundPool.play(fuelNotificationSoundId, .5f, .5f, 2, 0, 1f)
+            notificationSoundPool.stop(currentStreamId)
+            currentStreamId = notificationSoundPool.play(fuelNotificationSoundId, .5f, .5f, 2, 0, 1f)
         }
 
         milStatusObservable.subscribe {
-            notificationSoundPool.play(engineLightNotificationSoundId, .5f, .5f, 3, 0, 1f)
+            notificationSoundPool.stop(currentStreamId)
+            currentStreamId = notificationSoundPool.play(engineLightNotificationSoundId, .5f, .5f, 3, 0, 1f)
         }
 
     }

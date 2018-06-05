@@ -122,12 +122,13 @@
         app:layout_constraintTop_toTopOf="parent">
 
         <TextView
+            android:gravity="center"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:fontFamily="@font/atomic_age"
             android:text="@string/car_connect"
-            android:textColor="@color/primaryColor"
+            android:textColor="@color/primaryAccent"
             android:textSize="35dp"
             android:textStyle="bold" />
     </com.facebook.shimmer.ShimmerFrameLayout>

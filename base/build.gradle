@@ -83,9 +83,6 @@ dependencies {
         transitive = true
     }
 
-    api 'com.loopeer.lib:shadow:0.0.4-beta3'
-
-
     api "com.android.support:preference-v7:26.1.0"
 
     api 'com.android.support.constraint:constraint-layout:1.0.2'

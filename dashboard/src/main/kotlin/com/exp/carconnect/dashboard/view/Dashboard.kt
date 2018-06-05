@@ -79,6 +79,7 @@ class Dashboard @JvmOverloads constructor(context: Context,
     private val transientRect = Rect()
 
 
+    private var layedOut = false
     var onOnlineChangedListener: ((Boolean) -> Unit)? = null
     var onVINChangedListener: ((String) -> Unit)? = null
 
@@ -179,10 +180,12 @@ class Dashboard @JvmOverloads constructor(context: Context,
         set(value) {
             if (value != field && !animatingSideGauges) {
                 field = value
-                if (field) {
-                    showSideGauges()
-                } else {
-                    hideSideGauges()
+                if (layedOut) {
+                    if (field) {
+                        showSideGauges()
+                    } else {
+                        hideSideGauges()
+                    }
                 }
             }
         }
@@ -273,6 +276,14 @@ class Dashboard @JvmOverloads constructor(context: Context,
 
             override fun onViewAttachedToWindow(v: View?) {
             }
+        })
+
+        addOnLayoutChangeListener(object : View.OnLayoutChangeListener {
+            override fun onLayoutChange(v: View?, left: Int, top: Int, right: Int, bottom: Int, oldLeft: Int, oldTop: Int, oldRight: Int, oldBottom: Int) {
+                layedOut = true
+                removeOnLayoutChangeListener(this)
+            }
+
         })
 
     }

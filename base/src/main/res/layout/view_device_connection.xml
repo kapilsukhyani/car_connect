@@ -1,67 +1,105 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@drawable/app_background"
     android:orientation="vertical">
 
-    <View
-        android:id="@+id/track"
-        android:layout_width="245dp"
-        android:layout_height="245dp"
-        android:layout_gravity="center"
-        android:background="@drawable/track_element_circular" />
+    <android.support.constraint.Guideline
+        android:id="@+id/fixed_vertical_guideline"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_percent="0.25" />
 
-    <LinearLayout
+
+    <TextView
+        android:id="@+id/app_text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:orientation="vertical">
+        android:layout_marginBottom="8dp"
+        android:fontFamily="@font/atomic_age"
+        android:gravity="center"
+        android:text="@string/car_connect"
+        android:textColor="@color/primaryColor"
+        android:textSize="35dp"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toTopOf="@+id/fixed_vertical_guideline"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias=".5"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
-        <com.facebook.shimmer.ShimmerFrameLayout
+
+    <FrameLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintHorizontal_bias=".5"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/fixed_vertical_guideline"
+        app:layout_constraintVertical_bias=".25">
+
+        <View
+            android:id="@+id/track"
+            android:layout_width="245dp"
+            android:layout_height="245dp"
+            android:layout_gravity="center"
+            android:background="@drawable/track_element_circular" />
+
+        <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:layout_marginBottom="8dp"
-            app:auto_start="true">
+            android:orientation="vertical">
+
+            <com.facebook.shimmer.ShimmerFrameLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_marginBottom="8dp"
+                app:auto_start="true">
+
+                <TextView
+                    android:id="@+id/setup_title"
+                    android:layout_width="140dp"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:fontFamily="@font/atomic_age"
+                    android:gravity="center"
+                    android:text="@string/setting_up"
+                    android:textColor="@color/primaryColor"
+                    android:textSize="20dp"
+                    android:textStyle="bold" />
+            </com.facebook.shimmer.ShimmerFrameLayout>
 
             <TextView
-                android:id="@+id/setup_title"
+                android:id="@+id/status"
                 android:layout_width="140dp"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
-                android:fontFamily="@font/atomic_age"
                 android:gravity="center"
-                android:text="@string/setting_up"
+                android:text="Connecting"
                 android:textColor="@color/primaryColor"
-                android:textSize="20dp"
+                android:textSize="12dp"
                 android:textStyle="bold" />
-        </com.facebook.shimmer.ShimmerFrameLayout>
 
-        <TextView
-            android:id="@+id/status"
-            android:layout_width="140dp"
-            android:layout_height="wrap_content"
+        </LinearLayout>
+
+
+        <ImageView
+            android:id="@+id/app_logo"
+            android:layout_width="50dp"
+            android:layout_height="40dp"
             android:layout_gravity="center"
-            android:gravity="center"
-            android:text="Connecting"
-            android:textColor="@color/primaryColor"
-            android:textSize="12dp"
-            android:textStyle="bold" />
+            android:layout_marginTop="104dp"
+            android:rotation="180"
+            android:scaleType="centerInside"
+            android:src="@drawable/ic_race_car_active"
+            android:transitionName="app_logo_transition" />
 
-    </LinearLayout>
+    </FrameLayout>
 
-
-    <ImageView
-        android:id="@+id/app_logo"
-        android:layout_width="50dp"
-        android:layout_height="40dp"
-        android:layout_gravity="center"
-        android:layout_marginTop="105dp"
-        android:rotation="180"
-        android:scaleType="centerInside"
-        android:src="@drawable/ic_race_car_active"
-        android:transitionName="app_logo_transition" />
-
-</FrameLayout>
+</android.support.constraint.ConstraintLayout>

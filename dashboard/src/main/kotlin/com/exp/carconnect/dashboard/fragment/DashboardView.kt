@@ -76,7 +76,7 @@ class DashboardView : Fragment(), BackInterceptor {
         dashboard.currentAirIntakeTemp = dashboardData.currentAirIntakeTemp.getValueOrDefault(0.toFloat())
         dashboard.currentAmbientTemp = dashboardData.currentAmbientTemp.getValueOrDefault(0.toFloat())
 
-        if (setVehicleInfo) {
+        if (!setVehicleInfo) {
             if (vehicle.attributes is UnAvailableAvailableData.Available) {
                 val attributes = vehicle.attributes as UnAvailableAvailableData.Available
                 vehicle_info.text = getString(R.string.vehicle_info_text, attributes.data.make, attributes.data.model, attributes.data.modelYear)

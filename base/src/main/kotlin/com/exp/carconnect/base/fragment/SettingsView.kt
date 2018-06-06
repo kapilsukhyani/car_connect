@@ -59,6 +59,9 @@ class SettingsView : Fragment() {
             settingVM.clearDtcs()
         }
 
+        settings_toolbar.setNavigationOnClickListener { settingVM.onBackPressed() }
+
+
         settingVM.getSettingsScreenStateLiveData().observe(this, Observer {
             onNewState(it!!)
         })
@@ -139,7 +142,7 @@ class SettingsVM(app: Application) : AndroidViewModel(app), SharedPreferences.On
         val screenStateSubscription = store.asCustomObservable()
                 .map { (it.uiState.currentView as SettingsScreen).screenState }
                 .distinctUntilChanged()
-                .subscribe { settingsScreenStateLiveData.value = it}
+                .subscribe { settingsScreenStateLiveData.value = it }
         subscriptions.add(screenStateSubscription)
 
         listenForActiveSessionMilStatus()
@@ -288,6 +291,11 @@ class SettingsVM(app: Application) : AndroidViewModel(app), SharedPreferences.On
             store.dispatch(BaseAppAction.UpdateAppSettings(it))
             store.dispatch(BaseAppAction.RefreshActiveSessionDataFetchRate(it))
         }
+
+    }
+
+    fun onBackPressed() {
+        store.dispatch(CommonAppAction.BackPressed)
 
     }
 }

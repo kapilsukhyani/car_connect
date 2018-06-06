@@ -9,6 +9,7 @@ import com.exp.carconnect.base.di.OBDConnectionModule
 import com.exp.carconnect.base.fragment.DeviceConnectionScreenStateReducer
 import com.exp.carconnect.base.fragment.DeviceManagementScreenStateReducer
 import com.exp.carconnect.base.fragment.SettingsScreenStateReducer
+import com.exp.carconnect.base.network.VehicleInfoLoaderFactoryImpl
 import com.exp.carconnect.base.notification.Notifier
 import com.exp.carconnect.base.state.*
 import com.exp.carconnect.base.store.BaseStore
@@ -63,7 +64,8 @@ class CarConnectApp : Application(),
 
         persistenceStore = BaseStore(this, Schedulers.io())
 
-        val sessionManager = OBDDeviceSessionManager(Schedulers.io(), Schedulers.computation(), AndroidSchedulers.mainThread())
+        val sessionManager = OBDDeviceSessionManager(Schedulers.io(), Schedulers.computation(),
+                AndroidSchedulers.mainThread(), VehicleInfoLoaderFactoryImpl().getVehicleInfoLoader())
 
         val reducers = combineReducers(AppStateNavigationReducer(),
                 BaseAppStateReducer(), DeviceManagementScreenStateReducer(), DeviceConnectionScreenStateReducer(this), ActiveSessionReducer(), SettingsScreenStateReducer())

@@ -3,6 +3,7 @@ package com.exp.carconnect.base
 import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothSocket
 import com.exp.carconnect.Logger
+import com.exp.carconnect.base.network.VehicleInfoLoader
 import com.exp.carconnect.base.state.*
 import com.exp.carconnect.obdlib.OBDEngine
 import com.exp.carconnect.obdlib.OBDMultiRequest
@@ -14,7 +15,8 @@ import java.util.concurrent.TimeUnit
 
 class OBDDeviceSessionManager(private val ioScheduler: Scheduler,
                               private val computationScheduler: Scheduler,
-                              private val mainScheduler: Scheduler) {
+                              private val mainScheduler: Scheduler,
+                              private val vehicleInfoLoader: VehicleInfoLoader) {
     companion object {
         const val TAG = "OBDDeviceSessionManager"
     }
@@ -26,7 +28,8 @@ class OBDDeviceSessionManager(private val ioScheduler: Scheduler,
         activeSession = OBDSession(device,
                 ioScheduler,
                 computationScheduler,
-                mainScheduler)
+                mainScheduler,
+                vehicleInfoLoader)
 
         return activeSession!!
                 .start(settings)
@@ -58,7 +61,8 @@ class OBDDeviceSessionManager(private val ioScheduler: Scheduler,
 class OBDSession(val device: BluetoothDevice,
                  private val ioScheduler: Scheduler,
                  private val computationScheduler: Scheduler,
-                 private val mainScheduler: Scheduler) {
+                 private val mainScheduler: Scheduler,
+                 private val vehicleInfoLoader: VehicleInfoLoader) {
 
     companion object {
         const val TAG = "OBDSession"
@@ -174,6 +178,17 @@ class OBDSession(val device: BluetoothDevice,
                     BaseAppAction.AddVehicleInfoToActiveSession(device,
                             Vehicle(vin!!, UnAvailableAvailableData.Available(availablePIDs),
                                     UnAvailableAvailableData.Available(fuelType!!))) as BaseAppAction
+                }
+                .flatMap<BaseAppAction> {
+                    val addVehicleAction = it as BaseAppAction.AddVehicleInfoToActiveSession
+                    vehicleInfoLoader
+                            .loadVehicleInfo(it.info.vin)
+                            .map { vehicleInfo ->
+                                addVehicleAction.copy(info = addVehicleAction.info.copy(attributes =
+                                UnAvailableAvailableData.Available(VehicleAttributes(vehicleInfo.make, vehicleInfo.model,
+                                        vehicleInfo.manufacturer, vehicleInfo.modelYear))))
+                            }
+                            .onErrorReturn { addVehicleAction }
                 }
                 .toObservable()
                 .onErrorReturn { BaseAppAction.VehicleInfoLoadingFailed(device, it) }

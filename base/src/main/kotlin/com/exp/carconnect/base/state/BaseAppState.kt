@@ -172,7 +172,14 @@ data class Vehicle(val vin: String,
                    val supportedPIDs: UnAvailableAvailableData<Set<String>>
                    = UnAvailableAvailableData.UnAvailable,
                    val fuelType: UnAvailableAvailableData<FuelType>
+                   = UnAvailableAvailableData.UnAvailable,
+                   val attributes: UnAvailableAvailableData<VehicleAttributes>
                    = UnAvailableAvailableData.UnAvailable)
+
+data class VehicleAttributes(val make: String,
+                             val model: String,
+                             val manufacturer: String,
+                             val modelYear: String)
 
 data class Dongle(val address: String, val name: String)
 

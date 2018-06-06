@@ -4,6 +4,7 @@ import android.arch.persistence.room.*
 import com.exp.carconnect.base.UnAvailableAvailableData
 import com.exp.carconnect.base.state.Dongle
 import com.exp.carconnect.base.state.Vehicle
+import com.exp.carconnect.base.state.VehicleAttributes
 import com.exp.carconnect.obdlib.obdmessage.FuelType
 import io.reactivex.Flowable
 import io.reactivex.Single
@@ -13,6 +14,17 @@ fun Dongle.toEntity(recentlyUsed: Boolean = true): DongleEntity {
 }
 
 fun Vehicle.toEntity(recentlyUsed: Boolean = true): VehicleEntity {
+    var model = ""
+    var make = ""
+    var manufacturer = ""
+    var modelYear = ""
+    if (this.attributes is UnAvailableAvailableData.Available) {
+        model = this.attributes.data.model
+        make = this.attributes.data.make
+        manufacturer = this.attributes.data.manufacturer
+        modelYear = this.attributes.data.modelYear
+    }
+
     return VehicleEntity(this.vin, this.fuelType.let {
         if (it is UnAvailableAvailableData.Available) {
             it.data.value
@@ -25,7 +37,7 @@ fun Vehicle.toEntity(recentlyUsed: Boolean = true): VehicleEntity {
         } else {
             ""
         }
-    }, recentlyUsed)
+    }, recentlyUsed, make, model, manufacturer, modelYear)
 }
 
 
@@ -44,8 +56,17 @@ data class DongleEntity(@PrimaryKey val address: String,
 data class VehicleEntity constructor(@PrimaryKey var vin: String,
                                      @ColumnInfo var fuelType: Int,
                                      @ColumnInfo var supportedPIDs: String,
-                                     var recentlyUsed: Boolean) {
+                                     var recentlyUsed: Boolean,
+                                     @ColumnInfo var make: String,
+                                     @ColumnInfo var model: String,
+                                     @ColumnInfo var manufacturer: String,
+                                     @ColumnInfo var modelYear: String) {
     fun toVehicle(): Vehicle {
+        val attributes = if (this.model.isEmpty() && this.make.isEmpty() && this.manufacturer.isEmpty() && this.modelYear.isEmpty()) {
+            UnAvailableAvailableData.UnAvailable
+        } else {
+            UnAvailableAvailableData.Available(VehicleAttributes(this.make, this.model, this.manufacturer, this.modelYear))
+        }
         return Vehicle(vin, if (supportedPIDs.isEmpty()) {
             UnAvailableAvailableData.UnAvailable
         } else {
@@ -56,7 +77,7 @@ data class VehicleEntity constructor(@PrimaryKey var vin: String,
             UnAvailableAvailableData.UnAvailable
         } else {
             UnAvailableAvailableData.Available(FuelType.fromValue(fuelType))
-        }
+        }, attributes
         )
     }
 }

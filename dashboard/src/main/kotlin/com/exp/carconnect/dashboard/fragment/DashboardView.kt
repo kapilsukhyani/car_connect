@@ -21,6 +21,7 @@ import kotlinx.android.synthetic.main.view_dashboard.*
 class DashboardView : Fragment(), BackInterceptor {
     lateinit var dashboard: Dashboard
     lateinit var dashboardVM: DashboardVM
+    var setVehicleInfo = false
 
     override fun onAttach(context: Context?) {
         super.onAttach(context)
@@ -74,6 +75,14 @@ class DashboardView : Fragment(), BackInterceptor {
         dashboard.fuelPercentage = dashboardData.fuel.getValueOrDefault(0.toFloat())
         dashboard.currentAirIntakeTemp = dashboardData.currentAirIntakeTemp.getValueOrDefault(0.toFloat())
         dashboard.currentAmbientTemp = dashboardData.currentAmbientTemp.getValueOrDefault(0.toFloat())
+
+        if (setVehicleInfo) {
+            if (vehicle.attributes is UnAvailableAvailableData.Available) {
+                val attributes = vehicle.attributes as UnAvailableAvailableData.Available
+                vehicle_info.text = getString(R.string.vehicle_info_text, attributes.data.make, attributes.data.model, attributes.data.modelYear)
+            }
+            setVehicleInfo = true
+        }
     }
 
     private fun <T> UnAvailableAvailableData<T>.getValueOrDefault(default: T): T {

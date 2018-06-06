@@ -9,11 +9,11 @@ import com.exp.carconnect.base.state.*
 import io.reactivex.Observable
 import io.reactivex.Scheduler
 
-class ThresholdObserver(private val context: Context,
-                        private val stateObservable: Observable<AppState>,
-                        private val ioScheduler: Scheduler,
-                        private val mainScheduler: Scheduler,
-                        private val computationScheduler: Scheduler) {
+class Notifier(private val context: Context,
+               private val stateObservable: Observable<AppState>,
+               private val ioScheduler: Scheduler,
+               private val mainScheduler: Scheduler,
+               private val computationScheduler: Scheduler) {
 
     companion object {
         const val DEFAULT_LEFT_SPEAKER_SOUND_LEVEL = 0.6f
@@ -21,6 +21,10 @@ class ThresholdObserver(private val context: Context,
         const val SPEED_NOTIFICATION_PRIORITY = 1
         const val FUEL_NOTIFICATION_PRIORITY = 2
         const val ENGINE_LIGHT_NOTIFICATION_PRIORITY = 3
+
+        const val FUEL_CRITICALLY_LOW_LEVEL_1_THRESHOLD = .04
+        const val FUEL_CRITICALLY_LOW_LEVEL_2_THRESHOLD = .02
+
     }
 
     enum class ThresholdState {
@@ -29,6 +33,21 @@ class ThresholdObserver(private val context: Context,
         ABOVE_THRESHOLD,
         MOVING_BELOW_THRESHOLD,
         MOVING_ABOVE_THRESHOLD
+    }
+
+    enum class FuelLevel {
+        UNKNOWN,
+        ABOVE_THRESHOLD,
+        BELOW_THRESHOLD,
+        CRITICALLY_LOW_LEVEL1,
+        CRITICALLY_LOW_LEVEL2
+    }
+
+    enum class FuelNotificationType {
+        NONE,
+        NORMAL,
+        CRITICAL1,
+        CRITICAL2
     }
 
     private val notificationSoundPool: SoundPool
@@ -75,26 +94,36 @@ class ThresholdObserver(private val context: Context,
                         it.isFuelNotificationOn()
             }
             .map {
-                Pair(it.getActiveVehicleFuelLevel(),
-                        it.getMinFuelThresholdFromSettings())
+                val currentFuelLevel = it.getActiveVehicleFuelLevel()
+                val threshold = it.getMinFuelThresholdFromSettings()
+                val state = when {
+                    currentFuelLevel < FUEL_CRITICALLY_LOW_LEVEL_2_THRESHOLD -> FuelLevel.CRITICALLY_LOW_LEVEL2
+                    currentFuelLevel < FUEL_CRITICALLY_LOW_LEVEL_1_THRESHOLD -> FuelLevel.CRITICALLY_LOW_LEVEL1
+                    currentFuelLevel < threshold -> FuelLevel.BELOW_THRESHOLD
+                    else -> FuelLevel.ABOVE_THRESHOLD
+                }
+                state
             }
-            .map { it.first < it.second }
+            .startWith(FuelLevel.UNKNOWN)
             .buffer(2, 1)
             .map {
-                val thresholdState = if (it[0] == false && it[1] == false) {
-                    ThresholdState.BELOW_THRESHOLD
-                } else if (it[0] == false && it[1] == true) {
-                    ThresholdState.MOVING_ABOVE_THRESHOLD
-                } else if (it[0] == true && it[1] == true) {
-                    ThresholdState.ABOVE_THRESHOLD
-                } else {
-                    ThresholdState.MOVING_BELOW_THRESHOLD
+                val previousFuelLevel = it[0]
+                val currentFuelLevel = it[1]
+
+                when {
+                    previousFuelLevel == currentFuelLevel -> FuelNotificationType.NONE
+                    (previousFuelLevel == FuelLevel.UNKNOWN || previousFuelLevel == FuelLevel.ABOVE_THRESHOLD) &&
+                            currentFuelLevel == FuelLevel.BELOW_THRESHOLD -> FuelNotificationType.NORMAL
+                    previousFuelLevel == FuelLevel.UNKNOWN && currentFuelLevel == FuelLevel.CRITICALLY_LOW_LEVEL1 -> FuelNotificationType.CRITICAL1
+                    previousFuelLevel == FuelLevel.UNKNOWN && currentFuelLevel == FuelLevel.CRITICALLY_LOW_LEVEL2 -> FuelNotificationType.CRITICAL2
+                    previousFuelLevel == FuelLevel.BELOW_THRESHOLD && currentFuelLevel == FuelLevel.CRITICALLY_LOW_LEVEL1 -> FuelNotificationType.CRITICAL1
+                    previousFuelLevel == FuelLevel.CRITICALLY_LOW_LEVEL1 && currentFuelLevel == FuelLevel.CRITICALLY_LOW_LEVEL2 -> FuelNotificationType.CRITICAL2
+                    else -> FuelNotificationType.NONE
                 }
-                thresholdState
+
             }
             .distinctUntilChanged()
-            .startWith(ThresholdState.UNKNOWN)
-            .filter { it == ThresholdState.MOVING_ABOVE_THRESHOLD }
+            .filter { it != FuelNotificationType.NONE }
 
 
     private val milStatusObservable = vehicleDataAvailableObservable
@@ -133,10 +162,13 @@ class ThresholdObserver(private val context: Context,
 
         notificationSoundPool = SoundPool
                 .Builder()
-                .setMaxStreams(3)
+                .setMaxStreams(1)
                 .setAudioAttributes(attributes).build()
+
         val speedNotificationSoundId = notificationSoundPool.load(context, R.raw.speed_limit_notification_sev2, 1)
         val fuelNotificationSoundId = notificationSoundPool.load(context, R.raw.fuel_limit_notification, 2)
+        val fuelNotificationCriticalLevel1 = notificationSoundPool.load(context, R.raw.fuel_level_notification_critical_level1, 2)
+        val fuelNotificationCriticalLevel2 = notificationSoundPool.load(context, R.raw.fuel_level_notification_critical_level2, 2)
         val engineLightNotificationSoundId = notificationSoundPool.load(context, R.raw.engine_light_is_on_notification, 3)
 
         speedLimitThresholdObservable.subscribe {
@@ -144,7 +176,13 @@ class ThresholdObserver(private val context: Context,
         }
 
         fuelLimitThresholdObservable.subscribe {
-            playNotification(fuelNotificationSoundId, FUEL_NOTIFICATION_PRIORITY)
+            val notificationId = when (it) {
+                FuelNotificationType.NORMAL -> fuelNotificationSoundId
+                FuelNotificationType.CRITICAL1 -> fuelNotificationCriticalLevel1
+                FuelNotificationType.CRITICAL2 -> fuelNotificationCriticalLevel2
+                else -> fuelNotificationSoundId
+            }
+            playNotification(notificationId, FUEL_NOTIFICATION_PRIORITY)
         }
 
         milStatusObservable.subscribe {

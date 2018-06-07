@@ -245,7 +245,7 @@ class OBDSession(val device: BluetoothDevice,
                                                 .submit<PendingTroubleCodesResponse>(pendingTroubleCodesRequest)
                                                 .zipWith(engine.submit<OBDResponse>(freezeFrameRequest)
                                                         .toList()
-                                                        .map {
+                                                        .map<UnAvailableAvailableData<FreezeFrame>> {
                                                             var rpm = 0
                                                             var speed = 0
                                                             for (response in it) {
@@ -256,13 +256,15 @@ class OBDSession(val device: BluetoothDevice,
                                                                 }
                                                             }
 
-                                                            FreezeFrame(rpm, speed)
-                                                        }.toObservable()
-                                                        , BiFunction<PendingTroubleCodesResponse, FreezeFrame, Pair<PendingTroubleCodesResponse, FreezeFrame>> { t1, t2 ->
+                                                            UnAvailableAvailableData.Available(FreezeFrame(rpm, speed))
+                                                        }
+                                                        .onErrorReturn { UnAvailableAvailableData.UnAvailable }.toObservable()
+                                                        , BiFunction<PendingTroubleCodesResponse, UnAvailableAvailableData<FreezeFrame>,
+                                                        Pair<PendingTroubleCodesResponse, UnAvailableAvailableData<FreezeFrame>>> { t1, t2 ->
                                                     Pair(t1, t2)
                                                 })
                                                 .map {
-                                                    MILStatus.On(it.first.codes, UnAvailableAvailableData.Available(it.second))
+                                                    MILStatus.On(it.first.codes, it.second)
                                                 }
                                                 .onErrorReturn {
                                                     MILStatus.On(listOf(), UnAvailableAvailableData.UnAvailable)

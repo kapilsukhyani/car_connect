@@ -147,7 +147,23 @@ class PendingTroubleCodesResponse(rawResponse: String) : OBDResponse("PendingTro
     }
 
     init {
-        this::class.java
+        codes = parseDTCs()
+    }
+
+    /**
+     * Sample DTCs response from simulator
+     * 0100:4304016803031:000000000000002:000000000000003:00000000000000
+     * 0100:4302010100001:000000000000002:000000000000003:00000000000000
+     * 0100:4302010100001:000000000000002:000000000000003:00000000000000(p0101)
+     * 0100:4302502F00001:000000000000002:000000000000003:00000000000000(c102f)
+     * 0100:4304502F01011:000000000000002:000000000000003:00000000000000(c102f,p0101)
+     * 0100:4308502F01011:010201030000002:000000000000003:00000000000000(c102f,p0101,p0102,p0103)
+     * 0100:430E502F01011:01020103502EC12:01A201000000013:00000000000000(c102f,p0101,p0102,p0103,c102e,u0101,b2201)
+     *
+     * https://en.wikipedia.org/wiki/ISO_15765-2
+     * https://en.wikipedia.org/wiki/OBD-II_PIDs#Mode_3_(no_PID_required)
+     */
+    private fun parseDTCs(): List<String> {
         val dtcs = mutableListOf<String>()
         val workingData: String
         var startIndex = 0//Header size.
@@ -158,7 +174,7 @@ class PendingTroubleCodesResponse(rawResponse: String) : OBDResponse("PendingTro
             workingData = canOneFrame//47yy{codes}
             startIndex = 4//Header is 47yy, yy showing the number of data items.
         } else if (rawResponse.contains(":")) {//CAN(ISO-15765) protocol two and more frames.
-            workingData = rawResponse.replace("[\r\n].:".toRegex(), "").replace(":".toRegex(), "")//xxx47yy{codes}
+            workingData = rawResponse.replace("[\r\n[0-3]?]?:".toRegex(), "").replace(":".toRegex(), "")//xxx47yy{codes}
             startIndex = 7//Header is xxx47yy, xxx is bytes of information to follow, yy showing the number of data items.
         } else {//ISO9141-2, KWP2000 Fast and KWP2000 5Kbps (ISO15031) protocols.
             workingData = rawResponse.replace("^47|[\r\n]47|[\r\n]".toRegex(), "")
@@ -180,7 +196,7 @@ class PendingTroubleCodesResponse(rawResponse: String) : OBDResponse("PendingTro
             begin += 4
         }
 
-        codes = Collections.unmodifiableList(dtcs)
+        return Collections.unmodifiableList(dtcs)
     }
 
     private fun hexStringToByteArray(s: Char): Int {

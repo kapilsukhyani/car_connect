@@ -10,7 +10,6 @@ import com.exp.carconnect.obdlib.OBDMultiRequest
 import com.exp.carconnect.obdlib.obdmessage.*
 import io.reactivex.Observable
 import io.reactivex.Scheduler
-import io.reactivex.functions.BiFunction
 import java.util.concurrent.TimeUnit
 
 class OBDDeviceSessionManager(private val ioScheduler: Scheduler,
@@ -243,28 +242,31 @@ class OBDSession(val device: BluetoothDevice,
                                     if (dtcResponse.milOn) {
                                         engine
                                                 .submit<PendingTroubleCodesResponse>(pendingTroubleCodesRequest)
-                                                .zipWith(engine.submit<OBDResponse>(freezeFrameRequest)
-                                                        .toList()
-                                                        .map<UnAvailableAvailableData<FreezeFrame>> {
-                                                            var rpm = 0
-                                                            var speed = 0
-                                                            for (response in it) {
-                                                                if (response is SpeedResponse) {
-                                                                    speed = response.metricSpeed
-                                                                } else if (response is RPMResponse) {
-                                                                    rpm = response.rpm
-                                                                }
-                                                            }
+                                                /**
+                                                 *https://en.wikipedia.org/wiki/OBD-II_PIDs#Mode_02
+                                                 * Current freeze frame implementation is not current, freeze frames return dtc codes which cases a particular frame to froze
+                                                 * .zipWith(engine.submit<OBDResponse>(freezeFrameRequest)
+                                                .toList()
+                                                .map<UnAvailableAvailableData<FreezeFrame>> {
+                                                var rpm = 0
+                                                var speed = 0
+                                                for (response in it) {
+                                                if (response is SpeedResponse) {
+                                                speed = response.metricSpeed
+                                                } else if (response is RPMResponse) {
+                                                rpm = response.rpm
+                                                }
+                                                }
 
-                                                            UnAvailableAvailableData.Available(FreezeFrame(rpm, speed))
-                                                        }
-                                                        .onErrorReturn { UnAvailableAvailableData.UnAvailable }.toObservable()
-                                                        , BiFunction<PendingTroubleCodesResponse, UnAvailableAvailableData<FreezeFrame>,
-                                                        Pair<PendingTroubleCodesResponse, UnAvailableAvailableData<FreezeFrame>>> { t1, t2 ->
-                                                    Pair(t1, t2)
-                                                })
+                                                UnAvailableAvailableData.Available(FreezeFrame(rpm, speed))
+                                                }
+                                                .onErrorReturn { UnAvailableAvailableData.UnAvailable }.toObservable()
+                                                , BiFunction<PendingTroubleCodesResponse, UnAvailableAvailableData<FreezeFrame>,
+                                                Pair<PendingTroubleCodesResponse, UnAvailableAvailableData<FreezeFrame>>> { t1, t2 ->
+                                                Pair(t1, t2)
+                                                })**/
                                                 .map {
-                                                    MILStatus.On(it.first.codes, it.second)
+                                                    MILStatus.On(it.codes, UnAvailableAvailableData.UnAvailable)
                                                 }
                                                 .onErrorReturn {
                                                     MILStatus.On(listOf(), UnAvailableAvailableData.UnAvailable)

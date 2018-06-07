@@ -158,15 +158,15 @@ class PendingTroubleCodesResponse(rawResponse: String) : OBDResponse("PendingTro
             workingData = canOneFrame//47yy{codes}
             startIndex = 4//Header is 47yy, yy showing the number of data items.
         } else if (rawResponse.contains(":")) {//CAN(ISO-15765) protocol two and more frames.
-            workingData = rawResponse.replace("[\r\n].:".toRegex(), "")//xxx47yy{codes}
+            workingData = rawResponse.replace("[\r\n].:".toRegex(), "").replace(":".toRegex(), "")//xxx47yy{codes}
             startIndex = 7//Header is xxx47yy, xxx is bytes of information to follow, yy showing the number of data items.
         } else {//ISO9141-2, KWP2000 Fast and KWP2000 5Kbps (ISO15031) protocols.
             workingData = rawResponse.replace("^47|[\r\n]47|[\r\n]".toRegex(), "")
         }
         var begin = startIndex
-        var dtc = ""
 
         while (begin < workingData.length) {
+            var dtc = ""
             val b1 = hexStringToByteArray(workingData[begin])
             val ch1 = b1 and 0xC0 shr (6)
             val ch2 = b1 and 0x30 shr (4)

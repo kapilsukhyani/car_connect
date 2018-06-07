@@ -39,6 +39,9 @@ internal class VPICVehicleInfoLoader : VehicleInfoLoader {
                 .retry(2)
                 .map {
                     val loadedInfo = it.Results[0]
+                    if (loadedInfo.Make.isEmpty() && loadedInfo.Model.isEmpty() && loadedInfo.Manufacturer.isEmpty() && loadedInfo.ModelYear.isEmpty()) {
+                        throw RuntimeException("Properties Not Available")
+                    }
                     VehicleInfo(loadedInfo.Make, loadedInfo.Model, loadedInfo.Manufacturer, loadedInfo.ModelYear)
                 }
     }

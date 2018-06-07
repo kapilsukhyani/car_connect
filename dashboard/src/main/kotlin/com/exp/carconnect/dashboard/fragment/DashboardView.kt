@@ -80,6 +80,8 @@ class DashboardView : Fragment(), BackInterceptor {
             if (vehicle.attributes is UnAvailableAvailableData.Available) {
                 val attributes = vehicle.attributes as UnAvailableAvailableData.Available
                 vehicle_info.text = getString(R.string.vehicle_info_text, attributes.data.make, attributes.data.model, attributes.data.modelYear)
+            } else {
+                vehicle_info.text = ""
             }
             setVehicleInfo = true
         }

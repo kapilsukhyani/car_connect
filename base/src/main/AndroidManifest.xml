@@ -6,12 +6,7 @@
     <uses-permission android:name="android.permission.BLUETOOTH" />
     <uses-permission android:name="android.permission.INTERNET" />
 
-    <application>
-
-        <activity
-            android:name="com.exp.carconnect.base.activity.SetupActivity"
-            android:theme="@style/Theme.AppCompat.DayNight">
-        </activity>
+    <application android:icon="@mipmap/ic_launcher">
 
         <meta-data
             android:name="io.fabric.ApiKey"
@@ -22,7 +17,7 @@
             android:authorities="com.exp.carconnect.dashboard.test.crashlyticsinitprovider"
             android:exported="false"
             android:initOrder="100"
-            tools:replace="android:authorities"/>
+            tools:replace="android:authorities" />
     </application>
 
 </manifest>

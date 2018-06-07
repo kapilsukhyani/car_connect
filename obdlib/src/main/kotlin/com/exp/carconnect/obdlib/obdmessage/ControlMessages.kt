@@ -174,7 +174,7 @@ class PendingTroubleCodesResponse(rawResponse: String) : OBDResponse("PendingTro
             workingData = canOneFrame//47yy{codes}
             startIndex = 4//Header is 47yy, yy showing the number of data items.
         } else if (rawResponse.contains(":")) {//CAN(ISO-15765) protocol two and more frames.
-            workingData = rawResponse.replace("[\r\n[0-3]?]?:".toRegex(), "").replace(":".toRegex(), "")//xxx47yy{codes}
+            workingData = rawResponse.replace("[\r\n[0-3]?]?:".toRegex(), "")//xxx47yy{codes}
             startIndex = 7//Header is xxx47yy, xxx is bytes of information to follow, yy showing the number of data items.
         } else {//ISO9141-2, KWP2000 Fast and KWP2000 5Kbps (ISO15031) protocols.
             workingData = rawResponse.replace("^47|[\r\n]47|[\r\n]".toRegex(), "")

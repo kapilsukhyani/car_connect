@@ -3,6 +3,21 @@ package com.exp.carconnect.obdlib.obdmessage
 import java.util.*
 import java.util.regex.Pattern
 
+
+class FreezeDTCRequest(retriable: Boolean = true,
+                       repeatable: IsRepeatable = IsRepeatable.No) :
+        MultiModeOBDRequest(OBDRequestMode.FREEZE_FRAME,
+                "FreezeDTCRequest", "02",
+                retriable, repeatable) {
+    override fun toResponse(rawResponse: String): OBDResponse {
+        return FreezeDTCResponse(rawResponse)
+    }
+}
+
+class FreezeDTCResponse(rawResponse: String) : OBDResponse("FreezeDTCResponse", rawResponse) {
+    val framesAvailable = false
+}
+
 class DistanceRequest(mode: OBDRequestMode = OBDRequestMode.CURRENT,
                       distanceType: DistanceCommandType,
                       retriable: Boolean = true,

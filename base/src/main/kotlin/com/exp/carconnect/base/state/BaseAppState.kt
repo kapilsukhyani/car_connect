@@ -28,7 +28,7 @@ fun AppState.isAnActiveSessionAvailable(): Boolean {
 
 fun AppState.isVehicleDataLoaded(): Boolean {
     return this.isAnActiveSessionAvailable() &&
-            (this.getBaseAppState().activeSession as UnAvailableAvailableData.Available<ActiveSession>).data.currentVehicleData is LoadableState.Loaded
+            (this.getBaseAppState().activeSession as UnAvailableAvailableData.Available<ActiveSession>).data.liveVehicleData is LoadableState.Loaded
 }
 
 fun AppState.isVehicleInfoLoaded(): Boolean {
@@ -36,8 +36,8 @@ fun AppState.isVehicleInfoLoaded(): Boolean {
             (this.getBaseAppState().activeSession as UnAvailableAvailableData.Available<ActiveSession>).data.vehicle is LoadableState.Loaded
 }
 
-fun AppState.getCurrentVehicleData(): VehicleData {
-    return ((this.getBaseAppState().activeSession as UnAvailableAvailableData.Available<ActiveSession>).data.currentVehicleData as LoadableState.Loaded).savedState
+fun AppState.getCurrentVehicleData(): LiveVehicleData {
+    return ((this.getBaseAppState().activeSession as UnAvailableAvailableData.Available<ActiveSession>).data.liveVehicleData as LoadableState.Loaded).savedState
 }
 
 fun AppState.getCurrentVehicleInfo(): Vehicle {
@@ -46,7 +46,7 @@ fun AppState.getCurrentVehicleInfo(): Vehicle {
 
 fun AppState.isActiveVehicleSpeedLoaded(): Boolean {
     return this.isVehicleDataLoaded() && ((this.getBaseAppState().activeSession as UnAvailableAvailableData.Available<ActiveSession>)
-            .data.currentVehicleData as LoadableState.Loaded).savedState.speed is UnAvailableAvailableData.Available
+            .data.liveVehicleData as LoadableState.Loaded).savedState.speed is UnAvailableAvailableData.Available
 }
 
 fun AppState.isActiveVehcilesMILOn(): Boolean {
@@ -55,13 +55,13 @@ fun AppState.isActiveVehcilesMILOn(): Boolean {
 
 fun AppState.isActiveVehicleMilStatusLoaded(): Boolean {
     return this.isVehicleDataLoaded() && ((this.getBaseAppState().activeSession as UnAvailableAvailableData.Available<ActiveSession>)
-            .data.currentVehicleData as LoadableState.Loaded).savedState.milStatus is UnAvailableAvailableData.Available
+            .data.liveVehicleData as LoadableState.Loaded).savedState.milStatus is UnAvailableAvailableData.Available
 }
 
 
 fun AppState.isActiveVehicleFuelLoaded(): Boolean {
     return this.isVehicleDataLoaded() && ((this.getBaseAppState().activeSession as UnAvailableAvailableData.Available<ActiveSession>)
-            .data.currentVehicleData as LoadableState.Loaded).savedState.fuel is UnAvailableAvailableData.Available
+            .data.liveVehicleData as LoadableState.Loaded).savedState.fuel is UnAvailableAvailableData.Available
 }
 
 fun AppState.isSpeedNotificationOn(): Boolean {
@@ -74,7 +74,7 @@ fun AppState.getAppSettings(): AppSettings {
 
 fun AppState.getMilStatus(): MILStatus {
     return (((this.getBaseAppState().activeSession as UnAvailableAvailableData.Available<ActiveSession>)
-            .data.currentVehicleData as LoadableState.Loaded).savedState.milStatus as UnAvailableAvailableData.Available).data
+            .data.liveVehicleData as LoadableState.Loaded).savedState.milStatus as UnAvailableAvailableData.Available).data
 }
 
 fun AppState.isFuelNotificationOn(): Boolean {
@@ -93,12 +93,12 @@ fun AppState.clearActiveSessionState(): AppState {
 
 fun AppState.getActiveVehicleSpeed(): Float {
     return (((this.getBaseAppState().activeSession as UnAvailableAvailableData.Available<ActiveSession>)
-            .data.currentVehicleData as LoadableState.Loaded).savedState.speed as UnAvailableAvailableData.Available).data
+            .data.liveVehicleData as LoadableState.Loaded).savedState.speed as UnAvailableAvailableData.Available).data
 }
 
 fun AppState.getActiveVehicleFuelLevel(): Float {
     return (((this.getBaseAppState().activeSession as UnAvailableAvailableData.Available<ActiveSession>)
-            .data.currentVehicleData as LoadableState.Loaded).savedState.fuel as UnAvailableAvailableData.Available).data
+            .data.liveVehicleData as LoadableState.Loaded).savedState.fuel as UnAvailableAvailableData.Available).data
 }
 
 fun AppState.getMaxSpeedThresholdFromSettings(): Int {
@@ -256,9 +256,10 @@ data class ActiveSession(val dongle: Dongle,
                          val socket: BluetoothSocket,
                          val engine: OBDEngine,
                          val vehicle: LoadableState<Vehicle, Throwable> = LoadableState.NotLoaded,
-                         val currentVehicleData: LoadableState<VehicleData, Throwable>
+                         val liveVehicleData: LoadableState<LiveVehicleData, Throwable>
                          = LoadableState.NotLoaded,
-                         val clearDTCsOperationState: ClearDTCOperationState = ClearDTCOperationState.None)
+                         val clearDTCsOperationState: ClearDTCOperationState = ClearDTCOperationState.None,
+                         val report: LoadableState<Report, Throwable> = LoadableState.NotLoaded)
 
 sealed class ClearDTCOperationState {
 
@@ -271,24 +272,40 @@ sealed class ClearDTCOperationState {
     data class Error(val error: ClearDTCError) : ClearDTCOperationState()
 }
 
-data class VehicleData(val rpm: UnAvailableAvailableData<Float>
+data class LiveVehicleData(val rpm: UnAvailableAvailableData<Float>
                        = UnAvailableAvailableData.UnAvailable,
-                       val speed: UnAvailableAvailableData<Float>
+                           val speed: UnAvailableAvailableData<Float>
                        = UnAvailableAvailableData.UnAvailable,
-                       val throttlePosition: UnAvailableAvailableData<Float>
+                           val throttlePosition: UnAvailableAvailableData<Float>
                        = UnAvailableAvailableData.UnAvailable,
-                       val fuel: UnAvailableAvailableData<Float>
+                           val fuel: UnAvailableAvailableData<Float>
                        = UnAvailableAvailableData.UnAvailable,
-                       val ignition: UnAvailableAvailableData<Boolean>
+                           val ignition: UnAvailableAvailableData<Boolean>
                        = UnAvailableAvailableData.UnAvailable,
-                       val milStatus: UnAvailableAvailableData<MILStatus>
+                           val milStatus: UnAvailableAvailableData<MILStatus>
                        = UnAvailableAvailableData.UnAvailable,
-                       val currentAirIntakeTemp: UnAvailableAvailableData<Float>
+                           val currentAirIntakeTemp: UnAvailableAvailableData<Float>
                        = UnAvailableAvailableData.UnAvailable,
-                       val currentAmbientTemp: UnAvailableAvailableData<Float>
+                           val currentAmbientTemp: UnAvailableAvailableData<Float>
                        = UnAvailableAvailableData.UnAvailable,
-                       val fuelConsumptionRate: UnAvailableAvailableData<Float>
+                           val fuelConsumptionRate: UnAvailableAvailableData<Float>
                        = UnAvailableAvailableData.UnAvailable)
+
+data class Report(val engineLoad: UnAvailableAvailableData<Int>,
+                  val fuelPressure: UnAvailableAvailableData<Int>,
+                  val intakeMonitorPressure: UnAvailableAvailableData<Int>,
+                  val timingAdvance: UnAvailableAvailableData<Float>,
+                  val massAirFlow: UnAvailableAvailableData<Float>,
+                  val runTimeSinceEngineStart: UnAvailableAvailableData<Int>,
+                  val distanceTravelledSinceMILOn: UnAvailableAvailableData<Int>,
+                  val fuelRailPressure: UnAvailableAvailableData<Int>,
+                  val distanceSinceDTCCleared: UnAvailableAvailableData<Int>,
+                  val barometricPressure: UnAvailableAvailableData<Int>,
+                  val wideBandAirFuelRatio: UnAvailableAvailableData<Float>,
+                  val moduleVoltage: UnAvailableAvailableData<Float>,
+                  val absoluteLoad: UnAvailableAvailableData<Float>,
+                  val fuelAirCommandedEquivalenceRatio: UnAvailableAvailableData<Float>,
+                  val oilTemperature: UnAvailableAvailableData<Int>)
 
 sealed class MILStatus {
     object Off : MILStatus()

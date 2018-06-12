@@ -63,7 +63,7 @@ class DashboardView : Fragment(), BackInterceptor {
 
     }
 
-    private fun showNewSnapshot(vehicle: Vehicle, dashboardData: VehicleData) {
+    private fun showNewSnapshot(vehicle: Vehicle, dashboardData: LiveVehicleData) {
         dashboard.currentSpeed = dashboardData.speed.getValueOrDefault(0.toFloat())
         dashboard.currentRPM = dashboardData.rpm.getValueOrDefault(0.toFloat())
         dashboard.vin = vehicle.vin
@@ -128,7 +128,7 @@ class DashboardVM(app: Application) : AndroidViewModel(app) {
                 .filter { it.getActiveSession().vehicle is LoadableState.Loaded }
                 .map {
                     Pair((it.getActiveSession().vehicle as LoadableState.Loaded).savedState,
-                            it.getActiveSession().currentVehicleData)
+                            it.getActiveSession().liveVehicleData)
                 }
                 .distinctUntilChanged()
                 .subscribe {

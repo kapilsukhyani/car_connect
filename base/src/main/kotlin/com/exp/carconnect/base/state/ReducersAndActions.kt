@@ -132,7 +132,7 @@ class ActiveSessionReducer : Reducer<AppState> {
             }
             is BaseAppAction.AddVehicleDataLoadError -> {
                 if (state.getBaseAppState().activeSession is UnAvailableAvailableData.Available<ActiveSession>) {
-                    state.addActiveSession(state.getActiveSession().copy(currentVehicleData = LoadableState.LoadingError(action.error)))
+                    state.addActiveSession(state.getActiveSession().copy(liveVehicleData = LoadableState.LoadingError(action.error)))
                 } else {
                     state
                 }
@@ -215,16 +215,16 @@ class ActiveSessionReducer : Reducer<AppState> {
         }
     }
 
-    private fun getCurrentVehicleData(state: AppState): VehicleData {
-        return if (state.getActiveSession().currentVehicleData !is LoadableState.Loaded) {
-            VehicleData()
+    private fun getCurrentVehicleData(state: AppState): LiveVehicleData {
+        return if (state.getActiveSession().liveVehicleData !is LoadableState.Loaded) {
+            LiveVehicleData()
         } else {
-            (state.getActiveSession().currentVehicleData as LoadableState.Loaded).savedState
+            (state.getActiveSession().liveVehicleData as LoadableState.Loaded).savedState
         }
     }
 
-    private fun addNewSnapShot(state: AppState, data: VehicleData): AppState {
-        return state.addActiveSession(state.getActiveSession().copy(currentVehicleData = LoadableState.Loaded(data)))
+    private fun addNewSnapShot(state: AppState, data: LiveVehicleData): AppState {
+        return state.addActiveSession(state.getActiveSession().copy(liveVehicleData = LoadableState.Loaded(data)))
 
     }
 

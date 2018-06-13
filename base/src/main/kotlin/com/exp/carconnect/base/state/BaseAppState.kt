@@ -36,12 +36,20 @@ fun AppState.isVehicleInfoLoaded(): Boolean {
             (this.getBaseAppState().activeSession as UnAvailableAvailableData.Available<ActiveSession>).data.vehicle is LoadableState.Loaded
 }
 
+fun AppState.isAvailablePIDsLoaded(): Boolean {
+    return isVehicleInfoLoaded() && getCurrentVehicleInfo().supportedPIDs is UnAvailableAvailableData.Available
+}
+
 fun AppState.getCurrentVehicleData(): LiveVehicleData {
     return ((this.getBaseAppState().activeSession as UnAvailableAvailableData.Available<ActiveSession>).data.liveVehicleData as LoadableState.Loaded).savedState
 }
 
 fun AppState.getCurrentVehicleInfo(): Vehicle {
     return ((this.getBaseAppState().activeSession as UnAvailableAvailableData.Available<ActiveSession>).data.vehicle as LoadableState.Loaded).savedState
+}
+
+fun AppState.getAvailablePIDs(): Set<String> {
+    return (getCurrentVehicleInfo().supportedPIDs as UnAvailableAvailableData.Available).data
 }
 
 fun AppState.isActiveVehicleSpeedLoaded(): Boolean {
@@ -273,39 +281,54 @@ sealed class ClearDTCOperationState {
 }
 
 data class LiveVehicleData(val rpm: UnAvailableAvailableData<Float>
-                       = UnAvailableAvailableData.UnAvailable,
+                           = UnAvailableAvailableData.UnAvailable,
                            val speed: UnAvailableAvailableData<Float>
-                       = UnAvailableAvailableData.UnAvailable,
+                           = UnAvailableAvailableData.UnAvailable,
                            val throttlePosition: UnAvailableAvailableData<Float>
-                       = UnAvailableAvailableData.UnAvailable,
+                           = UnAvailableAvailableData.UnAvailable,
                            val fuel: UnAvailableAvailableData<Float>
-                       = UnAvailableAvailableData.UnAvailable,
+                           = UnAvailableAvailableData.UnAvailable,
                            val ignition: UnAvailableAvailableData<Boolean>
-                       = UnAvailableAvailableData.UnAvailable,
+                           = UnAvailableAvailableData.UnAvailable,
                            val milStatus: UnAvailableAvailableData<MILStatus>
-                       = UnAvailableAvailableData.UnAvailable,
+                           = UnAvailableAvailableData.UnAvailable,
                            val currentAirIntakeTemp: UnAvailableAvailableData<Float>
-                       = UnAvailableAvailableData.UnAvailable,
+                           = UnAvailableAvailableData.UnAvailable,
                            val currentAmbientTemp: UnAvailableAvailableData<Float>
-                       = UnAvailableAvailableData.UnAvailable,
+                           = UnAvailableAvailableData.UnAvailable,
                            val fuelConsumptionRate: UnAvailableAvailableData<Float>
-                       = UnAvailableAvailableData.UnAvailable)
+                           = UnAvailableAvailableData.UnAvailable)
 
-data class Report(val engineLoad: UnAvailableAvailableData<Int>,
-                  val fuelPressure: UnAvailableAvailableData<Int>,
-                  val intakeMonitorPressure: UnAvailableAvailableData<Int>,
-                  val timingAdvance: UnAvailableAvailableData<Float>,
-                  val massAirFlow: UnAvailableAvailableData<Float>,
-                  val runTimeSinceEngineStart: UnAvailableAvailableData<Int>,
-                  val distanceTravelledSinceMILOn: UnAvailableAvailableData<Int>,
-                  val fuelRailPressure: UnAvailableAvailableData<Int>,
-                  val distanceSinceDTCCleared: UnAvailableAvailableData<Int>,
-                  val barometricPressure: UnAvailableAvailableData<Int>,
-                  val wideBandAirFuelRatio: UnAvailableAvailableData<Float>,
-                  val moduleVoltage: UnAvailableAvailableData<Float>,
-                  val absoluteLoad: UnAvailableAvailableData<Float>,
-                  val fuelAirCommandedEquivalenceRatio: UnAvailableAvailableData<Float>,
-                  val oilTemperature: UnAvailableAvailableData<Int>)
+data class Report(val engineLoad: UnAvailableAvailableData<Float>
+                  = UnAvailableAvailableData.UnAvailable,
+                  val fuelPressure: UnAvailableAvailableData<Int>
+                  = UnAvailableAvailableData.UnAvailable,
+                  val intakeManifoldPressure: UnAvailableAvailableData<Int>
+                  = UnAvailableAvailableData.UnAvailable,
+                  val timingAdvance: UnAvailableAvailableData<Float>
+                  = UnAvailableAvailableData.UnAvailable,
+                  val massAirFlow: UnAvailableAvailableData<Float>
+                  = UnAvailableAvailableData.UnAvailable,
+                  val runTimeSinceEngineStart: UnAvailableAvailableData<Int>
+                  = UnAvailableAvailableData.UnAvailable,
+                  val distanceTravelledSinceMILOn: UnAvailableAvailableData<Int>
+                  = UnAvailableAvailableData.UnAvailable,
+                  val fuelRailPressure: UnAvailableAvailableData<Int>
+                  = UnAvailableAvailableData.UnAvailable,
+                  val distanceSinceDTCCleared: UnAvailableAvailableData<Int>
+                  = UnAvailableAvailableData.UnAvailable,
+                  val barometricPressure: UnAvailableAvailableData<Int>
+                  = UnAvailableAvailableData.UnAvailable,
+                  val wideBandAirFuelRatio: UnAvailableAvailableData<Float>
+                  = UnAvailableAvailableData.UnAvailable,
+                  val moduleVoltage: UnAvailableAvailableData<Float>
+                  = UnAvailableAvailableData.UnAvailable,
+                  val absoluteLoad: UnAvailableAvailableData<Float>
+                  = UnAvailableAvailableData.UnAvailable,
+                  val fuelAirCommandedEquivalenceRatio: UnAvailableAvailableData<Float>
+                  = UnAvailableAvailableData.UnAvailable,
+                  val oilTemperature: UnAvailableAvailableData<Int>
+                  = UnAvailableAvailableData.UnAvailable)
 
 sealed class MILStatus {
     object Off : MILStatus()

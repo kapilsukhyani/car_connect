@@ -2,6 +2,7 @@ package com.exp.carconnect.base.state
 
 import com.exp.carconnect.base.AppState
 import com.exp.carconnect.base.BaseAppContract
+import com.exp.carconnect.base.LoadableState
 import com.exp.carconnect.base.OBDDeviceSessionManager
 import io.reactivex.Observable
 import io.reactivex.Scheduler
@@ -101,6 +102,27 @@ class ClearDTCsEpic(private val ioScheduler: Scheduler,
                         Observable.empty()
                     } else {
                         sessionManager.clearDTCs(store.state.getActiveSession().engine)
+                                .subscribeOn(ioScheduler)
+                                .observeOn(mainThreadScheduler)
+                    }
+                }
+    }
+}
+
+class FetchReportEpic(private val ioScheduler: Scheduler,
+                      private val mainThreadScheduler: Scheduler,
+                      private val sessionManager: OBDDeviceSessionManager) : Epic<AppState> {
+
+    override fun map(actions: Observable<out Any>, store: Store<AppState>): Observable<out Any> {
+        return actions
+                .filter {
+                    it == BaseAppAction.FetchReport
+                }
+                .switchMap {
+                    if (!store.state.isAvailablePIDsLoaded()) {
+                        Observable.empty()
+                    } else {
+                        sessionManager.fetchReport(store.state.getActiveSession().engine, store.state.getAvailablePIDs())
                                 .subscribeOn(ioScheduler)
                                 .observeOn(mainThreadScheduler)
                     }

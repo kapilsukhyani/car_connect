@@ -54,6 +54,10 @@ class OBDDeviceSessionManager(private val ioScheduler: Scheduler,
                 ?: Observable.empty()
     }
 
+    fun fetchReport(engine: OBDEngine, availablePIDs: Set<String>): Observable<BaseAppAction> {
+        return activeSession?.fetchReport(engine, availablePIDs) ?: Observable.empty()
+    }
+
 
 }
 
@@ -88,6 +92,22 @@ class OBDSession(val device: BluetoothDevice,
         private val freezeFrameRequest = OBDMultiRequest(FREEZE_FRAME,
                 listOf(SpeedRequest(mode = OBDRequestMode.FREEZE_FRAME),
                         RPMRequest(mode = OBDRequestMode.FREEZE_FRAME)))
+
+        private val reportRequests = listOf<OBDRequest>(LoadRequest(),
+                FuelPressureRequest(),
+                IntakeManifoldPressureRequest(),
+                TimingAdvanceRequest(),
+                MassAirFlowRequest(),
+                RuntimeRequest(),
+                DistanceRequest(distanceType = DistanceCommandType.SINCE_MIL_ON),
+                FuelPressureRequest(),
+                DistanceRequest(distanceType = DistanceCommandType.SINCE_CC_CLEARED),
+                BarometricPressureRequest(),
+                WidebandAirFuelRatioRequest(),
+                ModuleVoltageRequest(),
+                AbsoluteLoadRequest(),
+                EquivalentRatioRequest(),
+                OilTempRequest())
 
 
     }
@@ -293,6 +313,66 @@ class OBDSession(val device: BluetoothDevice,
                 }
                 .onErrorReturn { BaseAppAction.UpdateClearDTCsOperationStateToFailed(ClearDTCError.UnkownError(it)) }
                 .startWith(BaseAppAction.UpdateClearDTCsOperationStateToClearing)
+    }
+
+
+    internal fun fetchReport(engine: OBDEngine, availablePIDs: Set<String>): Observable<BaseAppAction> {
+
+        val filteredRequests = reportRequests.filter { availablePIDs.contains(it.command.removePrefix("01 ").trim()) }
+
+        return engine.submit<OBDResponse>(OBDMultiRequest("Report", filteredRequests))
+                .map<BaseAppAction> { response ->
+                    when (response) {
+                        is LoadResponse -> {
+                            BaseAppAction.AddEngineLoadToReport(response.load)
+                        }
+                        is FuelPressureResponse -> {
+                            BaseAppAction.AddFuelPressureToReport(response.fuelPressure)
+                        }
+                        is IntakeManifoldPressureResponse -> {
+                            BaseAppAction.AddIntakeManifoldPressureToReport(response.intakeManifoldPressure)
+                        }
+                        is TimingAdvanceResponse -> {
+                            BaseAppAction.AddTimingAdvanceToReport(response.timingAdvance)
+                        }
+                        is MassAirFlowResponse -> {
+                            BaseAppAction.AddMassAirFlowToReport(response.maf)
+                        }
+                        is RuntimeResponse -> {
+                            BaseAppAction.AddRuntimeSinceEngineStartToReport(response.value)
+                        }
+                        is DistanceResponse -> {
+                            if (response.distanceType == DistanceCommandType.SINCE_MIL_ON) {
+                                BaseAppAction.AddDistanceTraveledSinceMILOnToReport(response.km)
+                            } else {
+                                BaseAppAction.AddDistanceSinceDTCClearedToReport(response.km)
+                            }
+                        }
+                        is FuelRailPressureResponse -> {
+                            BaseAppAction.AddFuelPressureToReport(response.fuelRailPressure)
+                        }
+                        is BarometricPressureResponse -> {
+                            BaseAppAction.AddBarometricPressureToReport(response.barometricPressure)
+                        }
+                        is WidebandAirFuelRatioResponse -> {
+                            BaseAppAction.AddWideBandAirFuelRatioToReport(response.wafr)
+                        }
+                        is ModuleVoltageResponse -> {
+                            BaseAppAction.AddModuleVoltageToReport(response.voltage)
+                        }
+                        is AbsoluteLoadResponse -> {
+                            BaseAppAction.AddAbsoluteLoadToReport(response.ratio)
+                        }
+                        is EquivalentRatioResponse -> {
+                            BaseAppAction.AddFuelAirCommandedEquivalenceRatioToReport(response.ratio)
+                        }
+                        else -> {
+                            BaseAppAction.AddOilTemperatureToReport((response as OilTempResponse).temperature)
+                        }
+                    }
+
+
+                }
     }
 
 }

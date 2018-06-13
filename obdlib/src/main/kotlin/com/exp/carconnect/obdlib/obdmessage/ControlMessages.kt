@@ -19,16 +19,16 @@ class FreezeDTCResponse(rawResponse: String) : OBDResponse("FreezeDTCResponse", 
 }
 
 class DistanceRequest(mode: OBDRequestMode = OBDRequestMode.CURRENT,
-                      distanceType: DistanceCommandType,
+                      val distanceType: DistanceCommandType,
                       retriable: Boolean = true,
                       repeatable: IsRepeatable = IsRepeatable.No) :
         MultiModeOBDRequest(mode, "DistanceRequest ${distanceType.name}", distanceType.value, retriable, repeatable) {
     override fun toResponse(rawResponse: String): OBDResponse {
-        return DistanceResponse(rawResponse)
+        return DistanceResponse(distanceType, rawResponse)
     }
 }
 
-class DistanceResponse(rawResponse: String) : OBDResponse("DistanceResponse", rawResponse) {
+class DistanceResponse(val distanceType: DistanceCommandType, rawResponse: String) : OBDResponse("DistanceResponse", rawResponse) {
     val km: Int
 
     init {

@@ -79,9 +79,11 @@ class CarConnectApp : Application(),
                 , sessionManager))
         val clearDTCsMiddleware = createEpicMiddleware(ClearDTCsEpic(Schedulers.io(), AndroidSchedulers.mainThread()
                 , sessionManager))
+        val fetchReportMiddleWare = createEpicMiddleware(FetchReportEpic(Schedulers.io(), AndroidSchedulers.mainThread()
+                , sessionManager))
 
         println("debugtag: creating store")
-        store = createStore(reducers, initialState, applyMiddleware(appStateLoadingMiddleware, obdSessionManagementMiddleware, clearDTCsMiddleware))
+        store = createStore(reducers, initialState, applyMiddleware(appStateLoadingMiddleware, obdSessionManagementMiddleware, clearDTCsMiddleware, fetchReportMiddleWare))
         println("debugtag: created store")
 
 

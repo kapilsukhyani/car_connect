@@ -12,11 +12,13 @@ import android.view.ViewGroup
 import com.exp.carconnect.base.*
 import com.exp.carconnect.base.state.*
 import com.exp.carconnect.dashboard.R
+import com.exp.carconnect.dashboard.state.DashboardAction
 import com.exp.carconnect.dashboard.state.DashboardScreen
 import com.exp.carconnect.dashboard.state.DashboardScreenState
 import com.exp.carconnect.dashboard.view.Dashboard
 import io.reactivex.disposables.CompositeDisposable
 import kotlinx.android.synthetic.main.view_dashboard.*
+
 
 class DashboardView : Fragment(), BackInterceptor {
     lateinit var dashboard: Dashboard
@@ -43,6 +45,10 @@ class DashboardView : Fragment(), BackInterceptor {
                 })
         settings_icon.setOnClickListener {
             dashboardVM.onSettingsIconClicked()
+        }
+
+        report_icon.setOnClickListener {
+            dashboardVM.onReportIconClicked()
         }
     }
 
@@ -160,5 +166,9 @@ class DashboardVM(app: Application) : AndroidViewModel(app) {
 
     fun onSettingsIconClicked() {
         store.dispatch(CommonAppAction.PushViewToBackStack(SettingsScreen(SettingsScreenState.ShowingSettings)))
+    }
+
+    fun onReportIconClicked() {
+        store.dispatch(DashboardAction.LaunchReport)
     }
 }

@@ -26,9 +26,14 @@ fun AppState.isAnActiveSessionAvailable(): Boolean {
             this.getBaseAppState().activeSession is UnAvailableAvailableData.Available
 }
 
-fun AppState.isVehicleDataLoaded(): Boolean {
+fun AppState.isLiveVehicleDataLoaded(): Boolean {
     return this.isAnActiveSessionAvailable() &&
             (this.getBaseAppState().activeSession as UnAvailableAvailableData.Available<ActiveSession>).data.liveVehicleData is LoadableState.Loaded
+}
+
+fun AppState.isReportLoaded(): Boolean {
+    return this.isAnActiveSessionAvailable() &&
+            (this.getBaseAppState().activeSession as UnAvailableAvailableData.Available<ActiveSession>).data.report is LoadableState.Loaded
 }
 
 fun AppState.isVehicleInfoLoaded(): Boolean {
@@ -53,22 +58,22 @@ fun AppState.getAvailablePIDs(): Set<String> {
 }
 
 fun AppState.isActiveVehicleSpeedLoaded(): Boolean {
-    return this.isVehicleDataLoaded() && ((this.getBaseAppState().activeSession as UnAvailableAvailableData.Available<ActiveSession>)
+    return this.isLiveVehicleDataLoaded() && ((this.getBaseAppState().activeSession as UnAvailableAvailableData.Available<ActiveSession>)
             .data.liveVehicleData as LoadableState.Loaded).savedState.speed is UnAvailableAvailableData.Available
 }
 
 fun AppState.isActiveVehcilesMILOn(): Boolean {
-    return this.isVehicleDataLoaded() && this.isActiveVehicleMilStatusLoaded() && this.getMilStatus() is MILStatus.On
+    return this.isLiveVehicleDataLoaded() && this.isActiveVehicleMilStatusLoaded() && this.getMilStatus() is MILStatus.On
 }
 
 fun AppState.isActiveVehicleMilStatusLoaded(): Boolean {
-    return this.isVehicleDataLoaded() && ((this.getBaseAppState().activeSession as UnAvailableAvailableData.Available<ActiveSession>)
+    return this.isLiveVehicleDataLoaded() && ((this.getBaseAppState().activeSession as UnAvailableAvailableData.Available<ActiveSession>)
             .data.liveVehicleData as LoadableState.Loaded).savedState.milStatus is UnAvailableAvailableData.Available
 }
 
 
 fun AppState.isActiveVehicleFuelLoaded(): Boolean {
-    return this.isVehicleDataLoaded() && ((this.getBaseAppState().activeSession as UnAvailableAvailableData.Available<ActiveSession>)
+    return this.isLiveVehicleDataLoaded() && ((this.getBaseAppState().activeSession as UnAvailableAvailableData.Available<ActiveSession>)
             .data.liveVehicleData as LoadableState.Loaded).savedState.fuel is UnAvailableAvailableData.Available
 }
 

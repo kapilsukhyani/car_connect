@@ -13,6 +13,8 @@ import android.transition.TransitionSet
 import android.view.View
 import com.exp.carconnect.app.CarConnectApp
 import com.exp.carconnect.app.R
+import com.exp.carconnect.app.fragment.ReportView
+import com.exp.carconnect.app.state.ReportScreen
 import com.exp.carconnect.base.*
 import com.exp.carconnect.base.fragment.DeviceConnectionView
 import com.exp.carconnect.base.fragment.DeviceManagementView
@@ -75,6 +77,10 @@ class CarConnectWindow : AppCompatActivity() {
 
             is SettingsScreen -> {
                 replaceFragment(fragment = SettingsView(), viewTransition = false)
+            }
+
+            is ReportScreen -> {
+                replaceFragment(fragment = ReportView(), viewTransition = false)
             }
         }
     }

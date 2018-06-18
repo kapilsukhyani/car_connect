@@ -6,8 +6,17 @@ import java.util.concurrent.TimeUnit
 //----------------------------------- Generic data structures -------------------------------------------------
 
 sealed class UnAvailableAvailableData<out T> {
-    object UnAvailable : UnAvailableAvailableData<Nothing>()
-    data class Available<out T : Any>(val data: T) : UnAvailableAvailableData<T>()
+    object UnAvailable : UnAvailableAvailableData<Nothing>() {
+        override fun toString(): String {
+            return "N/A"
+        }
+    }
+
+    data class Available<out T : Any>(val data: T) : UnAvailableAvailableData<T>() {
+        override fun toString(): String {
+            return data.toString()
+        }
+    }
 }
 
 sealed class LoadableState<out State, out Error : Throwable> {

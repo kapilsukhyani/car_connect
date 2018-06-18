@@ -1,6 +1,9 @@
 package com.exp.carconnect.app
 
 import android.app.Application
+import com.exp.carconnect.app.state.ReportData
+import com.exp.carconnect.app.state.ReportScreen
+import com.exp.carconnect.app.state.ReportScreenState
 import com.exp.carconnect.base.*
 import com.exp.carconnect.base.di.CarConnectGlobalComponent
 import com.exp.carconnect.base.di.DaggerCarConnectGlobalComponent
@@ -18,6 +21,7 @@ import com.exp.carconnect.dashboard.di.DashboardComponent
 import com.exp.carconnect.dashboard.di.DashboardModule
 import com.exp.carconnect.dashboard.state.DashboardScreen
 import com.exp.carconnect.dashboard.state.DashboardScreenState
+import io.reactivex.Scheduler
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
 import redux.api.Store
@@ -37,6 +41,9 @@ import javax.inject.Inject
 class CarConnectApp : Application(),
         BaseAppContract,
         DashboardAppContract {
+    override val mainScheduler: Scheduler = AndroidSchedulers.mainThread()
+    override val ioScheduler: Scheduler = Schedulers.io()
+    override val computationScheduler: Scheduler = Schedulers.computation()
 
 
     companion object {
@@ -67,23 +74,29 @@ class CarConnectApp : Application(),
 
         persistenceStore = BaseStore(this, Schedulers.io())
 
-        val sessionManager = OBDDeviceSessionManager(Schedulers.io(), Schedulers.computation(),
-                AndroidSchedulers.mainThread(), VehicleInfoLoaderFactoryImpl().getVehicleInfoLoader())
+        val sessionManager = OBDDeviceSessionManager(ioScheduler, computationScheduler,
+                mainScheduler, VehicleInfoLoaderFactoryImpl().getVehicleInfoLoader())
 
         val reducers = combineReducers(AppStateNavigationReducer(),
                 BaseAppStateReducer(), DeviceManagementScreenStateReducer(), DeviceConnectionScreenStateReducer(this), ActiveSessionReducer(), SettingsScreenStateReducer())
         val initialState = AppState(mapOf(Pair(BaseAppState.STATE_KEY, LoadableState.NotLoaded)),
                 CarConnectUIState(Stack()))
-        val appStateLoadingMiddleware = createEpicMiddleware(BaseSateLoadingEpic(Schedulers.io(), AndroidSchedulers.mainThread(), this))
-        val obdSessionManagementMiddleware = createEpicMiddleware(OBDSessionManagementEpic(Schedulers.io(), AndroidSchedulers.mainThread()
+
+        val appStateLoadingMiddleware = createEpicMiddleware(BaseSateLoadingEpic(ioScheduler, mainScheduler, this))
+        val obdSessionManagementMiddleware = createEpicMiddleware(OBDSessionManagementEpic(ioScheduler, mainScheduler
                 , sessionManager))
-        val clearDTCsMiddleware = createEpicMiddleware(ClearDTCsEpic(Schedulers.io(), AndroidSchedulers.mainThread()
+        val clearDTCsMiddleware = createEpicMiddleware(ClearDTCsEpic(ioScheduler, mainScheduler
                 , sessionManager))
-        val fetchReportMiddleWare = createEpicMiddleware(FetchReportEpic(Schedulers.io(), AndroidSchedulers.mainThread()
+        val fetchReportMiddleWare = createEpicMiddleware(FetchReportEpic(ioScheduler, mainScheduler
                 , sessionManager))
 
         println("debugtag: creating store")
-        store = createStore(reducers, initialState, applyMiddleware(appStateLoadingMiddleware, obdSessionManagementMiddleware, clearDTCsMiddleware, fetchReportMiddleWare))
+        store = createStore(reducers,
+                initialState,
+                applyMiddleware(appStateLoadingMiddleware,
+                        obdSessionManagementMiddleware,
+                        clearDTCsMiddleware,
+                        fetchReportMiddleWare))
         println("debugtag: created store")
 
 
@@ -121,4 +134,7 @@ class CarConnectApp : Application(),
         store.dispatch(CommonAppAction.PushViewToBackStack(DashboardScreen(DashboardScreenState.ShowNewSnapshot(info, LiveVehicleData()))))
     }
 
+    override fun onReportRequested() {
+        store.dispatch(CommonAppAction.PushViewToBackStack(ReportScreen(ReportScreenState.ShowNewSnapshot(ReportData()))))
+    }
 }

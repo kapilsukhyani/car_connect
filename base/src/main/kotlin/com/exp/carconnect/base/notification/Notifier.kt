@@ -56,7 +56,7 @@ class Notifier(private val context: Context,
     private val vehicleDataAvailableObservable = stateObservable
             .observeOn(ioScheduler)
             .filter {
-                it.isVehicleDataLoaded()
+                it.isLiveVehicleDataLoaded()
             }
             .distinctUntilChanged()
 

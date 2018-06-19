@@ -49,6 +49,10 @@ fun AppState.getCurrentVehicleData(): LiveVehicleData {
     return ((this.getBaseAppState().activeSession as UnAvailableAvailableData.Available<ActiveSession>).data.liveVehicleData as LoadableState.Loaded).savedState
 }
 
+fun AppState.getReport(): Report {
+    return ((this.getBaseAppState().activeSession as UnAvailableAvailableData.Available<ActiveSession>).data.report as LoadableState.Loaded).savedState
+}
+
 fun AppState.getCurrentVehicleInfo(): Vehicle {
     return ((this.getBaseAppState().activeSession as UnAvailableAvailableData.Available<ActiveSession>).data.vehicle as LoadableState.Loaded).savedState
 }

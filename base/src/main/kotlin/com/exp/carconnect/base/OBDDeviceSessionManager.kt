@@ -143,6 +143,7 @@ class OBDSession(val device: BluetoothDevice,
                                 device: BluetoothDevice,
                                 engine: OBDEngine,
                                 settings: AppSettings): Observable<BaseAppAction> {
+
         return Observable.concat(executeSetupCommands(engine),
                 loadVehicleInfo(engine),
                 loadVehicleData(engine,
@@ -228,7 +229,9 @@ class OBDSession(val device: BluetoothDevice,
         val fastChangingDataRequest = OBDMultiRequest(FAST_CHANGING_DATA,
                 listOf(SpeedRequest(),
                         RPMRequest(),
-                        IgnitionMonitorRequest()),
+                        IgnitionMonitorRequest(),
+                        ConsumptionRateRequest(),
+                        ThrottlePositionRequest()),
                 IsRepeatable.Yes(dataSettings.fastChangingDataRefreshFrequency.frequency,
                         dataSettings.fastChangingDataRefreshFrequency.unit))
 
@@ -253,6 +256,8 @@ class OBDSession(val device: BluetoothDevice,
                             when (response) {
                                 is SpeedResponse -> BaseAppAction.AddSpeed(response.metricSpeed.toFloat())
                                 is RPMResponse -> BaseAppAction.AddRPM(response.rpm / RPM_FACTOR)
+                                is ThrottlePositionResponse -> BaseAppAction.AddThrottlePosition(response.throttle)
+                                is ConsumptionRateResponse -> BaseAppAction.AddFuelConsumptionRate(response.fuelRate)
                                 else -> BaseAppAction.AddIgnition((response as IgnitionMonitorResponse).ignitionOn)
                             }
                         })

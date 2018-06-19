@@ -2,7 +2,6 @@ package com.exp.carconnect.base.state
 
 import com.exp.carconnect.base.AppState
 import com.exp.carconnect.base.BaseAppContract
-import com.exp.carconnect.base.LoadableState
 import com.exp.carconnect.base.OBDDeviceSessionManager
 import io.reactivex.Observable
 import io.reactivex.Scheduler

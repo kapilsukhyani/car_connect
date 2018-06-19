@@ -4,6 +4,7 @@ import android.app.Application
 import android.arch.lifecycle.*
 import android.os.Bundle
 import android.support.v4.app.Fragment
+import android.text.Html.fromHtml
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -37,29 +38,30 @@ internal class ReportView : Fragment() {
         refresh_report_button.setOnClickListener { reportVM.fetchReport() }
     }
 
+
     private fun onNewSpanShot(reportViewModel: ReportData) {
         vehicle_info.text = getString(R.string.vehicle_info_value, reportViewModel.name, reportViewModel.model + " " + reportViewModel.year, reportViewModel.vin)
-        mil.text = getString(R.string.mil_value, reportViewModel.milStatus, reportViewModel.pendingDTCs)
-        speed.text = getString(R.string.speed_value, reportViewModel.speed)
-        rpm.text = getString(R.string.rpm_value, reportViewModel.rpm)
-        throttle_position.text = getString(R.string.throttle_value, reportViewModel.throttlePosition)
-        fuel.text = getString(R.string.fuel_value, reportViewModel.fuelLevel, reportViewModel.fuelConsumptionRate)
-        temperature.text = getString(R.string.temperature_value, reportViewModel.airIntakeTemperature, reportViewModel.ambientTemperature)
-        engine_load.text = getString(R.string.engine_load_value, reportViewModel.engineLoad)
-        fuel_pressure.text = getString(R.string.fuel_pressure_value, reportViewModel.fuelPressure)
-        fuel_rail_pressure.text = getString(R.string.fuel_rail_pressure_value, reportViewModel.fuelRailPressure)
-        barometric_pressure.text = getString(R.string.barometric_pressure_value, reportViewModel.barometricPressure)
-        intake_manifold_pressure.text = getString(R.string.intake_manifold_pressure_value, reportViewModel.intakeManifoldPressure)
-        timing_advance.text = getString(R.string.timing_advance_value, reportViewModel.timingAdvance)
-        mass_air_flow.text = getString(R.string.mass_air_flow_value, reportViewModel.massAirFlow)
-        runtime_since_engine_start.text = getString(R.string.runtime_since_engine_start_value, reportViewModel.runtimeSinceEngineStart)
-        distance_since_mil_on.text = getString(R.string.distance_since_mil_on_value, reportViewModel.distanceSinceMILOn)
-        distance_since_cc_cleared.text = getString(R.string.distance_since_cc_cleared_value, reportViewModel.distanceSinceDTCCleared)
-        wide_band_air_fuel_ratio.text = getString(R.string.wide_band_fuel_ratio_value, reportViewModel.wideBandAirFuelRatio)
-        module_voltage.text = getString(R.string.module_voltage_value, reportViewModel.moduleVoltage)
-        absolute_load.text = getString(R.string.absolute_load_value, reportViewModel.absoluteLoad)
-        fuel_air_commanded_equivalence_ratio.text = getString(R.string.fuel_air_commanded_equivalence_ratio_value, reportViewModel.fuelAirCommandedEquivalenceRatio)
-        oil_temperature.text = getString(R.string.oil_temperature_value, reportViewModel.oilTemperature)
+        mil.text = fromHtml(getString(R.string.mil_value, reportViewModel.milStatus, reportViewModel.pendingDTCs))
+        speed.text = fromHtml(getString(R.string.speed_value, reportViewModel.speed))
+        rpm.text = fromHtml(getString(R.string.rpm_value, reportViewModel.rpm))
+        throttle_position.text = fromHtml(getString(R.string.throttle_value, reportViewModel.throttlePosition))
+        fuel.text = fromHtml(getString(R.string.fuel_value, reportViewModel.fuelLevel, reportViewModel.fuelConsumptionRate))
+        temperature.text = fromHtml(getString(R.string.temperature_value, reportViewModel.airIntakeTemperature, reportViewModel.ambientTemperature))
+        engine_load.text = fromHtml(getString(R.string.engine_load_value, reportViewModel.engineLoad))
+        fuel_pressure.text = fromHtml(getString(R.string.fuel_pressure_value, reportViewModel.fuelPressure))
+        fuel_rail_pressure.text = fromHtml(getString(R.string.fuel_rail_pressure_value, reportViewModel.fuelRailPressure))
+        barometric_pressure.text = fromHtml(getString(R.string.barometric_pressure_value, reportViewModel.barometricPressure))
+        intake_manifold_pressure.text = fromHtml(getString(R.string.intake_manifold_pressure_value, reportViewModel.intakeManifoldPressure))
+        timing_advance.text = fromHtml(getString(R.string.timing_advance_value, reportViewModel.timingAdvance))
+        mass_air_flow.text = fromHtml(getString(R.string.mass_air_flow_value, reportViewModel.massAirFlow))
+        runtime_since_engine_start.text = fromHtml(getString(R.string.runtime_since_engine_start_value, reportViewModel.runtimeSinceEngineStart))
+        distance_since_mil_on.text = fromHtml(getString(R.string.distance_since_mil_on_value, reportViewModel.distanceSinceMILOn))
+        distance_since_cc_cleared.text = fromHtml(getString(R.string.distance_since_cc_cleared_value, reportViewModel.distanceSinceDTCCleared))
+        wide_band_air_fuel_ratio.text = fromHtml(getString(R.string.wide_band_fuel_ratio_value, reportViewModel.wideBandAirFuelRatio))
+        module_voltage.text = fromHtml(getString(R.string.module_voltage_value, reportViewModel.moduleVoltage))
+        absolute_load.text = fromHtml(getString(R.string.absolute_load_value, reportViewModel.absoluteLoad))
+        fuel_air_commanded_equivalence_ratio.text = fromHtml(getString(R.string.fuel_air_commanded_equivalence_ratio_value, reportViewModel.fuelAirCommandedEquivalenceRatio))
+        oil_temperature.text = fromHtml(getString(R.string.oil_temperature_value, reportViewModel.oilTemperature))
     }
 }
 

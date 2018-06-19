@@ -68,7 +68,7 @@ internal class ReportViewModel(app: Application) : AndroidViewModel(app) {
 
     private val reportLiveData: MutableLiveData<ReportData> = MutableLiveData()
     private val store = (app as BaseAppContract).store
-    private val fetchReportCommandObservable = BehaviorSubject.create<Boolean>()
+    private val fetchReportCommandObservable = BehaviorSubject.createDefault<Boolean>(true)
     private val baseApp = (app as BaseAppContract)
 
     private val storeSubscription: CompositeDisposable = CompositeDisposable()
@@ -156,9 +156,8 @@ internal class ReportViewModel(app: Application) : AndroidViewModel(app) {
                 .debounce(1, TimeUnit.SECONDS, baseApp.computationScheduler)
                 .observeOn(baseApp.mainScheduler)
                 .subscribe {
-                    //                    store.dispatch(BaseAppAction.FetchReport)
+                    store.dispatch(BaseAppAction.FetchReport)
                 })
-        store.dispatch(BaseAppAction.FetchReport)
     }
 
     fun fetchReport() {

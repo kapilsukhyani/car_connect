@@ -12,7 +12,7 @@
     <string name="fuel_value">Fuel\nLevel %1$s\nConsumption Rate %2$s</string>
     <string name="temperature_value">Temperature\nAir Intake %1$s\nAmbient %2$s</string>
     <string name="report">Report</string>
-    <string name="engine_load_value"><b>Engine Load</b>   %s</string>
+    <string name="engine_load_value">Engine Load  %s</string>
     <string name="fuel_pressure_value"><b>Fuel Pressure</b>   %s</string>
     <string name="fuel_rail_pressure_value"><b>Fuel Rail Pressure</b>   %s</string>
     <string name="barometric_pressure_value"><b>Barometric Pressure</b>   %s</string>

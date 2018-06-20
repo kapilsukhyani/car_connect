@@ -16,6 +16,7 @@
         android:elevation="5dp"
         android:navigationIcon="@drawable/toolbar_back"
         android:title="@string/settings"
+        android:titleTextAppearance="@android:style/TextAppearance.Material.WindowTitle"
         android:titleTextColor="@color/primary"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"

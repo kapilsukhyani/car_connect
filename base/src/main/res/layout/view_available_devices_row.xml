@@ -7,6 +7,7 @@
     android:padding="16dp"
     android:textColor="@drawable/selectable_text_color"
     android:textSize="16dp"
+    android:textStyle="bold"
     tools:text="Device1">
 
 </TextView>

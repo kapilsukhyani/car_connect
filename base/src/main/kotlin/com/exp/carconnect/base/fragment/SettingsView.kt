@@ -4,7 +4,9 @@ import android.app.AlertDialog
 import android.app.Application
 import android.app.ProgressDialog
 import android.arch.lifecycle.*
+import android.content.Context
 import android.content.SharedPreferences
+import android.content.pm.ActivityInfo
 import android.os.Bundle
 import android.support.v4.app.Fragment
 import android.support.v7.preference.PreferenceFragmentCompat
@@ -24,9 +26,14 @@ class SettingsView : Fragment() {
         const val TAG = "PreferenceSettingsTag"
     }
 
-    lateinit var settingVM: SettingsVM
+    private lateinit var settingVM: SettingsVM
+    private var progressDialog: ProgressDialog? = null
 
-    var progressDialog: ProgressDialog? = null
+    override fun onAttach(context: Context?) {
+        super.onAttach(context)
+        activity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_SENSOR
+    }
+
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         super.onCreateView(inflater, container, savedInstanceState)

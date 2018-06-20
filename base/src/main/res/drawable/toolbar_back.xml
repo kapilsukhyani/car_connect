@@ -1,5 +1,7 @@
-<vector android:height="56dp" android:tint="#FFFFFF"
-    android:viewportHeight="24.0" android:viewportWidth="24.0"
-    android:width="56dp" xmlns:android="http://schemas.android.com/apk/res/android">
-    <path android:fillColor="#FF000000" android:pathData="M15.41,7.41L14,6l-6,6 6,6 1.41,-1.41L10.83,12z"/>
-</vector>
+<?xml version="1.0" encoding="utf-8"?>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:drawable="@drawable/toolbar_back_active" android:state_pressed="true" />
+    <item android:drawable="@drawable/toolbar_back_active" android:state_activated="true" />
+    <item android:drawable="@drawable/toolbar_back_active" android:state_focused="true" />
+    <item android:drawable="@drawable/toolbar_back_inactive" />
+</selector>

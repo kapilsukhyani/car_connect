@@ -2,6 +2,8 @@ package com.exp.carconnect.app.fragment
 
 import android.app.Application
 import android.arch.lifecycle.*
+import android.content.Context
+import android.content.pm.ActivityInfo
 import android.os.Bundle
 import android.support.v4.app.Fragment
 import android.text.Html.fromHtml
@@ -22,6 +24,12 @@ import java.util.concurrent.TimeUnit
 
 internal class ReportView : Fragment() {
     lateinit var reportVM: ReportViewModel
+
+    override fun onAttach(context: Context?) {
+        super.onAttach(context)
+        activity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_SENSOR
+    }
+
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         super.onCreateView(inflater, container, savedInstanceState)
         return inflater.inflate(R.layout.report_view, null)

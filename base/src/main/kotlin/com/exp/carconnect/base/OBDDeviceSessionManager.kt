@@ -100,7 +100,7 @@ class OBDSession(val device: BluetoothDevice,
                 MassAirFlowRequest(),
                 RuntimeRequest(),
                 DistanceRequest(distanceType = DistanceCommandType.SINCE_MIL_ON),
-                FuelPressureRequest(),
+                FuelRailPressureRequest(),
                 DistanceRequest(distanceType = DistanceCommandType.SINCE_CC_CLEARED),
                 BarometricPressureRequest(),
                 WidebandAirFuelRatioRequest(),
@@ -354,7 +354,7 @@ class OBDSession(val device: BluetoothDevice,
                             }
                         }
                         is FuelRailPressureResponse -> {
-                            BaseAppAction.AddFuelPressureToReport(response.fuelRailPressure)
+                            BaseAppAction.AddFuelRailPressureToReport(response.fuelRailPressure)
                         }
                         is BarometricPressureResponse -> {
                             BaseAppAction.AddBarometricPressureToReport(response.barometricPressure)

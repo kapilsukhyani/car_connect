@@ -323,7 +323,9 @@ class OBDSession(val device: BluetoothDevice,
 
     internal fun fetchReport(engine: OBDEngine, availablePIDs: Set<String>): Observable<BaseAppAction> {
 
-        val filteredRequests = reportRequests.filter { availablePIDs.contains(it.command.removePrefix("01 ").trim()) }
+        val filteredRequests = reportRequests.filter {
+            availablePIDs.contains(it.command.removePrefix("01 ").trim().toLowerCase())
+        }
 
         return engine.submit<OBDResponse>(OBDMultiRequest("Report", filteredRequests))
                 .map<BaseAppAction> { response ->

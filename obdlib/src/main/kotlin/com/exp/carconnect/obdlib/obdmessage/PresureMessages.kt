@@ -72,6 +72,29 @@ class FuelRailPressureResponse(rawResponse: String) : OBDResponse("FuelRailPress
     }
 }
 
+class RelativeFuelRailPressureRequest(mode: OBDRequestMode = OBDRequestMode.CURRENT,
+                                      retriable: Boolean = true,
+                                      repeatable: IsRepeatable = IsRepeatable.No) :
+        MultiModeOBDRequest(mode, "RelativeFuelRailPressureRequest", "22", retriable, repeatable) {
+    override fun toResponse(rawResponse: String): OBDResponse {
+        return RelativeFuelRailPressureResponse(rawResponse)
+    }
+}
+
+class RelativeFuelRailPressureResponse(rawResponse: String) : OBDResponse("RelativeFuelRailPressureResponse", rawResponse) {
+    val relativeFuelRailPressure: Float
+
+    init {
+        val buffer = rawResponse.toIntList()
+        // // ignore first two bytes [hh hh] of the response
+        relativeFuelRailPressure = ((buffer[2] * 256) + buffer[3]) * .079f
+    }
+
+    override fun getFormattedResult(): String {
+        return "$relativeFuelRailPressure kPa"
+    }
+}
+
 
 class IntakeManifoldPressureRequest(mode: OBDRequestMode = OBDRequestMode.CURRENT,
                                     retriable: Boolean = true,

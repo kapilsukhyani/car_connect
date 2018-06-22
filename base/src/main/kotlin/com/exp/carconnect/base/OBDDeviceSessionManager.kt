@@ -107,7 +107,8 @@ class OBDSession(val device: BluetoothDevice,
                 ModuleVoltageRequest(),
                 AbsoluteLoadRequest(),
                 EquivalentRatioRequest(),
-                OilTempRequest())
+                OilTempRequest(),
+                TemperatureRequest(TemperatureType.ENGINE_COOLANT))
 
 
     }
@@ -372,6 +373,10 @@ class OBDSession(val device: BluetoothDevice,
                         }
                         is EquivalentRatioResponse -> {
                             BaseAppAction.AddFuelAirCommandedEquivalenceRatioToReport(response.ratio)
+                        }
+                        is TemperatureResponse -> {
+                            BaseAppAction.AddEngineCoolantTemperatureToReport(response.temperature)
+
                         }
                         else -> {
                             BaseAppAction.AddOilTemperatureToReport((response as OilTempResponse).temperature)

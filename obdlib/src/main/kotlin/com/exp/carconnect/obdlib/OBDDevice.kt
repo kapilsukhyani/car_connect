@@ -55,7 +55,7 @@ internal class OBDDevice(private val inputStream: InputStream, private val outpu
     }
 
     private fun writeCommand(command: String) {
-
+//todo handle Caused by: java.io.IOException: Broken pipe, gets thrown when socket is closed
         // write to OutputStream (i.e.: a BluetoothSocket) with an added
         // Carriage return
         outputStream.write((command + "\r").toByteArray())
@@ -133,33 +133,33 @@ abstract class BadResponseException(private val command: String, private val res
             if (response.removeSpacesAndCapitalize().contains(BUSINIT_ERROR_MESSAGE_PATTERN.removeSpacesAndCapitalize())) {
                 throw BusInitException(command, response)
             } else if (response
-                    .removeSpacesAndCapitalize()
-                    .contains(MISUNDERSTOOD_COMMAND_MESSAGE_PATTERN
-                            .removeSpacesAndCapitalize())) {
+                            .removeSpacesAndCapitalize()
+                            .contains(MISUNDERSTOOD_COMMAND_MESSAGE_PATTERN
+                                    .removeSpacesAndCapitalize())) {
                 throw MisUnderstoodCommandException(command, response)
             } else if (response
-                    .removeSpacesAndCapitalize()
-                    .contains(NO_DATE_MESSAGE_PATTERN
-                            .removeSpacesAndCapitalize())) {
+                            .removeSpacesAndCapitalize()
+                            .contains(NO_DATE_MESSAGE_PATTERN
+                                    .removeSpacesAndCapitalize())) {
                 throw NoDataException(command, response)
             } else if (response
-                    .removeSpacesAndCapitalize()
-                    .contains(STOPPED_MESSAGE_PATERN
-                            .removeSpacesAndCapitalize())) {
+                            .removeSpacesAndCapitalize()
+                            .contains(STOPPED_MESSAGE_PATERN
+                                    .removeSpacesAndCapitalize())) {
                 throw StoppedException(command, response)
             } else if (response
-                    .removeSpacesAndCapitalize()
-                    .contains(UNABLE_TO_CONNECT_MESSAGE_PATTERN
-                            .removeSpacesAndCapitalize())) {
+                            .removeSpacesAndCapitalize()
+                            .contains(UNABLE_TO_CONNECT_MESSAGE_PATTERN
+                                    .removeSpacesAndCapitalize())) {
                 throw UnableToConnectException(command, response)
             } else if (response
-                    .removeSpacesAndCapitalize()
-                    .contains(ERROR_MESSAGE_PATTERN
-                            .removeSpacesAndCapitalize())) {
+                            .removeSpacesAndCapitalize()
+                            .contains(ERROR_MESSAGE_PATTERN
+                                    .removeSpacesAndCapitalize())) {
                 throw UnknownErrorException(command, response)
             } else if (response
-                    .removeSpacesAndCapitalize()
-                    .matches(UNSUPPORTED_COMMAND_MESSAGE_PATTERN.toRegex())) {
+                            .removeSpacesAndCapitalize()
+                            .matches(UNSUPPORTED_COMMAND_MESSAGE_PATTERN.toRegex())) {
                 throw UnSupportedCommandException(command, response)
             }
         }

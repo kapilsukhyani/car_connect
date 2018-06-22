@@ -59,6 +59,9 @@ sealed class BaseAppAction {
     data class AddFuelAirCommandedEquivalenceRatioToReport(val fuelAirCommandedEquivalenceRatio: Float): BaseAppAction()
     data class AddOilTemperatureToReport(val oilTemperature: Int): BaseAppAction()
 
+    //handle these actions in reducers
+    data class AddEngineCoolantTemperatureToReport(val engineCoolantTemperature: Int): BaseAppAction()
+
 
     object ClearDTCs : BaseAppAction()
     object FetchReport : BaseAppAction()

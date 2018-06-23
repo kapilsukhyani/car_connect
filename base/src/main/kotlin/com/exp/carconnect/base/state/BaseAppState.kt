@@ -6,6 +6,7 @@ import com.exp.carconnect.base.*
 import com.exp.carconnect.base.store.PersistedAppState
 import com.exp.carconnect.obdlib.OBDEngine
 import com.exp.carconnect.obdlib.obdmessage.FuelType
+import com.exp.carconnect.obdlib.obdmessage.ObdStandard
 import java.util.concurrent.TimeUnit
 
 
@@ -190,6 +191,8 @@ data class Vehicle(val vin: String,
                    = UnAvailableAvailableData.UnAvailable,
                    val fuelType: UnAvailableAvailableData<FuelType>
                    = UnAvailableAvailableData.UnAvailable,
+                   val obdStandard: UnAvailableAvailableData<ObdStandard>
+                   = UnAvailableAvailableData.UnAvailable,
                    val attributes: UnAvailableAvailableData<VehicleAttributes>
                    = UnAvailableAvailableData.UnAvailable)
 
@@ -320,6 +323,10 @@ data class Report(val engineLoad: UnAvailableAvailableData<Float>
                   = UnAvailableAvailableData.UnAvailable,
                   val runTimeSinceEngineStart: UnAvailableAvailableData<Int>
                   = UnAvailableAvailableData.UnAvailable,
+                  val runTimeWithMilOn: UnAvailableAvailableData<Int>
+                  = UnAvailableAvailableData.UnAvailable,
+                  val runTimeSinceDTCCleared: UnAvailableAvailableData<Int>
+                  = UnAvailableAvailableData.UnAvailable,
                   val distanceTravelledSinceMILOn: UnAvailableAvailableData<Int>
                   = UnAvailableAvailableData.UnAvailable,
                   val fuelRailPressure: UnAvailableAvailableData<Int>
@@ -337,6 +344,44 @@ data class Report(val engineLoad: UnAvailableAvailableData<Float>
                   val fuelAirCommandedEquivalenceRatio: UnAvailableAvailableData<Float>
                   = UnAvailableAvailableData.UnAvailable,
                   val oilTemperature: UnAvailableAvailableData<Int>
+                  = UnAvailableAvailableData.UnAvailable,
+                  val engineCoolantTemperature: UnAvailableAvailableData<Int>
+                  = UnAvailableAvailableData.UnAvailable,
+                  val relativeThrottlePosition: UnAvailableAvailableData<Float>
+                  = UnAvailableAvailableData.UnAvailable,
+                  val absoluteThrottlePositionB: UnAvailableAvailableData<Float>
+                  = UnAvailableAvailableData.UnAvailable,
+                  val absoluteThrottlePositionC: UnAvailableAvailableData<Float>
+                  = UnAvailableAvailableData.UnAvailable,
+                  val accelPedalPositionD: UnAvailableAvailableData<Float>
+                  = UnAvailableAvailableData.UnAvailable,
+                  val accelPedalPositionE: UnAvailableAvailableData<Float>
+                  = UnAvailableAvailableData.UnAvailable,
+                  val accelPedalPositionF: UnAvailableAvailableData<Float>
+                  = UnAvailableAvailableData.UnAvailable,
+                  val relativeAccelPedalPosition: UnAvailableAvailableData<Float>
+                  = UnAvailableAvailableData.UnAvailable,
+                  val commandedThrottleActuator: UnAvailableAvailableData<Float>
+                  = UnAvailableAvailableData.UnAvailable,
+                  val commandedEGR: UnAvailableAvailableData<Float>
+                  = UnAvailableAvailableData.UnAvailable,
+                  val egrError: UnAvailableAvailableData<Float>
+                  = UnAvailableAvailableData.UnAvailable,
+                  val fuelTrimShortTermBank1: UnAvailableAvailableData<Float>
+                  = UnAvailableAvailableData.UnAvailable,
+                  val fuelTrimShortTermBank2: UnAvailableAvailableData<Float>
+                  = UnAvailableAvailableData.UnAvailable,
+                  val fuelTrimLongTermBank1: UnAvailableAvailableData<Float>
+                  = UnAvailableAvailableData.UnAvailable,
+                  val fuelTrimLongTermBank2: UnAvailableAvailableData<Float>
+                  = UnAvailableAvailableData.UnAvailable,
+                  val ethanolFuelPercent: UnAvailableAvailableData<Float>
+                  = UnAvailableAvailableData.UnAvailable,
+                  val fuelInjectionTiming: UnAvailableAvailableData<Float>
+                  = UnAvailableAvailableData.UnAvailable,
+                  val absoluteEvapSystempVaporPressure: UnAvailableAvailableData<Float>
+                  = UnAvailableAvailableData.UnAvailable,
+                  val evapSystemVaporPressure: UnAvailableAvailableData<Float>
                   = UnAvailableAvailableData.UnAvailable)
 
 sealed class MILStatus {

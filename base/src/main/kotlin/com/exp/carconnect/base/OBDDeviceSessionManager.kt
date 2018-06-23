@@ -83,6 +83,7 @@ class OBDSession(val device: BluetoothDevice,
 
         private val vehicleInfoRequest = OBDMultiRequest(VEHICLE_INFO, listOf(VinRequest(),
                 FuelTypeRequest(),
+                OBDStandardRequest(),
                 AvailablePidsCommand(PidCommand.ONE_TO_TWENTY),
                 AvailablePidsCommand(PidCommand.TWENTY_ONE_TO_FOURTY),
                 AvailablePidsCommand(PidCommand.FOURTY_ONE_TO_SIXTY)))
@@ -99,6 +100,8 @@ class OBDSession(val device: BluetoothDevice,
                 TimingAdvanceRequest(),
                 MassAirFlowRequest(),
                 RuntimeRequest(RuntimeType.SINCE_ENGINE_START),
+                RuntimeRequest(RuntimeType.WITH_MIL_ON),
+                RuntimeRequest(RuntimeType.SINCE_DTC_CLEARED),
                 DistanceRequest(distanceType = DistanceCommandType.SINCE_MIL_ON),
                 FuelRailPressureRequest(),
                 DistanceRequest(distanceType = DistanceCommandType.SINCE_CC_CLEARED),
@@ -108,7 +111,25 @@ class OBDSession(val device: BluetoothDevice,
                 AbsoluteLoadRequest(),
                 EquivalentRatioRequest(),
                 OilTempRequest(),
-                TemperatureRequest(TemperatureType.ENGINE_COOLANT))
+                TemperatureRequest(TemperatureType.ENGINE_COOLANT),
+                ThrottleRequest(type = ThrottleRequestType.RELATIVE_POSITION),
+                ThrottleRequest(type = ThrottleRequestType.ABSOLUTE_POSITION_B),
+                ThrottleRequest(type = ThrottleRequestType.ABSOLUTE_POSITION_C),
+                ThrottleRequest(type = ThrottleRequestType.ACCELERATOR_PEDAL_POSITION_D),
+                ThrottleRequest(type = ThrottleRequestType.ACCELERATOR_PEDAL_POSITION_E),
+                ThrottleRequest(type = ThrottleRequestType.ACCELERATOR_PEDAL_POSITION_F),
+                ThrottleRequest(type = ThrottleRequestType.RELATIVE_ACCELERATOR_PEDAL_POSITION),
+                ThrottleRequest(type = ThrottleRequestType.COMMANDED_THROTTLE_ACTUATOR),
+                CommandedEGRRequest(),
+                CommandedEGRErrorRequest(),
+                FuelTrimRequest(fuelTrim = FuelTrim.SHORT_TERM_BANK_1),
+                FuelTrimRequest(fuelTrim = FuelTrim.SHORT_TERM_BANK_2),
+                FuelTrimRequest(fuelTrim = FuelTrim.LONG_TERM_BANK_1),
+                FuelTrimRequest(fuelTrim = FuelTrim.LONG_TERM_BANK_2),
+                EthanolFuelPercentRequest(),
+                FuelInjectionTimingRequest(),
+                AbsoluteEvapSystemPressureRequest(),
+                EvapSystemPressureRequest())
 
 
     }
@@ -181,6 +202,7 @@ class OBDSession(val device: BluetoothDevice,
                     var vin: String? = null
                     var fuelType: FuelType? = null
                     val availablePIDs = mutableSetOf<String>()
+                    var standard: ObdStandard = ObdStandard.UNKNOWN
                     responses.forEach {
                         when (it) {
                             is VinResponse -> {
@@ -188,6 +210,9 @@ class OBDSession(val device: BluetoothDevice,
                             }
                             is FuelTypeResponse -> {
                                 fuelType = FuelType.fromValue(it.fuelType)
+                            }
+                            is OBDStandardResponse -> {
+                                standard = it.standard
                             }
                             is AvailablePidsResponse -> {
                                 Logger.log(TAG, "Available pids response " + it.availablePids)
@@ -198,7 +223,8 @@ class OBDSession(val device: BluetoothDevice,
 
                     BaseAppAction.AddVehicleInfoToActiveSession(device,
                             Vehicle(vin!!, UnAvailableAvailableData.Available(availablePIDs),
-                                    UnAvailableAvailableData.Available(fuelType!!))) as BaseAppAction
+                                    UnAvailableAvailableData.Available(fuelType!!),
+                                    UnAvailableAvailableData.Available(standard))) as BaseAppAction
                 }
                 .flatMap<BaseAppAction> {
                     val addVehicleAction = it as BaseAppAction.AddVehicleInfoToActiveSession
@@ -347,7 +373,13 @@ class OBDSession(val device: BluetoothDevice,
                             BaseAppAction.AddMassAirFlowToReport(response.maf)
                         }
                         is RuntimeResponse -> {
-                            BaseAppAction.AddRuntimeSinceEngineStartToReport(response.value)
+                            if (response.type == RuntimeType.SINCE_ENGINE_START) {
+                                BaseAppAction.AddRuntimeSinceEngineStartToReport(response.value)
+                            } else if (response.type == RuntimeType.WITH_MIL_ON) {
+                                BaseAppAction.AddRuntimeWithMILOnToReport(response.value)
+                            } else {
+                                BaseAppAction.AddRuntimeSinceDTCClearedToReport(response.value)
+                            }
                         }
                         is DistanceResponse -> {
                             if (response.distanceType == DistanceCommandType.SINCE_MIL_ON) {
@@ -378,6 +410,74 @@ class OBDSession(val device: BluetoothDevice,
                             BaseAppAction.AddEngineCoolantTemperatureToReport(response.temperature)
 
                         }
+
+                        is ThrottleResponse -> {
+                            when (response.type) {
+                                ThrottleRequestType.RELATIVE_POSITION -> {
+                                    BaseAppAction.AddRelativeThrottlePositionToReport(response.response)
+                                }
+                                ThrottleRequestType.ABSOLUTE_POSITION_B -> {
+                                    BaseAppAction.AddAbsoluteThrottlePositionBToReport(response.response)
+                                }
+                                ThrottleRequestType.ABSOLUTE_POSITION_C -> {
+                                    BaseAppAction.AddAbsoluteThrottlePositionCToReport(response.response)
+                                }
+                                ThrottleRequestType.ACCELERATOR_PEDAL_POSITION_D -> {
+                                    BaseAppAction.AddAccelPedalPositionDToReport(response.response)
+                                }
+                                ThrottleRequestType.ACCELERATOR_PEDAL_POSITION_E -> {
+                                    BaseAppAction.AddAccelPedalPositionEToReport(response.response)
+                                }
+                                ThrottleRequestType.ACCELERATOR_PEDAL_POSITION_F -> {
+                                    BaseAppAction.AddAccelPedalPositionEToReport(response.response)
+                                }
+                                ThrottleRequestType.RELATIVE_ACCELERATOR_PEDAL_POSITION -> {
+                                    BaseAppAction.AddRelativeAccelPedalPositionToReport(response.response)
+                                }
+                                else -> {
+                                    BaseAppAction.AddCommandedThrottleActuatorToReport(response.response)
+                                }
+                            }
+                        }
+                        is CommandedEGRResponse -> {
+                            BaseAppAction.AddCommandedEGRToReport(response.ratio)
+                        }
+
+                        is CommandedEGRErrorResponse -> {
+                            BaseAppAction.AddEGRErrorToReport(response.error)
+                        }
+
+                        is FuelTrimResponse -> {
+                            when (response.type) {
+                                FuelTrim.SHORT_TERM_BANK_1 -> {
+                                    BaseAppAction.AddFuelTrimShortTermBank1ToReport(response.fuelTrim)
+                                }
+                                FuelTrim.SHORT_TERM_BANK_2 -> {
+                                    BaseAppAction.AddFuelTrimShortTermBank2ToReport(response.fuelTrim)
+                                }
+                                FuelTrim.LONG_TERM_BANK_1 -> {
+                                    BaseAppAction.AddFuelTrimLongTermBank1ToReport(response.fuelTrim)
+                                }
+
+                                else -> {
+                                    BaseAppAction.AddFuelTrimLongTermBank2ToReport(response.fuelTrim)
+                                }
+                            }
+                        }
+
+                        is EthanolFuelPercentResponse -> {
+                            BaseAppAction.AddEthanolFuelPercentageToReport(response.percent)
+                        }
+                        is FuelInjectionTimingResponse -> {
+                            BaseAppAction.AddFuelInjectionTimingToReport(response.response)
+                        }
+                        is AbsoluteEvapSystemPressureResponse -> {
+                            BaseAppAction.AddAbsoluteEvapSystemVaporPressureToReport(response.pressure)
+                        }
+                        is EvapSystemPressureResponse -> {
+                            BaseAppAction.AddEvapSystemVaporPressureToReport(response.pressure)
+                        }
+
                         else -> {
                             BaseAppAction.AddOilTemperatureToReport((response as OilTempResponse).temperature)
                         }

@@ -48,7 +48,7 @@ internal class ReportView : Fragment() {
 
 
     private fun onNewSpanShot(reportViewModel: ReportData) {
-        vehicle_info.text = getString(R.string.vehicle_info_value, reportViewModel.name, reportViewModel.model + " " + reportViewModel.year, reportViewModel.vin)
+        vehicle_info.text = getString(R.string.vehicle_info_value, reportViewModel.name, reportViewModel.model + " " + reportViewModel.year, reportViewModel.vin, reportViewModel.obdStandard)
         mil.text = fromHtml(getString(R.string.mil_value, reportViewModel.milStatus, reportViewModel.pendingDTCs))
         speed.text = fromHtml(getString(R.string.speed_value, reportViewModel.speed))
         rpm.text = fromHtml(getString(R.string.rpm_value, reportViewModel.rpm))
@@ -63,6 +63,8 @@ internal class ReportView : Fragment() {
         timing_advance.text = fromHtml(getString(R.string.timing_advance_value, reportViewModel.timingAdvance))
         mass_air_flow.text = fromHtml(getString(R.string.mass_air_flow_value, reportViewModel.massAirFlow))
         runtime_since_engine_start.text = fromHtml(getString(R.string.runtime_since_engine_start_value, reportViewModel.runtimeSinceEngineStart))
+        runtime_with_mil_on.text = fromHtml(getString(R.string.runtime_with_mil_on_value, reportViewModel.runtimeWithMIlOn))
+        runtime_since_dtc_cleared.text = fromHtml(getString(R.string.runtime_since_dtc_cleared_value, reportViewModel.runtimeSinceDTCCleared))
         distance_since_mil_on.text = fromHtml(getString(R.string.distance_since_mil_on_value, reportViewModel.distanceSinceMILOn))
         distance_since_cc_cleared.text = fromHtml(getString(R.string.distance_since_cc_cleared_value, reportViewModel.distanceSinceDTCCleared))
         wide_band_air_fuel_ratio.text = fromHtml(getString(R.string.wide_band_fuel_ratio_value, reportViewModel.wideBandAirFuelRatio))
@@ -70,6 +72,27 @@ internal class ReportView : Fragment() {
         absolute_load.text = fromHtml(getString(R.string.absolute_load_value, reportViewModel.absoluteLoad))
         fuel_air_commanded_equivalence_ratio.text = fromHtml(getString(R.string.fuel_air_commanded_equivalence_ratio_value, reportViewModel.fuelAirCommandedEquivalenceRatio))
         oil_temperature.text = fromHtml(getString(R.string.oil_temperature_value, reportViewModel.oilTemperature))
+        engine_coolant_temperature.text = fromHtml(getString(R.string.engine_load_value, reportViewModel.engineCoolantTemperature))
+        relative_throttle_position.text = fromHtml(getString(R.string.relative_throttle_position_value, reportViewModel.relativeThrottlePosition))
+        abs_throttle_b.text = fromHtml(getString(R.string.absolute_throttle_position_b_value, reportViewModel.absoluteThrottlePositionB))
+        abs_throttle_c.text = fromHtml(getString(R.string.absolute_throttle_position_c_value, reportViewModel.absoluteThrottlePositionC))
+        accel_pedal_d.text = fromHtml(getString(R.string.accel_pedal_position_d_value, reportViewModel.accelPedalPositionD))
+        accel_pedal_e.text = fromHtml(getString(R.string.accel_pedal_position_e_value, reportViewModel.accelPedalPositionE))
+        accel_pedal_f.text = fromHtml(getString(R.string.accel_pedal_position_f_value, reportViewModel.accelPedalPositionF))
+        relative_accel_position.text = fromHtml(getString(R.string.relative_accel_pedal_position_value, reportViewModel.relativeAccelPedalPosition))
+        commanded_throttle_actuator.text = fromHtml(getString(R.string.commanded_throttle_actuator_value, reportViewModel.commandedThrottleActuator))
+        commanded_egr.text = fromHtml(getString(R.string.commanded_egr_value, reportViewModel.commandedEGR))
+        commanded_egr_error.text = fromHtml(getString(R.string.commanded_egr_error_value, reportViewModel.commandedEGRError))
+        ft_st_bank1.text = fromHtml(getString(R.string.fuel_trim_short_term_bank1_value, reportViewModel.fuelTrimShortTermBank1))
+        ft_st_bank2.text = fromHtml(getString(R.string.fuel_trim_short_term_bank2_value, reportViewModel.fuelTrimShortTermBank2))
+        ft_lt_bank1.text = fromHtml(getString(R.string.fuel_trim_long_term_bank1_value, reportViewModel.fuelTrimLongTermBank1))
+        ft_lt_bank2.text = fromHtml(getString(R.string.fuel_trim_long_term_bank2_value, reportViewModel.fuelTrimLongTermBank2))
+        ethanol_percentage.text = fromHtml(getString(R.string.ethanol_fuel_percent_value, reportViewModel.ethanolFuelPercent))
+        fuel_injection_timing.text = fromHtml(getString(R.string.fuel_injection_timing_value, reportViewModel.fuelInjectionTiming))
+        abs_evap_pressure.text = fromHtml(getString(R.string.abs_evap_system_vapor_pressure_value, reportViewModel.absoluteEvapSystempVaporPressure))
+        evap_pressure.text = fromHtml(getString(R.string.evap_system_vapor_pressure_value, reportViewModel.evapSystemVaporPressure))
+
+
     }
 }
 
@@ -128,7 +151,7 @@ internal class ReportViewModel(app: Application) : AndroidViewModel(app) {
 
 
                     ReportData(name = name, model = model, year = year, manufacturer = manufacturer,
-                            vin = vehicle.vin, fuelType = vehicle.fuelType.toString(),
+                            vin = vehicle.vin, fuelType = vehicle.fuelType.toString(), obdStandard = vehicle.obdStandard.toString(),
                             supportedPIDs = vehicle.supportedPIDs.toString(),
                             speed = "${liveVehicleData.speed} km/hr",
                             rpm = liveVehicleData.rpm.toString(),
@@ -147,13 +170,34 @@ internal class ReportViewModel(app: Application) : AndroidViewModel(app) {
                             timingAdvance = report.timingAdvance.toString(),
                             massAirFlow = report.massAirFlow.toString(),
                             runtimeSinceEngineStart = report.runTimeSinceEngineStart.toString(),
+                            runtimeSinceDTCCleared = report.runTimeSinceDTCCleared.toString(),
+                            runtimeWithMIlOn = report.runTimeWithMilOn.toString(),
                             distanceSinceMILOn = "${report.distanceTravelledSinceMILOn} km",
                             distanceSinceDTCCleared = "${report.distanceSinceDTCCleared} km",
                             wideBandAirFuelRatio = report.wideBandAirFuelRatio.toString(),
                             moduleVoltage = report.moduleVoltage.toString(),
                             absoluteLoad = report.absoluteLoad.toString(),
                             fuelAirCommandedEquivalenceRatio = report.fuelAirCommandedEquivalenceRatio.toString(),
-                            oilTemperature = report.oilTemperature.toString())
+                            oilTemperature = report.oilTemperature.toString(),
+                            engineCoolantTemperature = report.engineCoolantTemperature.toString(),
+                            relativeThrottlePosition = report.relativeThrottlePosition.toString(),
+                            absoluteThrottlePositionB = report.absoluteThrottlePositionB.toString(),
+                            absoluteThrottlePositionC = report.absoluteThrottlePositionC.toString(),
+                            accelPedalPositionD = report.accelPedalPositionD.toString(),
+                            accelPedalPositionE = report.accelPedalPositionE.toString(),
+                            accelPedalPositionF = report.accelPedalPositionF.toString(),
+                            relativeAccelPedalPosition = report.relativeAccelPedalPosition.toString(),
+                            commandedThrottleActuator = report.commandedThrottleActuator.toString(),
+                            commandedEGR = report.commandedEGR.toString(),
+                            commandedEGRError = report.egrError.toString(),
+                            fuelTrimShortTermBank1 = report.fuelTrimShortTermBank1.toString(),
+                            fuelTrimShortTermBank2 = report.fuelTrimShortTermBank2.toString(),
+                            fuelTrimLongTermBank1 = report.fuelTrimLongTermBank1.toString(),
+                            fuelTrimLongTermBank2 = report.fuelTrimLongTermBank2.toString(),
+                            ethanolFuelPercent = report.ethanolFuelPercent.toString(),
+                            fuelInjectionTiming = report.fuelInjectionTiming.toString(),
+                            absoluteEvapSystempVaporPressure = report.absoluteEvapSystempVaporPressure.toString(),
+                            evapSystemVaporPressure = report.evapSystemVaporPressure.toString())
 
                 }
                 .distinctUntilChanged()

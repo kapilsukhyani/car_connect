@@ -77,7 +77,8 @@ data class VehicleEntity constructor(@PrimaryKey var vin: String,
             UnAvailableAvailableData.UnAvailable
         } else {
             UnAvailableAvailableData.Available(FuelType.fromValue(fuelType))
-        }, attributes
+            //todo add obd standard in DB
+        }, UnAvailableAvailableData.UnAvailable, attributes
         )
     }
 }

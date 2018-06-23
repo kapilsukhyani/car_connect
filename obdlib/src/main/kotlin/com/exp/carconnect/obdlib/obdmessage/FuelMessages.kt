@@ -142,15 +142,15 @@ class FuelLevelResponse(rawResponse: String) : OBDResponse("FuelLevelResponse", 
     }
 }
 
-class FuelTrimRequest(fuelTrim: FuelTrim, retriable: Boolean = true,
+class FuelTrimRequest(val fuelTrim: FuelTrim, retriable: Boolean = true,
                       repeatable: IsRepeatable = IsRepeatable.No) :
         OBDRequest("FuelTrimRequest[${fuelTrim.bank}]", fuelTrim.buildObdCommand(), retriable, repeatable) {
     override fun toResponse(rawResponse: String): OBDResponse {
-        return FuelTrimResponse(rawResponse)
+        return FuelTrimResponse(rawResponse, fuelTrim)
     }
 }
 
-class FuelTrimResponse(rawResponse: String) : OBDResponse("FuelTrimResponse", rawResponse) {
+class FuelTrimResponse(rawResponse: String, val type: FuelTrim) : OBDResponse("FuelTrimResponse", rawResponse) {
     val fuelTrim: Float
 
     init {

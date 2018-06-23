@@ -289,7 +289,7 @@ class ThrottleRequest(mode: OBDRequestMode = OBDRequestMode.CURRENT,
     }
 }
 
-class ThrottleResponse(rawResponse: String, type: ThrottleRequestType) :
+class ThrottleResponse(rawResponse: String, val type: ThrottleRequestType) :
         OBDResponse("ThrottleResponse", rawResponse) {
 
     val response = (rawResponse.toIntList()[2] * 100.0f) / 255.0f

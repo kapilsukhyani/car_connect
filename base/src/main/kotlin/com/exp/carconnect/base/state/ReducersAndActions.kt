@@ -43,25 +43,42 @@ sealed class BaseAppAction {
     data class AddNewConnectedDongle(val dongle: Dongle) : BaseAppAction()
     data class AddNewVehicle(val vehicle: Vehicle) : BaseAppAction()
 
-    data class AddEngineLoadToReport(val engineLoad: Float): BaseAppAction()
-    data class AddFuelPressureToReport(val fuelPressure: Int): BaseAppAction()
-    data class AddIntakeManifoldPressureToReport(val intakeMonitorPressure: Int): BaseAppAction()
-    data class AddTimingAdvanceToReport(val timingAdvance: Float): BaseAppAction()
-    data class AddMassAirFlowToReport(val massAirFlow: Float): BaseAppAction()
-    data class AddRuntimeSinceEngineStartToReport(val runtimeSinceEngineStart: Int): BaseAppAction()
-    data class AddDistanceTraveledSinceMILOnToReport(val distanceTraveledSinceMilOn: Int): BaseAppAction()
-    data class AddFuelRailPressureToReport(val fuelRailPressure: Int): BaseAppAction()
-    data class AddDistanceSinceDTCClearedToReport(val distanceSinceDTCCleared: Int): BaseAppAction()
-    data class AddBarometricPressureToReport(val barometricPressure: Int): BaseAppAction()
-    data class AddWideBandAirFuelRatioToReport(val wideBandAirFuelRatio: Float): BaseAppAction()
-    data class AddModuleVoltageToReport(val moduleVoltage: Float): BaseAppAction()
-    data class AddAbsoluteLoadToReport(val absoluteLoad: Float): BaseAppAction()
-    data class AddFuelAirCommandedEquivalenceRatioToReport(val fuelAirCommandedEquivalenceRatio: Float): BaseAppAction()
-    data class AddOilTemperatureToReport(val oilTemperature: Int): BaseAppAction()
-
-    //handle these actions in reducers
-    data class AddEngineCoolantTemperatureToReport(val engineCoolantTemperature: Int): BaseAppAction()
-
+    data class AddEngineLoadToReport(val engineLoad: Float) : BaseAppAction()
+    data class AddFuelPressureToReport(val fuelPressure: Int) : BaseAppAction()
+    data class AddIntakeManifoldPressureToReport(val intakeMonitorPressure: Int) : BaseAppAction()
+    data class AddTimingAdvanceToReport(val timingAdvance: Float) : BaseAppAction()
+    data class AddMassAirFlowToReport(val massAirFlow: Float) : BaseAppAction()
+    data class AddRuntimeSinceEngineStartToReport(val runtimeSinceEngineStart: Int) : BaseAppAction()
+    data class AddRuntimeWithMILOnToReport(val runtimeWithMILOn: Int) : BaseAppAction()
+    data class AddRuntimeSinceDTCClearedToReport(val runtimeSinceDTCCleared: Int) : BaseAppAction()
+    data class AddDistanceTraveledSinceMILOnToReport(val distanceTraveledSinceMilOn: Int) : BaseAppAction()
+    data class AddFuelRailPressureToReport(val fuelRailPressure: Int) : BaseAppAction()
+    data class AddDistanceSinceDTCClearedToReport(val distanceSinceDTCCleared: Int) : BaseAppAction()
+    data class AddBarometricPressureToReport(val barometricPressure: Int) : BaseAppAction()
+    data class AddWideBandAirFuelRatioToReport(val wideBandAirFuelRatio: Float) : BaseAppAction()
+    data class AddModuleVoltageToReport(val moduleVoltage: Float) : BaseAppAction()
+    data class AddAbsoluteLoadToReport(val absoluteLoad: Float) : BaseAppAction()
+    data class AddFuelAirCommandedEquivalenceRatioToReport(val fuelAirCommandedEquivalenceRatio: Float) : BaseAppAction()
+    data class AddOilTemperatureToReport(val oilTemperature: Int) : BaseAppAction()
+    data class AddEngineCoolantTemperatureToReport(val engineCoolantTemperature: Int) : BaseAppAction()
+    data class AddRelativeThrottlePositionToReport(val value: Float) : BaseAppAction()
+    data class AddAbsoluteThrottlePositionBToReport(val value: Float) : BaseAppAction()
+    data class AddAbsoluteThrottlePositionCToReport(val value: Float) : BaseAppAction()
+    data class AddAccelPedalPositionDToReport(val value: Float) : BaseAppAction()
+    data class AddAccelPedalPositionEToReport(val value: Float) : BaseAppAction()
+    data class AddAccelPedalPositionFToReport(val value: Float) : BaseAppAction()
+    data class AddRelativeAccelPedalPositionToReport(val value: Float) : BaseAppAction()
+    data class AddCommandedThrottleActuatorToReport(val value: Float) : BaseAppAction()
+    data class AddCommandedEGRToReport(val value: Float) : BaseAppAction()
+    data class AddEGRErrorToReport(val value: Float) : BaseAppAction()
+    data class AddFuelTrimShortTermBank1ToReport(val value: Float) : BaseAppAction()
+    data class AddFuelTrimShortTermBank2ToReport(val value: Float) : BaseAppAction()
+    data class AddFuelTrimLongTermBank1ToReport(val value: Float) : BaseAppAction()
+    data class AddFuelTrimLongTermBank2ToReport(val value: Float) : BaseAppAction()
+    data class AddEthanolFuelPercentageToReport(val value: Float) : BaseAppAction()
+    data class AddFuelInjectionTimingToReport(val value: Float) : BaseAppAction()
+    data class AddAbsoluteEvapSystemVaporPressureToReport(val value: Float) : BaseAppAction()
+    data class AddEvapSystemVaporPressureToReport(val value: Float) : BaseAppAction()
 
     object ClearDTCs : BaseAppAction()
     object FetchReport : BaseAppAction()
@@ -248,6 +265,14 @@ class ActiveSessionReducer : Reducer<AppState> {
                             val report = getCurrentReport(state).copy(runTimeSinceEngineStart = UnAvailableAvailableData.Available(action.runtimeSinceEngineStart))
                             addNewReportSnapShot(state, report)
                         }
+                        is BaseAppAction.AddRuntimeWithMILOnToReport -> {
+                            val report = getCurrentReport(state).copy(runTimeWithMilOn = UnAvailableAvailableData.Available(action.runtimeWithMILOn))
+                            addNewReportSnapShot(state, report)
+                        }
+                        is BaseAppAction.AddRuntimeSinceDTCClearedToReport -> {
+                            val report = getCurrentReport(state).copy(runTimeSinceDTCCleared = UnAvailableAvailableData.Available(action.runtimeSinceDTCCleared))
+                            addNewReportSnapShot(state, report)
+                        }
                         is BaseAppAction.AddDistanceTraveledSinceMILOnToReport -> {
                             val report = getCurrentReport(state).copy(distanceTravelledSinceMILOn = UnAvailableAvailableData.Available(action.distanceTraveledSinceMilOn))
                             addNewReportSnapShot(state, report)
@@ -284,7 +309,86 @@ class ActiveSessionReducer : Reducer<AppState> {
                             val report = getCurrentReport(state).copy(oilTemperature = UnAvailableAvailableData.Available(action.oilTemperature))
                             addNewReportSnapShot(state, report)
                         }
+                        is BaseAppAction.AddEngineCoolantTemperatureToReport -> {
+                            val report = getCurrentReport(state).copy(engineCoolantTemperature = UnAvailableAvailableData.Available(action.engineCoolantTemperature))
+                            addNewReportSnapShot(state, report)
+                        }
 
+                        is BaseAppAction.AddRelativeThrottlePositionToReport -> {
+                            val report = getCurrentReport(state).copy(relativeThrottlePosition = UnAvailableAvailableData.Available(action.value))
+                            addNewReportSnapShot(state, report)
+                        }
+                        is BaseAppAction.AddAbsoluteThrottlePositionBToReport -> {
+                            val report = getCurrentReport(state).copy(absoluteThrottlePositionB = UnAvailableAvailableData.Available(action.value))
+                            addNewReportSnapShot(state, report)
+                        }
+                        is BaseAppAction.AddAbsoluteThrottlePositionCToReport -> {
+                            val report = getCurrentReport(state).copy(absoluteThrottlePositionC = UnAvailableAvailableData.Available(action.value))
+                            addNewReportSnapShot(state, report)
+                        }
+                        is BaseAppAction.AddAccelPedalPositionDToReport -> {
+                            val report = getCurrentReport(state).copy(accelPedalPositionD = UnAvailableAvailableData.Available(action.value))
+                            addNewReportSnapShot(state, report)
+                        }
+                        is BaseAppAction.AddAccelPedalPositionEToReport -> {
+                            val report = getCurrentReport(state).copy(accelPedalPositionE = UnAvailableAvailableData.Available(action.value))
+                            addNewReportSnapShot(state, report)
+                        }
+                        is BaseAppAction.AddAccelPedalPositionFToReport -> {
+                            val report = getCurrentReport(state).copy(accelPedalPositionF = UnAvailableAvailableData.Available(action.value))
+                            addNewReportSnapShot(state, report)
+                        }
+                        is BaseAppAction.AddRelativeAccelPedalPositionToReport -> {
+                            val report = getCurrentReport(state).copy(relativeAccelPedalPosition = UnAvailableAvailableData.Available(action.value))
+                            addNewReportSnapShot(state, report)
+                        }
+
+                        is BaseAppAction.AddCommandedThrottleActuatorToReport -> {
+                            val report = getCurrentReport(state).copy(commandedThrottleActuator = UnAvailableAvailableData.Available(action.value))
+                            addNewReportSnapShot(state, report)
+                        }
+
+                        is BaseAppAction.AddCommandedEGRToReport -> {
+                            val report = getCurrentReport(state).copy(commandedEGR = UnAvailableAvailableData.Available(action.value))
+                            addNewReportSnapShot(state, report)
+                        }
+                        is BaseAppAction.AddEGRErrorToReport -> {
+                            val report = getCurrentReport(state).copy(egrError = UnAvailableAvailableData.Available(action.value))
+                            addNewReportSnapShot(state, report)
+                        }
+                        is BaseAppAction.AddFuelTrimShortTermBank1ToReport -> {
+                            val report = getCurrentReport(state).copy(fuelTrimShortTermBank1 = UnAvailableAvailableData.Available(action.value))
+                            addNewReportSnapShot(state, report)
+                        }
+                        is BaseAppAction.AddFuelTrimShortTermBank2ToReport -> {
+                            val report = getCurrentReport(state).copy(fuelTrimShortTermBank2 = UnAvailableAvailableData.Available(action.value))
+                            addNewReportSnapShot(state, report)
+                        }
+
+                        is BaseAppAction.AddFuelTrimLongTermBank1ToReport -> {
+                            val report = getCurrentReport(state).copy(fuelTrimLongTermBank1 = UnAvailableAvailableData.Available(action.value))
+                            addNewReportSnapShot(state, report)
+                        }
+                        is BaseAppAction.AddFuelTrimLongTermBank2ToReport -> {
+                            val report = getCurrentReport(state).copy(fuelTrimLongTermBank2 = UnAvailableAvailableData.Available(action.value))
+                            addNewReportSnapShot(state, report)
+                        }
+                        is BaseAppAction.AddEthanolFuelPercentageToReport -> {
+                            val report = getCurrentReport(state).copy(ethanolFuelPercent = UnAvailableAvailableData.Available(action.value))
+                            addNewReportSnapShot(state, report)
+                        }
+                        is BaseAppAction.AddFuelInjectionTimingToReport -> {
+                            val report = getCurrentReport(state).copy(fuelInjectionTiming = UnAvailableAvailableData.Available(action.value))
+                            addNewReportSnapShot(state, report)
+                        }
+                        is BaseAppAction.AddAbsoluteEvapSystemVaporPressureToReport -> {
+                            val report = getCurrentReport(state).copy(absoluteEvapSystempVaporPressure = UnAvailableAvailableData.Available(action.value))
+                            addNewReportSnapShot(state, report)
+                        }
+                        is BaseAppAction.AddEvapSystemVaporPressureToReport -> {
+                            val report = getCurrentReport(state).copy(evapSystemVaporPressure = UnAvailableAvailableData.Available(action.value))
+                            addNewReportSnapShot(state, report)
+                        }
                         else -> {
                             state
                         }

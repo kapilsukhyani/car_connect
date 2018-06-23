@@ -96,6 +96,30 @@ class RelativeFuelRailPressureResponse(rawResponse: String) : OBDResponse("Relat
 }
 
 
+class AbsoluteFuelRailPressureRequest(mode: OBDRequestMode = OBDRequestMode.CURRENT,
+                                      retriable: Boolean = true,
+                                      repeatable: IsRepeatable = IsRepeatable.No) :
+        MultiModeOBDRequest(mode, "AbsoluteFuelRailPressureRequest", "59", retriable, repeatable) {
+    override fun toResponse(rawResponse: String): OBDResponse {
+        return AbsoluteFuelRailPressureResponse(rawResponse)
+    }
+}
+
+class AbsoluteFuelRailPressureResponse(rawResponse: String) : OBDResponse("AbsoluteFuelRailPressureResponse", rawResponse) {
+    val pressure: Float
+
+    init {
+        val buffer = rawResponse.toIntList()
+        // // ignore first two bytes [hh hh] of the response
+        pressure = ((buffer[2] * 256) + buffer[3]) * 10.0f
+    }
+
+    override fun getFormattedResult(): String {
+        return "$pressure kPa"
+    }
+}
+
+
 class IntakeManifoldPressureRequest(mode: OBDRequestMode = OBDRequestMode.CURRENT,
                                     retriable: Boolean = true,
                                     repeatable: IsRepeatable = IsRepeatable.No) :
@@ -116,5 +140,52 @@ class IntakeManifoldPressureResponse(rawResponse: String) : OBDResponse("IntakeM
 
     override fun getFormattedResult(): String {
         return "$intakeManifoldPressure kPa"
+    }
+}
+
+class AbsoluteEvapSystemPressureRequest(mode: OBDRequestMode = OBDRequestMode.CURRENT,
+                                        retriable: Boolean = true,
+                                        repeatable: IsRepeatable = IsRepeatable.No) :
+        MultiModeOBDRequest(mode, "AbsoluteEvapSystempPressureRequest", "53", retriable, repeatable) {
+    override fun toResponse(rawResponse: String): OBDResponse {
+        return AbsoluteEvapSystemPressureResponse(rawResponse)
+    }
+}
+
+class AbsoluteEvapSystemPressureResponse(rawResponse: String) : OBDResponse("AbsoluteEvapSystempPressureResponse", rawResponse) {
+    val pressure: Float
+
+    init {
+        val buffer = rawResponse.toIntList()
+        // // ignore first two bytes [hh hh] of the response
+        pressure = (buffer[2] * 256.0f + buffer[3]) / 200.0f
+    }
+
+    override fun getFormattedResult(): String {
+        return "$pressure kPa"
+    }
+}
+
+
+class EvapSystemPressureRequest(mode: OBDRequestMode = OBDRequestMode.CURRENT,
+                                retriable: Boolean = true,
+                                repeatable: IsRepeatable = IsRepeatable.No) :
+        MultiModeOBDRequest(mode, "EvapSystemPressureRequest", "54", retriable, repeatable) {
+    override fun toResponse(rawResponse: String): OBDResponse {
+        return EvapSystemPressureResponse(rawResponse)
+    }
+}
+
+class EvapSystemPressureResponse(rawResponse: String) : OBDResponse("EvapSystemPressureResponse", rawResponse) {
+    val pressure: Float
+
+    init {
+        val buffer = rawResponse.toIntList()
+        // // ignore first two bytes [hh hh] of the response
+        pressure = ((buffer[2] * 256.0f + buffer[3])) - 32767
+    }
+
+    override fun getFormattedResult(): String {
+        return "$pressure Pa"
     }
 }

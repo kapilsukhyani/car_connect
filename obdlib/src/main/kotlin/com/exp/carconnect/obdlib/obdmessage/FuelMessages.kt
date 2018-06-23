@@ -215,3 +215,49 @@ class WidebandAirFuelRatioResponse(rawResponse: String) : OBDResponse("WidebandA
     }
 }
 
+
+class EthanolFuelPercentRequest(mode: OBDRequestMode = OBDRequestMode.CURRENT,
+                                retriable: Boolean = true,
+                                repeatable: IsRepeatable = IsRepeatable.No) :
+        MultiModeOBDRequest(mode, "EthanolFuelPercentRequest", "52", retriable, repeatable) {
+    override fun toResponse(rawResponse: String): OBDResponse {
+        return EthanolFuelPercentResponse(rawResponse)
+    }
+}
+
+class EthanolFuelPercentResponse(rawResponse: String) : OBDResponse("EthanolFuelPercentResponse", rawResponse) {
+    val percent: Float
+
+    init {
+        val buffer = rawResponse.toIntList()
+        // // ignore first two bytes [hh hh] of the response
+        percent = buffer[2] * 100.0f / 255.0f
+    }
+
+    override fun getFormattedResult(): String {
+        return "$percent %"
+    }
+}
+
+class FuelInjectionTimingRequest(mode: OBDRequestMode = OBDRequestMode.CURRENT,
+                                 retriable: Boolean = true,
+                                 repeatable: IsRepeatable = IsRepeatable.No) :
+        MultiModeOBDRequest(mode, "FuelInjectionTimingRequest", "5D", retriable, repeatable) {
+    override fun toResponse(rawResponse: String): OBDResponse {
+        return FuelInjectionTimingResponse(rawResponse)
+    }
+}
+
+class FuelInjectionTimingResponse(rawResponse: String) : OBDResponse("FuelInjectionTimingResponse", rawResponse) {
+    val response: Float
+
+    init {
+        val buffer = rawResponse.toIntList()
+        // // ignore first two bytes [hh hh] of the response
+        response = ((buffer[2] * 256.0f + buffer[3]) / 128.0f) - 210
+    }
+
+    override fun getFormattedResult(): String {
+        return "$response"
+    }
+}

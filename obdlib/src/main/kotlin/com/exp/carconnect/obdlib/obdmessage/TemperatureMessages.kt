@@ -58,7 +58,7 @@ class CatalystTemperatureResponse(rawResponse: String, val type: CatalystTempera
 
 enum class CatalystTemperatureType(val command: String) {
     BANK1SEONSOR1("3C"),
-    BANK1SEONSOR2("3D"),
-    BANK2SEONSOR1("3E"),
+    BANK2SEONSOR1("3D"),
+    BANK1SEONSOR2("3E"),
     BANK2SEONSOR2("3F")
 }

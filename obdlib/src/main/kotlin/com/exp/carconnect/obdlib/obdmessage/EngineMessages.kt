@@ -91,16 +91,16 @@ class CommandedEGRErrorRequest(mode: OBDRequestMode = OBDRequestMode.CURRENT,
 class CommandedEGRErrorResponse(rawResponse: String) :
         OBDResponse("CommandedEGRErrorResponse", rawResponse) {
 
-    val ratio: Float
+    val error: Float
 
     init {
         val buffer = rawResponse.toIntList()
         val a = buffer[2]
-        ratio = (a) * 100.0f / 255.0f - 100
+        error = ((a) * 100.0f / 128.0f) - 100
     }
 
     override fun getFormattedResult(): String {
-        return "$ratio %"
+        return "$error %"
     }
 }
 
@@ -224,16 +224,17 @@ class OilTempResponse(rawResponse: String) :
 }
 
 
-class RuntimeRequest(mode: OBDRequestMode = OBDRequestMode.CURRENT,
+class RuntimeRequest(val type: RuntimeType, mode: OBDRequestMode = OBDRequestMode.CURRENT,
                      retriable: Boolean = true,
                      repeatable: IsRepeatable = IsRepeatable.No) :
-        MultiModeOBDRequest(mode, "RuntimeRequest", "1F", retriable, repeatable) {
+        MultiModeOBDRequest(mode, "RuntimeRequest", type.command, retriable, repeatable) {
     override fun toResponse(rawResponse: String): OBDResponse {
-        return RuntimeResponse(rawResponse)
+        return RuntimeResponse(rawResponse, type)
     }
 }
 
-class RuntimeResponse(rawResponse: String) :
+class RuntimeResponse(rawResponse: String
+                      , val type: RuntimeType) :
         OBDResponse("RuntimeResponse", rawResponse) {
 
     val value: Int
@@ -251,58 +252,10 @@ class RuntimeResponse(rawResponse: String) :
     }
 }
 
-class RuntimeWithMILOnRequest(mode: OBDRequestMode = OBDRequestMode.CURRENT,
-                              retriable: Boolean = true,
-                              repeatable: IsRepeatable = IsRepeatable.No) :
-        MultiModeOBDRequest(mode, "RuntimeWithMILOnRequest", "4D", retriable, repeatable) {
-    override fun toResponse(rawResponse: String): OBDResponse {
-        return RuntimeWithMILOnResponse(rawResponse)
-    }
-}
-
-class RuntimeWithMILOnResponse(rawResponse: String) :
-        OBDResponse("RuntimeWithMILOnResponse", rawResponse) {
-
-    val value: Int
-
-    init {
-        val buffer = rawResponse.toIntList()
-        value = buffer[2] * 256 + buffer[3]
-    }
-
-    override fun getFormattedResult(): String {
-        val hh = String.format("%02d", value / 3600)
-        val mm = String.format("%02d", value % 3600 / 60)
-        val ss = String.format("%02d", value % 60)
-        return "$hh:$mm:$ss"
-    }
-}
-
-class RuntimeSinceTroubleCodeClearedRequest(mode: OBDRequestMode = OBDRequestMode.CURRENT,
-                                            retriable: Boolean = true,
-                                            repeatable: IsRepeatable = IsRepeatable.No) :
-        MultiModeOBDRequest(mode, "RuntimeSinceTroubleCodeClearedRequest", "4E", retriable, repeatable) {
-    override fun toResponse(rawResponse: String): OBDResponse {
-        return RuntimeSinceTroubleCodeClearedResponse(rawResponse)
-    }
-}
-
-class RuntimeSinceTroubleCodeClearedResponse(rawResponse: String) :
-        OBDResponse("RuntimeSinceTroubleCodeClearedResponse", rawResponse) {
-
-    val value: Int
-
-    init {
-        val buffer = rawResponse.toIntList()
-        value = buffer[2] * 256 + buffer[3]
-    }
-
-    override fun getFormattedResult(): String {
-        val hh = String.format("%02d", value / 3600)
-        val mm = String.format("%02d", value % 3600 / 60)
-        val ss = String.format("%02d", value % 60)
-        return "$hh:$mm:$ss"
-    }
+enum class RuntimeType(val command: String) {
+    SINCE_ENGINE_START("1F"),
+    WITH_MIL_ON("4D"),
+    SINCE_DTC_CLEARED("4E")
 }
 
 
@@ -339,10 +292,10 @@ class ThrottleRequest(mode: OBDRequestMode = OBDRequestMode.CURRENT,
 class ThrottleResponse(rawResponse: String, type: ThrottleRequestType) :
         OBDResponse("ThrottleResponse", rawResponse) {
 
-    val throttle = (rawResponse.toIntList()[2] * 100.0f) / 255.0f
+    val response = (rawResponse.toIntList()[2] * 100.0f) / 255.0f
 
     override fun getFormattedResult(): String {
-        return "$throttle %"
+        return "$response %"
     }
 }
 
@@ -353,6 +306,7 @@ enum class ThrottleRequestType(val command: String) {
     ACCELERATOR_PEDAL_POSITION_D("49"),
     ACCELERATOR_PEDAL_POSITION_E("4A"),
     ACCELERATOR_PEDAL_POSITION_F("4B"),
+    RELATIVE_ACCELERATOR_PEDAL_POSITION("5A"),
     COMMANDED_THROTTLE_ACTUATOR("4C")
 
 }

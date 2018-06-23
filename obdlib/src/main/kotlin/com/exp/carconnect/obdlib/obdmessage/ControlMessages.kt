@@ -59,11 +59,137 @@ class DTCNumberRequest(mode: OBDRequestMode = OBDRequestMode.CURRENT,
 class DTCNumberResponse(rawResponse: String) : OBDResponse("DTCNumberResponse", rawResponse) {
     val codeCount: Int
     val milOn: Boolean
+    val motorType: MotorType
+    val tests: Array<Test>
 
     init {
         val buffer = rawResponse.toIntList()
         milOn = buffer[2] and 0x80 == 128
         codeCount = buffer[2] and 0x7F
+        motorType = if (buffer[3] and 0x08 == 8) {
+            tests = Array(9, { index ->
+                var available = false
+                var complete = false
+                when (index) {
+                    0 -> {
+                        available = (buffer[3] and 0x04 == 4)
+                        complete = (buffer[3] and 0x40 == 0)
+                        Test(TestType.COMPONENTS, available, complete)
+                    }
+                    1 -> {
+                        available = (buffer[3] and 0x02 == 2)
+                        complete = (buffer[3] and 0x20 == 0)
+                        Test(TestType.FUEL_SYSTEM, available, complete)
+                    }
+                    2 -> {
+                        available = (buffer[3] and 0x01 == 1)
+                        complete = (buffer[3] and 0x10 == 0)
+                        Test(TestType.MIS_FIRE, available, complete)
+                    }
+                    3 -> {
+                        available = (buffer[4] and 0x80 == 128)
+                        complete = (buffer[5] and 0x80 == 0)
+                        Test(TestType.EGR_SYSTEM, available, complete)
+                    }
+                    4 -> {
+                        available = (buffer[4] and 0x40 == 64)
+                        complete = (buffer[5] and 0x40 == 0)
+                        Test(TestType.PM_FILTER_MONITORING, available, complete)
+                    }
+                    5 -> {
+                        available = (buffer[4] and 0x20 == 32)
+                        complete = (buffer[5] and 0x20 == 0)
+                        Test(TestType.EXHAUST_GAS_SENSOR, available, complete)
+                    }
+                    6 -> {
+                        available = (buffer[4] and 0x08 == 8)
+                        complete = (buffer[5] and 0x08 == 0)
+                        Test(TestType.BOOST_PRESSURE, available, complete)
+                    }
+                    7 -> {
+                        available = (buffer[4] and 0x02 == 2)
+                        complete = (buffer[5] and 0x02 == 0)
+                        Test(TestType.SCR_MONITOR, available, complete)
+                    }
+                    else -> {
+                        available = (buffer[4] and 0x01 == 1)
+                        complete = (buffer[5] and 0x01 == 0)
+                        Test(TestType.NMHC_CATALYST, available, complete)
+                    }
+
+                }
+
+            })
+            MotorType.COMPRESSION
+
+        } else {
+            tests = Array(11, { index ->
+                var available = false
+                var complete = false
+                when (index) {
+                    0 -> {
+                        available = (buffer[3] and 0x04 == 4)
+                        complete = (buffer[3] and 0x40 == 0)
+                        Test(TestType.COMPONENTS, available, complete)
+                    }
+                    1 -> {
+                        available = (buffer[3] and 0x02 == 2)
+                        complete = (buffer[3] and 0x20 == 0)
+                        Test(TestType.FUEL_SYSTEM, available, complete)
+                    }
+                    2 -> {
+                        available = (buffer[3] and 0x01 == 1)
+                        complete = (buffer[3] and 0x10 == 0)
+                        Test(TestType.MIS_FIRE, available, complete)
+                    }
+                    3 -> {
+                        available = (buffer[4] and 0x80 == 128)
+                        complete = (buffer[5] and 0x80 == 0)
+                        Test(TestType.EGR_SYSTEM, available, complete)
+                    }
+                    4 -> {
+                        available = (buffer[4] and 0x40 == 64)
+                        complete = (buffer[5] and 0x40 == 0)
+                        Test(TestType.OXYGEN_SENSOR_HEATER, available, complete)
+                    }
+                    5 -> {
+                        available = (buffer[4] and 0x20 == 32)
+                        complete = (buffer[5] and 0x20 == 0)
+                        Test(TestType.OXYGEN_SENSOR, available, complete)
+                    }
+                    6 -> {
+                        available = (buffer[4] and 0x10 == 16)
+                        complete = (buffer[5] and 0x10 == 0)
+                        Test(TestType.AC_REFRIGERANT, available, complete)
+                    }
+
+                    7 -> {
+                        available = (buffer[4] and 0x08 == 8)
+                        complete = (buffer[5] and 0x08 == 0)
+                        Test(TestType.SECONDARY_AIR_SYSTEM, available, complete)
+                    }
+
+                    8 -> {
+                        available = (buffer[4] and 0x04 == 4)
+                        complete = (buffer[5] and 0x04 == 0)
+                        Test(TestType.EVAPORATIVE_SYSTEM, available, complete)
+                    }
+                    9 -> {
+                        available = (buffer[4] and 0x02 == 2)
+                        complete = (buffer[5] and 0x02 == 0)
+                        Test(TestType.HEATED_CATALYST, available, complete)
+                    }
+                    else -> {
+                        available = (buffer[4] and 0x01 == 1)
+                        complete = (buffer[5] and 0x01 == 0)
+                        Test(TestType.CATALYST, available, complete)
+                    }
+
+                }
+            })
+            MotorType.SPARK
+        }
+
     }
 
     override fun getFormattedResult(): String {
@@ -71,6 +197,33 @@ class DTCNumberResponse(rawResponse: String) : OBDResponse("DTCNumberResponse", 
         return "$res  $codeCount codes"
     }
 }
+
+enum class MotorType {
+    SPARK,
+    COMPRESSION
+}
+
+enum class TestType {
+    COMPONENTS,
+    FUEL_SYSTEM,
+    MIS_FIRE,
+    EGR_SYSTEM,
+    OXYGEN_SENSOR_HEATER,
+    OXYGEN_SENSOR,
+    AC_REFRIGERANT,
+    SECONDARY_AIR_SYSTEM,
+    EVAPORATIVE_SYSTEM,
+    HEATED_CATALYST,
+    CATALYST,
+    PM_FILTER_MONITORING,
+    EXHAUST_GAS_SENSOR,
+    BOOST_PRESSURE,
+    SCR_MONITOR,
+    NMHC_CATALYST
+}
+
+data class Test(val testType: TestType, val available: Boolean, val complete: Boolean)
+
 
 class EquivalentRatioRequest(mode: OBDRequestMode = OBDRequestMode.CURRENT,
                              retriable: Boolean = true,

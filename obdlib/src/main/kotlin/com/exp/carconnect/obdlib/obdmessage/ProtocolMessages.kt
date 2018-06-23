@@ -59,7 +59,7 @@ class AvailablePidsResponse(command: PidCommand, rawResponse: String) : OBDRespo
 
     }
 
-   private fun Int.getHexString(): String {
+    private fun Int.getHexString(): String {
         val hexString = this.toString(16)
         return if (hexString.length == 1) {
             "0$hexString"
@@ -97,6 +97,112 @@ class OBDResetCommand(retriable: Boolean = true,
                       repeatable: IsRepeatable = IsRepeatable.No) :
         OBDRequest("OBDResetCommand", "AT Z", retriable, repeatable)
 
+
+class OBDStandardRequest(retriable: Boolean = true,
+                         repeatable: IsRepeatable = IsRepeatable.No) : OBDRequest("OBDStandardRequest", "01 1C", retriable, repeatable) {
+    override fun toResponse(rawResponse: String): OBDResponse {
+        return OBDStandardResponse(rawResponse)
+    }
+}
+
+class OBDStandardResponse(rawResponse: String) : OBDResponse("OBDStandardResponse", rawResponse) {
+    val standard: ObdStandard
+
+    init {
+        val standardType = rawResponse.toIntList()[2]
+        standard = when (standardType) {
+            1 -> {
+                ObdStandard.CARB_OBD2
+            }
+            2 -> {
+                ObdStandard.EPA_OBD
+            }
+            3 -> {
+                ObdStandard.OBD_OBD2
+            }
+            4 -> {
+                ObdStandard.OBD1
+            }
+            5 -> {
+                ObdStandard.NOT_OBD_COMPLIANT
+            }
+            6 -> {
+                ObdStandard.EOBD
+            }
+            7 -> {
+                ObdStandard.EOBD_OBD2
+            }
+            8 -> {
+                ObdStandard.EOBD_OBD
+            }
+            9 -> {
+                ObdStandard.EOBD_OBD_OBD2
+            }
+            10 -> {
+                ObdStandard.JOBD
+            }
+            11 -> {
+                ObdStandard.JOBD_OBD2
+            }
+            12 -> {
+                ObdStandard.JOBD_EOBD
+            }
+            13 -> {
+                ObdStandard.JOBD_EOBD_OBD2
+            }
+            17 -> {
+                ObdStandard.EMD
+            }
+            18 -> {
+                ObdStandard.EMD_PLUS
+            }
+            19 -> {
+                ObdStandard.HD_OBD_C
+            }
+            20 -> {
+                ObdStandard.HD_OBD
+            }
+            21 -> {
+                ObdStandard.WWH_OBD
+            }
+            23 -> {
+                ObdStandard.HD_EOBD1
+            }
+            24 -> {
+                ObdStandard.HD_EOBD1_N
+            }
+            25 -> {
+                ObdStandard.HD_EOBD2
+            }
+            26 -> {
+                ObdStandard.HD_EOBD2_N
+            }
+            28 -> {
+                ObdStandard.OBD_BR_1
+            }
+            29 -> {
+                ObdStandard.OBD_BR_2
+            }
+            30 -> {
+                ObdStandard.KOBD
+            }
+            31 -> {
+                ObdStandard.IOBD
+            }
+            32 -> {
+                ObdStandard.IOBD2
+            }
+            33 -> {
+                ObdStandard.HD_EOBD4
+            }
+            else -> {
+                ObdStandard.UNKNOWN
+            }
+        }
+    }
+
+
+}
 
 enum class PidCommand(val value: String) {
     ONE_TO_TWENTY("01 00") {
@@ -186,4 +292,39 @@ enum class ObdProtocol(
      * 11 bit ID (user adjustable), 50 kbaud (user adjustable)
      */
     USER2_CAN('C')
+}
+
+
+//reference : https://en.wikipedia.org/wiki/OBD-II_PIDs#Mode_1_PID_1C
+enum class ObdStandard {
+    CARB_OBD2,
+    EPA_OBD,
+    OBD_OBD2,
+    OBD1,
+    NOT_OBD_COMPLIANT,
+    EOBD,
+    EOBD_OBD2,
+    EOBD_OBD,
+    EOBD_OBD_OBD2,
+    JOBD,
+    JOBD_OBD2,
+    JOBD_EOBD,
+    JOBD_EOBD_OBD2,
+    EMD,
+    EMD_PLUS,
+    HD_OBD_C,
+    HD_OBD,
+    WWH_OBD,
+    HD_EOBD1,
+    HD_EOBD1_N,
+    HD_EOBD2,
+    HD_EOBD2_N,
+    OBD_BR_1,
+    OBD_BR_2,
+    KOBD,
+    IOBD,
+    IOBD2,
+    HD_EOBD4,
+    UNKNOWN
+
 }

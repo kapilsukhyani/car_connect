@@ -48,5 +48,9 @@
     <string name="fuel_injection_timing_value">&lt;b>Fuel Injection Timing&lt;/b>   %s</string>
     <string name="abs_evap_system_vapor_pressure_value">&lt;b>ABS EVAP System Vapor Pressure&lt;/b>   %s</string>
     <string name="evap_system_vapor_pressure_value">&lt;b>EVAP System Vapor Pressure&lt;/b>   %s</string>
+    <string name="monitor_status">Monitor Status</string>
+    <string name="test">Test</string>
+    <string name="available">Available</string>
+    <string name="complete">Complete</string>
 
 </resources>

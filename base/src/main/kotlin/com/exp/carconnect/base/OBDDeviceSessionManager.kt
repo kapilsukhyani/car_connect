@@ -318,16 +318,16 @@ class OBDSession(val device: BluetoothDevice,
                                                 Pair(t1, t2)
                                                 })**/
                                                 .map {
-                                                    MILStatus.On(it.codes, UnAvailableAvailableData.UnAvailable)
+                                                    Pair(MILStatus.On(it.codes, UnAvailableAvailableData.UnAvailable), dtcResponse.tests)
                                                 }
                                                 .onErrorReturn {
-                                                    MILStatus.On(listOf(), UnAvailableAvailableData.UnAvailable)
+                                                    Pair(MILStatus.On(listOf(), UnAvailableAvailableData.UnAvailable), dtcResponse.tests)
                                                 }
                                     } else {
-                                        Observable.just(MILStatus.Off)
+                                        Observable.just(Pair(MILStatus.Off, dtcResponse.tests))
                                     }
                                 }.map {
-                                    BaseAppAction.AddMilStatus(it)
+                                    BaseAppAction.AddMilStatusAndTests(it.first, it.second)
                                 }
                 )
                 .onErrorReturn {

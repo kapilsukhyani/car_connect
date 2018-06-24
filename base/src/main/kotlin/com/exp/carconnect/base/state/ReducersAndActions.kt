@@ -4,6 +4,7 @@ import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothSocket
 import com.exp.carconnect.base.*
 import com.exp.carconnect.obdlib.OBDEngine
+import com.exp.carconnect.obdlib.obdmessage.MonitorTest
 import redux.api.Reducer
 
 
@@ -32,6 +33,7 @@ sealed class BaseAppAction {
     data class AddThrottlePosition(val throttle: Float) : BaseAppAction()
     data class AddFuel(val fuel: Float) : BaseAppAction()
     data class AddIgnition(val ignition: Boolean) : BaseAppAction()
+    data class AddMilStatusAndTests(val milStatus: MILStatus, val tests: Array<MonitorTest>) : BaseAppAction()
     data class AddMilStatus(val milStatus: MILStatus) : BaseAppAction()
     data class AddFuelConsumptionRate(val fuelConsumptionRate: Float) : BaseAppAction()
     data class AddVehicleDataLoadError(val error: Throwable) : BaseAppAction()
@@ -209,6 +211,12 @@ class ActiveSessionReducer : Reducer<AppState> {
                         is BaseAppAction.AddFuel -> {
                             val vehicleData = getCurrentVehicleData(state)
                                     .copy(fuel = UnAvailableAvailableData.Available(action.fuel))
+                            addNewLiveVehicleDataSnapShot(state, vehicleData)
+                        }
+                        is BaseAppAction.AddMilStatusAndTests -> {
+                            val vehicleData = getCurrentVehicleData(state)
+                                    .copy(milStatus = UnAvailableAvailableData.Available(action.milStatus),
+                                            monitorStatus = UnAvailableAvailableData.Available(action.tests))
                             addNewLiveVehicleDataSnapShot(state, vehicleData)
                         }
                         is BaseAppAction.AddMilStatus -> {

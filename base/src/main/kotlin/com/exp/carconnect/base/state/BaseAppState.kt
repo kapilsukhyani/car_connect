@@ -7,6 +7,7 @@ import com.exp.carconnect.base.store.PersistedAppState
 import com.exp.carconnect.obdlib.OBDEngine
 import com.exp.carconnect.obdlib.obdmessage.FuelType
 import com.exp.carconnect.obdlib.obdmessage.ObdStandard
+import com.exp.carconnect.obdlib.obdmessage.MonitorTest
 import java.util.concurrent.TimeUnit
 
 
@@ -303,6 +304,8 @@ data class LiveVehicleData(val rpm: UnAvailableAvailableData<Float>
                            val ignition: UnAvailableAvailableData<Boolean>
                            = UnAvailableAvailableData.UnAvailable,
                            val milStatus: UnAvailableAvailableData<MILStatus>
+                           = UnAvailableAvailableData.UnAvailable,
+                           val monitorStatus: UnAvailableAvailableData<Array<MonitorTest>>
                            = UnAvailableAvailableData.UnAvailable,
                            val currentAirIntakeTemp: UnAvailableAvailableData<Float>
                            = UnAvailableAvailableData.UnAvailable,

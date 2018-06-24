@@ -169,6 +169,32 @@
 
 
             <TextView
+                android:id="@+id/monitor_status_label"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:background="@color/primaryDark"
+                android:gravity="center"
+                android:text="@string/monitor_status"
+                android:textColor="@color/primary"
+                android:textSize="22dp"
+                android:textStyle="bold"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintRight_toRightOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/fuel" />
+
+            <GridLayout
+                android:id="@+id/monitor_status_grid"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:columnCount="3"
+                android:padding="8dp"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintRight_toRightOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/monitor_status_label" />
+
+
+            <TextView
                 android:id="@+id/report_label"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -181,7 +207,7 @@
                 android:textStyle="bold"
                 app:layout_constraintLeft_toLeftOf="parent"
                 app:layout_constraintRight_toLeftOf="@id/horizontal_guideline_50"
-                app:layout_constraintTop_toBottomOf="@id/fuel" />
+                app:layout_constraintTop_toBottomOf="@id/monitor_status_grid" />
 
             <ImageView
                 android:id="@+id/refresh_report_button"
@@ -191,7 +217,7 @@
                 android:layout_marginTop="16dp"
                 android:src="@drawable/ic_refresh"
                 app:layout_constraintRight_toRightOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/fuel" />
+                app:layout_constraintTop_toBottomOf="@id/monitor_status_grid" />
 
             <TextView
                 android:id="@+id/engine_load"

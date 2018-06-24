@@ -10,7 +10,10 @@ import android.text.Html.fromHtml
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.GridLayout
+import android.widget.TextView
 import com.exp.carconnect.app.R
+import com.exp.carconnect.app.state.MonitorStatusTest
 import com.exp.carconnect.app.state.ReportData
 import com.exp.carconnect.base.BaseAppContract
 import com.exp.carconnect.base.LoadableState
@@ -92,7 +95,38 @@ internal class ReportView : Fragment() {
         abs_evap_pressure.text = fromHtml(getString(R.string.abs_evap_system_vapor_pressure_value, reportViewModel.absoluteEvapSystempVaporPressure))
         evap_pressure.text = fromHtml(getString(R.string.evap_system_vapor_pressure_value, reportViewModel.evapSystemVaporPressure))
 
+        monitor_status_grid.removeAllViews()
+        addNewRowMonitorStatusGrid(getString(R.string.test), getString(R.string.available), getString(R.string.complete), 0)
+        var index = 1
+        reportViewModel.monitorStatusTests.forEach {
+            addNewRowMonitorStatusGrid(it, index)
+            index++
+        }
 
+
+    }
+
+    private fun addNewRowMonitorStatusGrid(it: MonitorStatusTest, rowNumber: Int) {
+        addNewRowMonitorStatusGrid(it.testName.toLowerCase(), it.available.toString(), it.complete.toString(), rowNumber)
+    }
+
+
+    private fun addNewRowMonitorStatusGrid(col1: String, col2: String, col3: String, rowNumber: Int) {
+        val testName = layoutInflater.inflate(R.layout.monitor_status_grid_col, null) as TextView
+        val available = layoutInflater.inflate(R.layout.monitor_status_grid_col, null) as TextView
+        val complete = layoutInflater.inflate(R.layout.monitor_status_grid_col, null) as TextView
+
+        testName.layoutParams = GridLayout.LayoutParams(GridLayout.spec(rowNumber), GridLayout.spec(0, .6f))
+        available.layoutParams = GridLayout.LayoutParams(GridLayout.spec(rowNumber), GridLayout.spec(1, .2f))
+        complete.layoutParams = GridLayout.LayoutParams(GridLayout.spec(rowNumber), GridLayout.spec(2, .2f))
+
+        testName.text = col1
+        available.text = col2
+        complete.text = col3
+
+        monitor_status_grid.addView(testName)
+        monitor_status_grid.addView(available)
+        monitor_status_grid.addView(complete)
     }
 }
 
@@ -130,6 +164,14 @@ internal class ReportViewModel(app: Application) : AndroidViewModel(app) {
                     var manufacturer = "N/A"
                     var model = "N/A"
                     var year = "N/A"
+                    val tests = if (liveVehicleData.monitorStatus is UnAvailableAvailableData.Available) {
+                        val monitoStatus = (liveVehicleData.monitorStatus as UnAvailableAvailableData.Available).data
+                        Array<MonitorStatusTest>(monitoStatus.size, { index ->
+                            MonitorStatusTest(monitoStatus[index].testType.name, monitoStatus[index].available, monitoStatus[index].complete)
+                        })
+                    } else {
+                        emptyArray()
+                    }
 
                     if (vehicle.attributes is UnAvailableAvailableData.Available) {
                         name = (vehicle.attributes as UnAvailableAvailableData.Available).data.make
@@ -197,7 +239,8 @@ internal class ReportViewModel(app: Application) : AndroidViewModel(app) {
                             ethanolFuelPercent = report.ethanolFuelPercent.toString(),
                             fuelInjectionTiming = report.fuelInjectionTiming.toString(),
                             absoluteEvapSystempVaporPressure = report.absoluteEvapSystempVaporPressure.toString(),
-                            evapSystemVaporPressure = report.evapSystemVaporPressure.toString())
+                            evapSystemVaporPressure = report.evapSystemVaporPressure.toString(),
+                            monitorStatusTests = tests)
 
                 }
                 .distinctUntilChanged()

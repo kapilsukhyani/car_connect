@@ -20,6 +20,8 @@
 
     <string name="setup_error_title">Setup Error</string>
 
+    <string name="data_loading_error">Data Error</string>
+
 
     <!-- Settings -->
     <string name="settings">Settings</string>

@@ -145,6 +145,7 @@ internal class ReportViewModel(app: Application) : AndroidViewModel(app) {
         storeSubscription.add(store
                 .asCustomObservable()
                 .filter {
+                    //todo implement vehicle data loading and report loading error handling
                     it.isAvailablePIDsLoaded() &&
                             it.isLiveVehicleDataLoaded() &&
                             it.isReportLoaded()

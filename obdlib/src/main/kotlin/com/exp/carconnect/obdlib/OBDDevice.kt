@@ -124,6 +124,7 @@ abstract class BadResponseException(private val command: String, private val res
         private val UNABLE_TO_CONNECT_MESSAGE_PATTERN = "UNABLE TO CONNECT"
         private val ERROR_MESSAGE_PATTERN = "ERROR"
         private val UNSUPPORTED_COMMAND_MESSAGE_PATTERN = Pattern.compile("7F 0[0-A] 1[1-2]")
+
         private fun String.removeSpacesAndCapitalize(): String {
             return this.replace("\\s".toRegex(), "").toUpperCase()
         }

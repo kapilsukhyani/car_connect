@@ -343,7 +343,10 @@ class OBDSession(val device: BluetoothDevice,
                     Observable.fromArray<BaseAppAction>(BaseAppAction.AddMilStatus(MILStatus.Off),
                             BaseAppAction.UpdateClearDTCsOperationStateToSuccessful)
                 }
-                .onErrorReturn { BaseAppAction.UpdateClearDTCsOperationStateToFailed(ClearDTCError.UnkownError(it)) }
+                .onErrorReturn {
+                    //todo reduce UpdateClearDTCsOperationStateToFailed action
+                    BaseAppAction.UpdateClearDTCsOperationStateToFailed(ClearDTCError.UnkownError(it))
+                }
                 .startWith(BaseAppAction.UpdateClearDTCsOperationStateToClearing)
     }
 
@@ -485,6 +488,7 @@ class OBDSession(val device: BluetoothDevice,
 
 
                 }
+                .onErrorReturn { BaseAppAction.AddFailedToLoadReportArrorToState(device, it) }
     }
 
 }

@@ -175,6 +175,7 @@ class DeviceConnectionScreenStateReducer(val context: Context) : Reducer<AppStat
                         .ShowSetupError(context.getString(R.string.setup_error_message, action.device.name, action.error.localizedMessage)))
             }
 
+        //todo update baseapp state to reflect vehicle info loading failed and then update the Connectionview state
             is BaseAppAction.VehicleInfoLoadingFailed -> {
                 updateState(state, ConnectionScreenState
                         .ShowSetupError(context.getString(R.string.vehicle_info_loading_error_message, action.device.name, action.error.localizedMessage)))

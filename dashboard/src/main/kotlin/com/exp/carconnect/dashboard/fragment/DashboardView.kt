@@ -1,5 +1,6 @@
 package com.exp.carconnect.dashboard.fragment
 
+import android.app.AlertDialog
 import android.app.Application
 import android.arch.lifecycle.*
 import android.content.Context
@@ -65,7 +66,17 @@ class DashboardView : Fragment(), BackInterceptor {
     }
 
     private fun showError(error: String) {
-
+        AlertDialog
+                .Builder(activity)
+                .setTitle(getString(com.exp.carconnect.base.R.string.data_loading_error))
+                .setMessage(error)
+                .setCancelable(false)
+                .setPositiveButton(android.R.string.ok) { dialog, which ->
+                    dashboardVM.onDataErrorAcknowledged()
+                    dialog.dismiss()
+                }
+                .create()
+                .show()
     }
 
     private fun showNewSnapshot(vehicle: Vehicle, dashboardData: LiveVehicleData) {
@@ -137,7 +148,7 @@ class DashboardVM(app: Application) : AndroidViewModel(app) {
                 }
                 .distinctUntilChanged()
                 .subscribe {
-
+                    //todo maintain dashboard state instead of directly updating love data
                     if (it.second is LoadableState.Loaded) {
                         dashboardViewLiveData.value = DashboardScreenState.ShowNewSnapshot(it.first,
                                 (it.second as LoadableState.Loaded).savedState)
@@ -169,5 +180,9 @@ class DashboardVM(app: Application) : AndroidViewModel(app) {
 
     fun onReportIconClicked() {
         (getApplication<Application>() as BaseAppContract).onReportRequested()
+    }
+
+    fun onDataErrorAcknowledged() {
+        store.dispatch(CommonAppAction.FinishCurrentView)
     }
 }

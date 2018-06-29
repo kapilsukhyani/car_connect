@@ -13,11 +13,13 @@ import android.view.ViewGroup
 import com.exp.carconnect.base.*
 import com.exp.carconnect.base.state.*
 import com.exp.carconnect.dashboard.R
+import com.exp.carconnect.dashboard.state.DashboardAction
 import com.exp.carconnect.dashboard.state.DashboardScreen
 import com.exp.carconnect.dashboard.state.DashboardScreenState
 import com.exp.carconnect.dashboard.view.Dashboard
 import io.reactivex.disposables.CompositeDisposable
 import kotlinx.android.synthetic.main.view_dashboard.*
+import redux.api.Reducer
 
 
 class DashboardView : Fragment(), BackInterceptor {
@@ -148,17 +150,25 @@ class DashboardVM(app: Application) : AndroidViewModel(app) {
                 }
                 .distinctUntilChanged()
                 .subscribe {
-                    //todo maintain dashboard state instead of directly updating love data
                     if (it.second is LoadableState.Loaded) {
-                        dashboardViewLiveData.value = DashboardScreenState.ShowNewSnapshot(it.first,
-                                (it.second as LoadableState.Loaded).savedState)
+                        store.dispatch(DashboardAction.AddNewDashboardState(DashboardScreenState.ShowNewSnapshot(it.first,
+                                (it.second as LoadableState.Loaded).savedState)))
 
                     } else if (it.second is LoadableState.LoadingError) {
-                        dashboardViewLiveData.value = DashboardScreenState
+                        store.dispatch(DashboardAction.AddNewDashboardState(DashboardScreenState
                                 .ShowError(getApplication<Application>()
                                         .getString(R.string.data_load_error,
-                                                (it.second as LoadableState.LoadingError<Throwable>).error.localizedMessage))
+                                                (it.second as LoadableState.LoadingError<Throwable>).error.localizedMessage))))
                     }
+                })
+
+        storeSubscription.add(store
+                .asCustomObservable()
+                .filter { it.uiState.currentView is DashboardScreen }
+                .map { (it.uiState.currentView as DashboardScreen).screenState }
+                .distinctUntilChanged()
+                .subscribe {
+                    dashboardViewLiveData.value = it
                 })
     }
 
@@ -185,4 +195,28 @@ class DashboardVM(app: Application) : AndroidViewModel(app) {
     fun onDataErrorAcknowledged() {
         store.dispatch(CommonAppAction.FinishCurrentView)
     }
+}
+
+class DashboardReducer : Reducer<AppState> {
+    override fun reduce(state: AppState, action: Any): AppState {
+        return when (action) {
+            is DashboardAction.AddNewDashboardState -> {
+                updateState(state, action.state)
+            }
+            else -> {
+                state
+            }
+        }
+    }
+
+    private fun updateState(state: AppState, dashboardScreenState: DashboardScreenState): AppState {
+        return state.copy(uiState = state
+                .uiState
+                .copy(backStack = state
+                        .uiState
+                        .backStack
+                        .subList(0, state.uiState.backStack.size - 1) +
+                        DashboardScreen(dashboardScreenState)))
+    }
+
 }

@@ -81,7 +81,7 @@ sealed class BaseAppAction {
     data class AddFuelInjectionTimingToReport(val value: Float) : BaseAppAction()
     data class AddAbsoluteEvapSystemVaporPressureToReport(val value: Float) : BaseAppAction()
     data class AddEvapSystemVaporPressureToReport(val value: Float) : BaseAppAction()
-    data class AddFailedToLoadReportArrorToState(val device: BluetoothDevice, val error: Throwable) : BaseAppAction()
+    data class AddFailedToLoadReportErrorToState(val device: BluetoothDevice, val error: Throwable) : BaseAppAction()
 
     object ClearDTCs : BaseAppAction()
     object FetchReport : BaseAppAction()
@@ -179,7 +179,7 @@ class ActiveSessionReducer : Reducer<AppState> {
                 }
             }
 
-            is BaseAppAction.AddFailedToLoadReportArrorToState -> {
+            is BaseAppAction.AddFailedToLoadReportErrorToState -> {
                 if (state.getBaseAppState().activeSession is UnAvailableAvailableData.Available<ActiveSession>) {
                     state.addActiveSession(state.getActiveSession().copy(report = LoadableState.LoadingError(action.error)))
                 } else {

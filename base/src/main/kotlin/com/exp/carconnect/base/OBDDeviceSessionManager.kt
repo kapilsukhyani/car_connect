@@ -488,7 +488,7 @@ class OBDSession(val device: BluetoothDevice,
 
 
                 }
-                .onErrorReturn { BaseAppAction.AddFailedToLoadReportArrorToState(device, it) }
+                .onErrorReturn { BaseAppAction.AddFailedToLoadReportErrorToState(device, it) }
     }
 
 }

@@ -1,6 +1,7 @@
 package com.exp.carconnect.app
 
 import android.app.Application
+import com.exp.carconnect.app.fragment.ReportReducer
 import com.exp.carconnect.app.state.ReportData
 import com.exp.carconnect.app.state.ReportScreen
 import com.exp.carconnect.app.state.ReportScreenState
@@ -19,6 +20,7 @@ import com.exp.carconnect.base.store.BaseStore
 import com.exp.carconnect.dashboard.DashboardAppContract
 import com.exp.carconnect.dashboard.di.DashboardComponent
 import com.exp.carconnect.dashboard.di.DashboardModule
+import com.exp.carconnect.dashboard.fragment.DashboardReducer
 import com.exp.carconnect.dashboard.state.DashboardScreen
 import com.exp.carconnect.dashboard.state.DashboardScreenState
 import io.reactivex.Scheduler
@@ -78,7 +80,13 @@ class CarConnectApp : Application(),
                 mainScheduler, VehicleInfoLoaderFactoryImpl().getVehicleInfoLoader())
 
         val reducers = combineReducers(AppStateNavigationReducer(),
-                BaseAppStateReducer(), DeviceManagementScreenStateReducer(), DeviceConnectionScreenStateReducer(this), ActiveSessionReducer(), SettingsScreenStateReducer())
+                BaseAppStateReducer(),
+                DeviceManagementScreenStateReducer(),
+                DeviceConnectionScreenStateReducer(this),
+                ActiveSessionReducer(),
+                DashboardReducer(),
+                ReportReducer(),
+                SettingsScreenStateReducer())
         val initialState = AppState(mapOf(Pair(BaseAppState.STATE_KEY, LoadableState.NotLoaded)),
                 CarConnectUIState(Stack()))
 

@@ -13,16 +13,13 @@ import android.view.ViewGroup
 import android.widget.GridLayout
 import android.widget.TextView
 import com.exp.carconnect.app.R
-import com.exp.carconnect.app.state.MonitorStatusTest
-import com.exp.carconnect.app.state.ReportData
-import com.exp.carconnect.base.BaseAppContract
-import com.exp.carconnect.base.LoadableState
-import com.exp.carconnect.base.UnAvailableAvailableData
-import com.exp.carconnect.base.asCustomObservable
+import com.exp.carconnect.app.state.*
+import com.exp.carconnect.base.*
 import com.exp.carconnect.base.state.*
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.subjects.BehaviorSubject
 import kotlinx.android.synthetic.main.report_view.*
+import redux.api.Reducer
 import java.util.concurrent.TimeUnit
 
 internal class ReportView : Fragment() {
@@ -43,10 +40,22 @@ internal class ReportView : Fragment() {
         reportVM = ViewModelProviders.of(this).get(ReportViewModel::class.java)
         reportVM.getReportLiveData()
                 .observe(this, Observer {
-                    onNewSpanShot(it!!)
+                    onNewState(it!!)
+
                 })
         report_toolbar.setNavigationOnClickListener { reportVM.onBackPressed() }
         refresh_report_button.setOnClickListener { reportVM.fetchReport() }
+    }
+
+    private fun onNewState(state: ReportScreenState) {
+        when (state) {
+            is ReportScreenState.ShowNewSnapshot -> {
+                onNewSpanShot(state.report)
+            }
+            is ReportScreenState.ShowError -> {
+
+            }
+        }
     }
 
 
@@ -133,7 +142,7 @@ internal class ReportView : Fragment() {
 
 internal class ReportViewModel(app: Application) : AndroidViewModel(app) {
 
-    private val reportLiveData: MutableLiveData<ReportData> = MutableLiveData()
+    private val reportLiveData: MutableLiveData<ReportScreenState> = MutableLiveData()
     private val store = (app as BaseAppContract).store
     private val fetchReportCommandObservable = BehaviorSubject.createDefault<Boolean>(true)
     private val baseApp = (app as BaseAppContract)
@@ -167,7 +176,7 @@ internal class ReportViewModel(app: Application) : AndroidViewModel(app) {
                     var year = "N/A"
                     val tests = if (liveVehicleData.monitorStatus is UnAvailableAvailableData.Available) {
                         val monitoStatus = (liveVehicleData.monitorStatus as UnAvailableAvailableData.Available).data
-                        Array<MonitorStatusTest>(monitoStatus.size, { index ->
+                        Array(monitoStatus.size, { index ->
                             MonitorStatusTest(monitoStatus[index].testType.name, monitoStatus[index].available, monitoStatus[index].complete)
                         })
                     } else {
@@ -190,7 +199,6 @@ internal class ReportViewModel(app: Application) : AndroidViewModel(app) {
                             milStatus = "OFF"
                         }
                     }
-                    //todo send an action to modify view state and add a reducer instead of directly setting to livedata
 
 
                     ReportData(name = name, model = model, year = year, manufacturer = manufacturer,
@@ -247,6 +255,15 @@ internal class ReportViewModel(app: Application) : AndroidViewModel(app) {
                 .distinctUntilChanged()
                 .startWith(ReportData())
                 .subscribe {
+                    store.dispatch(ReportAction.AddNewReportState(ReportScreenState.ShowNewSnapshot(it)))
+                })
+
+        storeSubscription.add(store
+                .asCustomObservable()
+                .filter { it.uiState.currentView is ReportScreen }
+                .map { (it.uiState.currentView as ReportScreen).screenState }
+                .distinctUntilChanged()
+                .subscribe {
                     reportLiveData.value = it
                 })
 
@@ -262,7 +279,7 @@ internal class ReportViewModel(app: Application) : AndroidViewModel(app) {
         fetchReportCommandObservable.onNext(true)
     }
 
-    fun getReportLiveData(): LiveData<ReportData> {
+    fun getReportLiveData(): LiveData<ReportScreenState> {
         return reportLiveData
     }
 
@@ -274,4 +291,30 @@ internal class ReportViewModel(app: Application) : AndroidViewModel(app) {
     fun onBackPressed() {
         store.dispatch(CommonAppAction.BackPressed)
     }
+}
+
+class ReportReducer : Reducer<AppState> {
+
+    override fun reduce(state: AppState, action: Any): AppState {
+        return when (action) {
+            is ReportAction.AddNewReportState -> {
+                updateState(state, action.state)
+            }
+            else -> {
+                state
+            }
+        }
+    }
+
+
+    private fun updateState(state: AppState, reportScreenState: ReportScreenState): AppState {
+        return state.copy(uiState = state
+                .uiState
+                .copy(backStack = state
+                        .uiState
+                        .backStack
+                        .subList(0, state.uiState.backStack.size - 1) +
+                        ReportScreen(reportScreenState)))
+    }
+
 }

@@ -106,103 +106,14 @@ class OBDStandardRequest(retriable: Boolean = true,
 }
 
 class OBDStandardResponse(rawResponse: String) : OBDResponse("OBDStandardResponse", rawResponse) {
-    val standard: ObdStandard
+    val standard: OBDStandard
 
     init {
         val standardType = rawResponse.toIntList()[2]
-        standard = when (standardType) {
-            1 -> {
-                ObdStandard.CARB_OBD2
-            }
-            2 -> {
-                ObdStandard.EPA_OBD
-            }
-            3 -> {
-                ObdStandard.OBD_OBD2
-            }
-            4 -> {
-                ObdStandard.OBD1
-            }
-            5 -> {
-                ObdStandard.NOT_OBD_COMPLIANT
-            }
-            6 -> {
-                ObdStandard.EOBD
-            }
-            7 -> {
-                ObdStandard.EOBD_OBD2
-            }
-            8 -> {
-                ObdStandard.EOBD_OBD
-            }
-            9 -> {
-                ObdStandard.EOBD_OBD_OBD2
-            }
-            10 -> {
-                ObdStandard.JOBD
-            }
-            11 -> {
-                ObdStandard.JOBD_OBD2
-            }
-            12 -> {
-                ObdStandard.JOBD_EOBD
-            }
-            13 -> {
-                ObdStandard.JOBD_EOBD_OBD2
-            }
-            17 -> {
-                ObdStandard.EMD
-            }
-            18 -> {
-                ObdStandard.EMD_PLUS
-            }
-            19 -> {
-                ObdStandard.HD_OBD_C
-            }
-            20 -> {
-                ObdStandard.HD_OBD
-            }
-            21 -> {
-                ObdStandard.WWH_OBD
-            }
-            23 -> {
-                ObdStandard.HD_EOBD1
-            }
-            24 -> {
-                ObdStandard.HD_EOBD1_N
-            }
-            25 -> {
-                ObdStandard.HD_EOBD2
-            }
-            26 -> {
-                ObdStandard.HD_EOBD2_N
-            }
-            28 -> {
-                ObdStandard.OBD_BR_1
-            }
-            29 -> {
-                ObdStandard.OBD_BR_2
-            }
-            30 -> {
-                ObdStandard.KOBD
-            }
-            31 -> {
-                ObdStandard.IOBD
-            }
-            32 -> {
-                ObdStandard.IOBD2
-            }
-            33 -> {
-                ObdStandard.HD_EOBD4
-            }
-            else -> {
-                ObdStandard.UNKNOWN
-            }
-        }
+        standard = OBDStandard.fromValue(standardType)
     }
-
-
 }
+
 
 enum class PidCommand(val value: String) {
     ONE_TO_TWENTY("01 00") {
@@ -296,35 +207,130 @@ enum class ObdProtocol(
 
 
 //reference : https://en.wikipedia.org/wiki/OBD-II_PIDs#Mode_1_PID_1C
-enum class ObdStandard {
-    CARB_OBD2,
-    EPA_OBD,
-    OBD_OBD2,
-    OBD1,
-    NOT_OBD_COMPLIANT,
-    EOBD,
-    EOBD_OBD2,
-    EOBD_OBD,
-    EOBD_OBD_OBD2,
-    JOBD,
-    JOBD_OBD2,
-    JOBD_EOBD,
-    JOBD_EOBD_OBD2,
-    EMD,
-    EMD_PLUS,
-    HD_OBD_C,
-    HD_OBD,
-    WWH_OBD,
-    HD_EOBD1,
-    HD_EOBD1_N,
-    HD_EOBD2,
-    HD_EOBD2_N,
-    OBD_BR_1,
-    OBD_BR_2,
-    KOBD,
-    IOBD,
-    IOBD2,
-    HD_EOBD4,
-    UNKNOWN
+enum class OBDStandard(val value: Int) {
+    CARB_OBD2(1),
+    EPA_OBD(2),
+    OBD_OBD2(3),
+    OBD1(4),
+    NOT_OBD_COMPLIANT(5),
+    EOBD(6),
+    EOBD_OBD2(7),
+    EOBD_OBD(8),
+    EOBD_OBD_OBD2(9),
+    JOBD(10),
+    JOBD_OBD2(11),
+    JOBD_EOBD(12),
+    JOBD_EOBD_OBD2(13),
+    EMD(17),
+    EMD_PLUS(18),
+    HD_OBD_C(19),
+    HD_OBD(20),
+    WWH_OBD(21),
+    HD_EOBD1(23),
+    HD_EOBD1_N(24),
+    HD_EOBD2(25),
+    HD_EOBD2_N(26),
+    OBD_BR_1(28),
+    OBD_BR_2(29),
+    KOBD(30),
+    IOBD(31),
+    IOBD2(32),
+    HD_EOBD4(33),
+    UNKNOWN(0);
+
+    companion object {
+        fun fromValue(value: Int): OBDStandard {
+            return when (value) {
+                1 -> {
+                    OBDStandard.CARB_OBD2
+                }
+                2 -> {
+                    OBDStandard.EPA_OBD
+                }
+                3 -> {
+                    OBDStandard.OBD_OBD2
+                }
+                4 -> {
+                    OBDStandard.OBD1
+                }
+                5 -> {
+                    OBDStandard.NOT_OBD_COMPLIANT
+                }
+                6 -> {
+                    OBDStandard.EOBD
+                }
+                7 -> {
+                    OBDStandard.EOBD_OBD2
+                }
+                8 -> {
+                    OBDStandard.EOBD_OBD
+                }
+                9 -> {
+                    OBDStandard.EOBD_OBD_OBD2
+                }
+                10 -> {
+                    OBDStandard.JOBD
+                }
+                11 -> {
+                    OBDStandard.JOBD_OBD2
+                }
+                12 -> {
+                    OBDStandard.JOBD_EOBD
+                }
+                13 -> {
+                    OBDStandard.JOBD_EOBD_OBD2
+                }
+                17 -> {
+                    OBDStandard.EMD
+                }
+                18 -> {
+                    OBDStandard.EMD_PLUS
+                }
+                19 -> {
+                    OBDStandard.HD_OBD_C
+                }
+                20 -> {
+                    OBDStandard.HD_OBD
+                }
+                21 -> {
+                    OBDStandard.WWH_OBD
+                }
+                23 -> {
+                    OBDStandard.HD_EOBD1
+                }
+                24 -> {
+                    OBDStandard.HD_EOBD1_N
+                }
+                25 -> {
+                    OBDStandard.HD_EOBD2
+                }
+                26 -> {
+                    OBDStandard.HD_EOBD2_N
+                }
+                28 -> {
+                    OBDStandard.OBD_BR_1
+                }
+                29 -> {
+                    OBDStandard.OBD_BR_2
+                }
+                30 -> {
+                    OBDStandard.KOBD
+                }
+                31 -> {
+                    OBDStandard.IOBD
+                }
+                32 -> {
+                    OBDStandard.IOBD2
+                }
+                33 -> {
+                    OBDStandard.HD_EOBD4
+                }
+                else -> {
+                    OBDStandard.UNKNOWN
+                }
+            }
+        }
+    }
+
 
 }

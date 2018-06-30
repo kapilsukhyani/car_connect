@@ -6,7 +6,7 @@ import com.exp.carconnect.base.*
 import com.exp.carconnect.base.store.PersistedAppState
 import com.exp.carconnect.obdlib.OBDEngine
 import com.exp.carconnect.obdlib.obdmessage.FuelType
-import com.exp.carconnect.obdlib.obdmessage.ObdStandard
+import com.exp.carconnect.obdlib.obdmessage.OBDStandard
 import com.exp.carconnect.obdlib.obdmessage.MonitorTest
 import java.util.concurrent.TimeUnit
 
@@ -192,7 +192,7 @@ data class Vehicle(val vin: String,
                    = UnAvailableAvailableData.UnAvailable,
                    val fuelType: UnAvailableAvailableData<FuelType>
                    = UnAvailableAvailableData.UnAvailable,
-                   val obdStandard: UnAvailableAvailableData<ObdStandard>
+                   val obdStandard: UnAvailableAvailableData<OBDStandard>
                    = UnAvailableAvailableData.UnAvailable,
                    val attributes: UnAvailableAvailableData<VehicleAttributes>
                    = UnAvailableAvailableData.UnAvailable)

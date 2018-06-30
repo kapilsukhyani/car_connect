@@ -202,7 +202,7 @@ class OBDSession(val device: BluetoothDevice,
                     var vin: String? = null
                     var fuelType: FuelType? = null
                     val availablePIDs = mutableSetOf<String>()
-                    var standard: ObdStandard = ObdStandard.UNKNOWN
+                    var standard: OBDStandard = OBDStandard.UNKNOWN
                     responses.forEach {
                         when (it) {
                             is VinResponse -> {
@@ -344,7 +344,6 @@ class OBDSession(val device: BluetoothDevice,
                             BaseAppAction.UpdateClearDTCsOperationStateToSuccessful)
                 }
                 .onErrorReturn {
-                    //todo reduce UpdateClearDTCsOperationStateToFailed action
                     BaseAppAction.UpdateClearDTCsOperationStateToFailed(ClearDTCError.UnkownError(it))
                 }
                 .startWith(BaseAppAction.UpdateClearDTCsOperationStateToClearing)

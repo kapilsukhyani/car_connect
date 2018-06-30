@@ -6,6 +6,7 @@ import com.exp.carconnect.base.state.Dongle
 import com.exp.carconnect.base.state.Vehicle
 import com.exp.carconnect.base.state.VehicleAttributes
 import com.exp.carconnect.obdlib.obdmessage.FuelType
+import com.exp.carconnect.obdlib.obdmessage.OBDStandard
 import io.reactivex.Flowable
 import io.reactivex.Single
 
@@ -25,19 +26,29 @@ fun Vehicle.toEntity(recentlyUsed: Boolean = true): VehicleEntity {
         modelYear = this.attributes.data.modelYear
     }
 
-    return VehicleEntity(this.vin, this.fuelType.let {
-        if (it is UnAvailableAvailableData.Available) {
-            it.data.value
-        } else {
-            -1
-        }
-    }, this.supportedPIDs.let {
-        if (it is UnAvailableAvailableData.Available) {
-            it.data.toString()
-        } else {
-            ""
-        }
-    }, recentlyUsed, make, model, manufacturer, modelYear)
+    return VehicleEntity(this.vin,
+            this.fuelType.let {
+                if (it is UnAvailableAvailableData.Available) {
+                    it.data.value
+                } else {
+                    -1
+                }
+            },
+            this.supportedPIDs.let {
+                if (it is UnAvailableAvailableData.Available) {
+                    it.data.toString()
+                } else {
+                    ""
+                }
+            },
+            recentlyUsed, make, model, manufacturer, modelYear,
+            this.obdStandard.let {
+                if (it is UnAvailableAvailableData.Available) {
+                    it.data.value
+                } else {
+                    -1
+                }
+            })
 }
 
 
@@ -60,7 +71,8 @@ data class VehicleEntity constructor(@PrimaryKey var vin: String,
                                      @ColumnInfo var make: String,
                                      @ColumnInfo var model: String,
                                      @ColumnInfo var manufacturer: String,
-                                     @ColumnInfo var modelYear: String) {
+                                     @ColumnInfo var modelYear: String,
+                                     @ColumnInfo var obdStandard: Int) {
     fun toVehicle(): Vehicle {
         val attributes = if (this.model.isEmpty() && this.make.isEmpty() && this.manufacturer.isEmpty() && this.modelYear.isEmpty()) {
             UnAvailableAvailableData.UnAvailable
@@ -77,8 +89,11 @@ data class VehicleEntity constructor(@PrimaryKey var vin: String,
             UnAvailableAvailableData.UnAvailable
         } else {
             UnAvailableAvailableData.Available(FuelType.fromValue(fuelType))
-            //todo add obd standard in DB
-        }, UnAvailableAvailableData.UnAvailable, attributes
+        }, if (obdStandard == -1) {
+            UnAvailableAvailableData.UnAvailable
+        } else {
+            UnAvailableAvailableData.Available(OBDStandard.fromValue(obdStandard))
+        }
         )
     }
 }

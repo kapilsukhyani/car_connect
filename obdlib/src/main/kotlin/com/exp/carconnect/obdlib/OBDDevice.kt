@@ -55,7 +55,6 @@ internal class OBDDevice(private val inputStream: InputStream, private val outpu
     }
 
     private fun writeCommand(command: String) {
-//todo handle Caused by: java.io.IOException: Broken pipe, gets thrown when socket is closed
         // write to OutputStream (i.e.: a BluetoothSocket) with an added
         // Carriage return
         outputStream.write((command + "\r").toByteArray())

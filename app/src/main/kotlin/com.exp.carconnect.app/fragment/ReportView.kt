@@ -184,6 +184,7 @@ internal class ReportViewModel(app: Application) : AndroidViewModel(app) {
 
                     it
                 }
+                //todo not sure why debounce isn't working
                 //debouncing events, as it is not needed to refresh report ui as fast as fast data changing refresh frequency
 //                .debounce(500, TimeUnit.MILLISECONDS, baseApp.computationScheduler)
 //                .observeOn(baseApp.mainScheduler)

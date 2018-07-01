@@ -111,8 +111,8 @@ class DeviceManagementView : Fragment() {
                 .setMessage(getString(R.string.bluetooth_not_available_message))
                 .setCancelable(false)
                 .setPositiveButton(android.R.string.ok) { dialog, which ->
-                    deviceManagementVM.onBluetoothErrorAcknowledged()
                     dialog.dismiss()
+                    deviceManagementVM.onBluetoothErrorAcknowledged()
                 }
                 .create()
                 .show()

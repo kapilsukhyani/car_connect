@@ -1,5 +1,6 @@
 package com.exp.carconnect.app.fragment
 
+import android.app.AlertDialog
 import android.app.Application
 import android.arch.lifecycle.*
 import android.content.Context
@@ -53,11 +54,25 @@ internal class ReportView : Fragment() {
                 onNewSpanShot(state.report)
             }
             is ReportScreenState.ShowError -> {
-
+                showError(state.error)
             }
         }
     }
 
+
+    private fun showError(error: String) {
+        AlertDialog
+                .Builder(activity)
+                .setTitle(getString(com.exp.carconnect.base.R.string.data_loading_error))
+                .setMessage(error)
+                .setCancelable(false)
+                .setPositiveButton(android.R.string.ok) { dialog, which ->
+                    dialog.dismiss()
+                    reportVM.onDataErrorAcknowledged()
+                }
+                .create()
+                .show()
+    }
 
     private fun onNewSpanShot(reportViewModel: ReportData) {
         vehicle_info.text = getString(R.string.vehicle_info_value, reportViewModel.name, reportViewModel.model + " " + reportViewModel.year, reportViewModel.vin, reportViewModel.obdStandard)
@@ -151,12 +166,29 @@ internal class ReportViewModel(app: Application) : AndroidViewModel(app) {
 
 
     init {
+
+
         storeSubscription.add(store
                 .asCustomObservable()
                 .filter {
-                    //todo implement vehicle data loading and report loading error handling
-                    it.isAvailablePIDsLoaded() &&
-                            it.isLiveVehicleDataLoaded() &&
+                    it.isAvailablePIDsLoaded()
+                }
+                .map {
+                    val session = it.getActiveSession()
+                    if (session.report is LoadableState.LoadingError) {
+                        throw (session.report as LoadableState.LoadingError<Throwable>).error
+                    }
+                    if (session.liveVehicleData is LoadableState.LoadingError) {
+                        throw (session.liveVehicleData as LoadableState.LoadingError<Throwable>).error
+                    }
+
+                    it
+                }
+                //debouncing events, as it is not needed to refresh report ui as fast as fast data changing refresh frequency
+//                .debounce(500, TimeUnit.MILLISECONDS, baseApp.computationScheduler)
+//                .observeOn(baseApp.mainScheduler)
+                .filter {
+                    it.isLiveVehicleDataLoaded() &&
                             it.isReportLoaded()
                 }
                 .distinctUntilChanged { first, second ->
@@ -254,9 +286,14 @@ internal class ReportViewModel(app: Application) : AndroidViewModel(app) {
                 }
                 .distinctUntilChanged()
                 .startWith(ReportData())
-                .subscribe {
+                .subscribe({
                     store.dispatch(ReportAction.AddNewReportState(ReportScreenState.ShowNewSnapshot(it)))
-                })
+                }, {
+                    store.dispatch(ReportAction.AddNewReportState(ReportScreenState.ShowError(getApplication<Application>()
+                            .getString(R.string.data_load_error,
+                                    "Unknown"))))
+                }))
+
 
         storeSubscription.add(store
                 .asCustomObservable()
@@ -290,6 +327,10 @@ internal class ReportViewModel(app: Application) : AndroidViewModel(app) {
 
     fun onBackPressed() {
         store.dispatch(CommonAppAction.BackPressed)
+    }
+
+    fun onDataErrorAcknowledged() {
+        store.dispatch(CommonAppAction.FinishCurrentView)
     }
 }
 

@@ -21,6 +21,7 @@
     <string name="setup_error_title">Setup Error</string>
 
     <string name="data_loading_error">Data Error</string>
+    <string name="data_load_error">Data load error [%1$s]</string>
 
 
     <!-- Settings -->

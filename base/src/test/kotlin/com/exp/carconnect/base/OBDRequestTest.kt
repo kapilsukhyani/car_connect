@@ -1,6 +1,11 @@
 package com.exp.carconnect.base
 
+import io.reactivex.Observable
+import io.reactivex.Scheduler
+import io.reactivex.schedulers.Schedulers
 import org.junit.Test
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.TimeUnit
 
 
 class OBDRequestTest {
@@ -136,6 +141,21 @@ class OBDRequestTest {
 //        Assert.assertEquals(actualException, (testSubscriber.errors()[0] as ExecutionException).cause)
 //
 //    }
+
+
+    @Test
+    fun testRX() {
+        val aa = Array(1000000, { it })
+        val aas = CountDownLatch(1)
+        Observable.fromIterable(aa.toList())
+                .debounce(100, TimeUnit.NANOSECONDS, Schedulers.computation())
+                .subscribe({
+                    println("received $it")
+                }, { println("received  error $it") }, {
+                    aas.countDown()
+                })
+        aas.await()
+    }
 
 
 }

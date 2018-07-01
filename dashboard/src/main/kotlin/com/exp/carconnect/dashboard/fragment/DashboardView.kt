@@ -74,8 +74,8 @@ class DashboardView : Fragment(), BackInterceptor {
                 .setMessage(error)
                 .setCancelable(false)
                 .setPositiveButton(android.R.string.ok) { dialog, which ->
-                    dashboardVM.onDataErrorAcknowledged()
                     dialog.dismiss()
+                    dashboardVM.onDataErrorAcknowledged()
                 }
                 .create()
                 .show()

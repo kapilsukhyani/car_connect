@@ -1,4 +1,3 @@
 <resources>
-    <string name="data_load_error">Data load error [%1$s]</string>
     <string name="vehicle_info_text">%1$s %2$s, %3$s</string>
 </resources>

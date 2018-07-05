@@ -37,6 +37,8 @@ sealed class BaseAppAction {
     data class AddMilStatus(val milStatus: MILStatus) : BaseAppAction()
     data class AddFuelConsumptionRate(val fuelConsumptionRate: Float) : BaseAppAction()
     data class AddVehicleDataLoadError(val error: Throwable) : BaseAppAction()
+    //todo handle this
+    data class AddFailedOBDResnseError(val error: Throwable): BaseAppAction()
     object KillActiveSession : BaseAppAction()
     object CloseSocketAndClearActiveSessionState : BaseAppAction()
     data class RefreshActiveSessionDataFetchRate(val settings: AppSettings) : BaseAppAction()

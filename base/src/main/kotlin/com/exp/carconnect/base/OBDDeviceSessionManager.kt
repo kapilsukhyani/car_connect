@@ -5,6 +5,7 @@ import android.bluetooth.BluetoothSocket
 import com.exp.carconnect.Logger
 import com.exp.carconnect.base.network.VehicleInfoLoader
 import com.exp.carconnect.base.state.*
+import com.exp.carconnect.obdlib.FailedOBDResponse
 import com.exp.carconnect.obdlib.OBDEngine
 import com.exp.carconnect.obdlib.OBDMultiRequest
 import com.exp.carconnect.obdlib.obdmessage.*
@@ -61,6 +62,7 @@ class OBDDeviceSessionManager(private val ioScheduler: Scheduler,
 
 }
 
+//todo handle FailedOBDResponse for all the multi request
 class OBDSession(val device: BluetoothDevice,
                  private val ioScheduler: Scheduler,
                  private val computationScheduler: Scheduler,
@@ -289,6 +291,8 @@ class OBDSession(val device: BluetoothDevice,
                                 is RPMResponse -> BaseAppAction.AddRPM(response.rpm / RPM_FACTOR)
                                 is ThrottlePositionResponse -> BaseAppAction.AddThrottlePosition(response.throttle)
                                 is ConsumptionRateResponse -> BaseAppAction.AddFuelConsumptionRate(response.fuelRate)
+                            //could be received if one the request in multi request failed
+                                is FailedOBDResponse -> BaseAppAction.AddFailedOBDResnseError(response.exception)
                                 else -> BaseAppAction.AddIgnition((response as IgnitionMonitorResponse).ignitionOn)
                             }
                         })

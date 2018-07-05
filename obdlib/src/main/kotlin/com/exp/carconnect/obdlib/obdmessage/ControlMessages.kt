@@ -392,7 +392,7 @@ class TimingAdvanceResponse(rawResponse: String) : OBDResponse("TimingAdvanceRes
     init {
         val buffer = rawResponse.toIntList()
         // ignore first two bytes [hh hh] of the response
-        timingAdvance = (buffer[2] * 100.0f) / 255.0f
+        timingAdvance = (buffer[2] / 2f) - 64f
     }
 
     override fun getFormattedResult(): String {

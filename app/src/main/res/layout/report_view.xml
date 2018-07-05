@@ -256,6 +256,30 @@
                 app:layout_constraintTop_toBottomOf="@id/fuel_pressure" />
 
             <TextView
+                android:id="@+id/relative_fuel_rail_pressure"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:gravity="left"
+                android:text="@string/relative_fuel_rail_pressure_value"
+                android:textSize="18dp"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintRight_toRightOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/fuel_rail_pressure" />
+
+            <TextView
+                android:id="@+id/absolute_fuel_rail_pressure"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:gravity="left"
+                android:text="@string/absolute_fuel_rail_pressure_value"
+                android:textSize="18dp"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintRight_toRightOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/relative_fuel_rail_pressure" />
+
+            <TextView
                 android:id="@+id/barometric_pressure"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
@@ -265,7 +289,7 @@
                 android:textSize="18dp"
                 app:layout_constraintLeft_toLeftOf="parent"
                 app:layout_constraintRight_toRightOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/fuel_rail_pressure" />
+                app:layout_constraintTop_toBottomOf="@id/absolute_fuel_rail_pressure" />
 
             <TextView
                 android:id="@+id/intake_manifold_pressure"
@@ -558,6 +582,18 @@
                 app:layout_constraintTop_toBottomOf="@id/commanded_egr" />
 
             <TextView
+                android:id="@+id/commanded_evaporative_purge"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:gravity="left"
+                android:text="@string/commanded_evaporative_purge_value"
+                android:textSize="18dp"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintRight_toRightOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/commanded_egr_error" />
+
+            <TextView
                 android:id="@+id/ft_st_bank1"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
@@ -567,7 +603,7 @@
                 android:textSize="18dp"
                 app:layout_constraintLeft_toLeftOf="parent"
                 app:layout_constraintRight_toRightOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/commanded_egr_error" />
+                app:layout_constraintTop_toBottomOf="@id/commanded_evaporative_purge" />
 
             <TextView
                 android:id="@+id/ft_st_bank2"
@@ -652,6 +688,18 @@
                 app:layout_constraintLeft_toLeftOf="parent"
                 app:layout_constraintRight_toRightOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/abs_evap_pressure" />
+
+            <TextView
+                android:id="@+id/warmups"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:gravity="left"
+                android:text="@string/warmups_value"
+                android:textSize="18dp"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintRight_toRightOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/evap_pressure" />
 
         </android.support.constraint.ConstraintLayout>
     </ScrollView>

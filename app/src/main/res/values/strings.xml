@@ -15,6 +15,8 @@
     <string name="engine_load_value">&lt;b>Engine Load&lt;/b>  %s</string>
     <string name="fuel_pressure_value">&lt;b>Fuel Pressure&lt;/b>   %s</string>
     <string name="fuel_rail_pressure_value">&lt;b>Fuel Rail Pressure&lt;/b>    %s</string>
+    <string name="relative_fuel_rail_pressure_value">&lt;b>Relative Fuel Rail Pressure&lt;/b>    %s</string>
+    <string name="absolute_fuel_rail_pressure_value">&lt;b>Absolute Fuel Rail Pressure&lt;/b>    %s</string>
     <string name="barometric_pressure_value">&lt;b>Barometric Pressure&lt;/b>    %s</string>
     <string name="intake_manifold_pressure_value">&lt;b>Intake Manifold Pressure&lt;/b>    %s</string>
     <string name="timing_advance_value">&lt;b>Timing Advance&lt;/b>    %s</string>
@@ -40,6 +42,7 @@
     <string name="commanded_throttle_actuator_value">&lt;b>Commanded Throttle Actuator&lt;/b>   %s</string>
     <string name="commanded_egr_value">&lt;b>Commanded EGR&lt;/b>   %s</string>
     <string name="commanded_egr_error_value">&lt;b>Commanded EGR Error&lt;/b>   %s</string>
+    <string name="commanded_evaporative_purge_value">&lt;b>Commanded Evaporative Purge&lt;/b>   %s</string>
     <string name="fuel_trim_short_term_bank1_value">&lt;b>FuelTrim ShortTerm Bank1&lt;/b>   %s</string>
     <string name="fuel_trim_short_term_bank2_value">&lt;b>FuelTrim ShortTerm Bank2&lt;/b>   %s</string>
     <string name="fuel_trim_long_term_bank1_value">&lt;b>FuelTrim LongTerm Bank1&lt;/b>   %s</string>
@@ -48,6 +51,7 @@
     <string name="fuel_injection_timing_value">&lt;b>Fuel Injection Timing&lt;/b>   %s</string>
     <string name="abs_evap_system_vapor_pressure_value">&lt;b>ABS EVAP System Vapor Pressure&lt;/b>   %s</string>
     <string name="evap_system_vapor_pressure_value">&lt;b>EVAP System Vapor Pressure&lt;/b>   %s</string>
+    <string name="warmups_value">&lt;b>WarmUps Since Code Cleared&lt;/b>   %s</string>
     <string name="monitor_status">Monitor Status</string>
     <string name="test">Test</string>
     <string name="available">Available</string>

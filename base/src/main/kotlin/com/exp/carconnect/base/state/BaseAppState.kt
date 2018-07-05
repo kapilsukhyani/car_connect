@@ -6,8 +6,8 @@ import com.exp.carconnect.base.*
 import com.exp.carconnect.base.store.PersistedAppState
 import com.exp.carconnect.obdlib.OBDEngine
 import com.exp.carconnect.obdlib.obdmessage.FuelType
-import com.exp.carconnect.obdlib.obdmessage.OBDStandard
 import com.exp.carconnect.obdlib.obdmessage.MonitorTest
+import com.exp.carconnect.obdlib.obdmessage.OBDStandard
 import java.util.concurrent.TimeUnit
 
 
@@ -334,6 +334,10 @@ data class Report(val engineLoad: UnAvailableAvailableData<Float>
                   = UnAvailableAvailableData.UnAvailable,
                   val fuelRailPressure: UnAvailableAvailableData<Int>
                   = UnAvailableAvailableData.UnAvailable,
+                  val relativeFuelRailPressure: UnAvailableAvailableData<Float>
+                  = UnAvailableAvailableData.UnAvailable,
+                  val absoluteFuelRailPressure: UnAvailableAvailableData<Float>
+                  = UnAvailableAvailableData.UnAvailable,
                   val distanceSinceDTCCleared: UnAvailableAvailableData<Int>
                   = UnAvailableAvailableData.UnAvailable,
                   val barometricPressure: UnAvailableAvailableData<Int>
@@ -370,6 +374,8 @@ data class Report(val engineLoad: UnAvailableAvailableData<Float>
                   = UnAvailableAvailableData.UnAvailable,
                   val egrError: UnAvailableAvailableData<Float>
                   = UnAvailableAvailableData.UnAvailable,
+                  val commandedEvaporativePurge: UnAvailableAvailableData<Float>
+                  = UnAvailableAvailableData.UnAvailable,
                   val fuelTrimShortTermBank1: UnAvailableAvailableData<Float>
                   = UnAvailableAvailableData.UnAvailable,
                   val fuelTrimShortTermBank2: UnAvailableAvailableData<Float>
@@ -385,6 +391,8 @@ data class Report(val engineLoad: UnAvailableAvailableData<Float>
                   val absoluteEvapSystempVaporPressure: UnAvailableAvailableData<Float>
                   = UnAvailableAvailableData.UnAvailable,
                   val evapSystemVaporPressure: UnAvailableAvailableData<Float>
+                  = UnAvailableAvailableData.UnAvailable,
+                  val warmupsSinceCodeCleared: UnAvailableAvailableData<Int>
                   = UnAvailableAvailableData.UnAvailable)
 
 sealed class MILStatus {

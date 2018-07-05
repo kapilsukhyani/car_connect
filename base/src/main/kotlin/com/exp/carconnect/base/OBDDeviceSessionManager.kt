@@ -104,6 +104,8 @@ class OBDSession(val device: BluetoothDevice,
                 RuntimeRequest(RuntimeType.SINCE_DTC_CLEARED),
                 DistanceRequest(distanceType = DistanceCommandType.SINCE_MIL_ON),
                 FuelRailPressureRequest(),
+                RelativeFuelRailPressureRequest(),
+                AbsoluteFuelRailPressureRequest(),
                 DistanceRequest(distanceType = DistanceCommandType.SINCE_CC_CLEARED),
                 BarometricPressureRequest(),
                 WidebandAirFuelRatioRequest(),
@@ -122,6 +124,7 @@ class OBDSession(val device: BluetoothDevice,
                 ThrottleRequest(type = ThrottleRequestType.COMMANDED_THROTTLE_ACTUATOR),
                 CommandedEGRRequest(),
                 CommandedEGRErrorRequest(),
+                CommandedEvaporativePurgeRequest(),
                 FuelTrimRequest(fuelTrim = FuelTrim.SHORT_TERM_BANK_1),
                 FuelTrimRequest(fuelTrim = FuelTrim.SHORT_TERM_BANK_2),
                 FuelTrimRequest(fuelTrim = FuelTrim.LONG_TERM_BANK_1),
@@ -129,7 +132,8 @@ class OBDSession(val device: BluetoothDevice,
                 EthanolFuelPercentRequest(),
                 FuelInjectionTimingRequest(),
                 AbsoluteEvapSystemPressureRequest(),
-                EvapSystemPressureRequest())
+                EvapSystemPressureRequest(),
+                WarmupsSinceCodeClearedRequest())
 
 
     }
@@ -393,6 +397,13 @@ class OBDSession(val device: BluetoothDevice,
                         is FuelRailPressureResponse -> {
                             BaseAppAction.AddFuelRailPressureToReport(response.fuelRailPressure)
                         }
+                        is RelativeFuelRailPressureResponse -> {
+                            BaseAppAction.AddRelativeFuelRailPressureToReport(response.relativeFuelRailPressure)
+                        }
+
+                        is AbsoluteFuelRailPressureResponse -> {
+                            BaseAppAction.AddAbsoluteFuelRailPressureToReport(response.pressure)
+                        }
                         is BarometricPressureResponse -> {
                             BaseAppAction.AddBarometricPressureToReport(response.barometricPressure)
                         }
@@ -431,7 +442,7 @@ class OBDSession(val device: BluetoothDevice,
                                     BaseAppAction.AddAccelPedalPositionEToReport(response.response)
                                 }
                                 ThrottleRequestType.ACCELERATOR_PEDAL_POSITION_F -> {
-                                    BaseAppAction.AddAccelPedalPositionEToReport(response.response)
+                                    BaseAppAction.AddAccelPedalPositionFToReport(response.response)
                                 }
                                 ThrottleRequestType.RELATIVE_ACCELERATOR_PEDAL_POSITION -> {
                                     BaseAppAction.AddRelativeAccelPedalPositionToReport(response.response)
@@ -448,7 +459,9 @@ class OBDSession(val device: BluetoothDevice,
                         is CommandedEGRErrorResponse -> {
                             BaseAppAction.AddEGRErrorToReport(response.error)
                         }
-
+                        is CommandedEvaporativePurgeResponse -> {
+                            BaseAppAction.AddCommandedEvaporativePurgeToReport(response.ratio)
+                        }
                         is FuelTrimResponse -> {
                             when (response.type) {
                                 FuelTrim.SHORT_TERM_BANK_1 -> {
@@ -480,6 +493,9 @@ class OBDSession(val device: BluetoothDevice,
                             BaseAppAction.AddEvapSystemVaporPressureToReport(response.pressure)
                         }
 
+                        is WarmupsSinceCodeClearedResponse -> {
+                            BaseAppAction.AddWarmupsSinceCodeClearedToReport(response.warmUps)
+                        }
                         else -> {
                             BaseAppAction.AddOilTemperatureToReport((response as OilTempResponse).temperature)
                         }

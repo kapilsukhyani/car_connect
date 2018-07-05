@@ -132,17 +132,17 @@ class CommandedEvaporativePurgeResponse(rawResponse: String) :
 }
 
 
-class WramupsSinceCodeClearedRequest(mode: OBDRequestMode = OBDRequestMode.CURRENT,
+class WarmupsSinceCodeClearedRequest(mode: OBDRequestMode = OBDRequestMode.CURRENT,
                                      retriable: Boolean = true,
                                      repeatable: IsRepeatable = IsRepeatable.No) :
         MultiModeOBDRequest(mode, "WramupsSinceCodeClearedRequest", "30", retriable, repeatable) {
     override fun toResponse(rawResponse: String): OBDResponse {
-        return WramupsSinceCodeClearedResponse(rawResponse)
+        return WarmupsSinceCodeClearedResponse(rawResponse)
     }
 }
 
 
-class WramupsSinceCodeClearedResponse(rawResponse: String) :
+class WarmupsSinceCodeClearedResponse(rawResponse: String) :
         OBDResponse("WramupsSinceCodeClearedResponse", rawResponse) {
 
     val warmUps: Int

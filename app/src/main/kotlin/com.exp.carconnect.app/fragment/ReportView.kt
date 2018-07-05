@@ -85,6 +85,8 @@ internal class ReportView : Fragment() {
         engine_load.text = fromHtml(getString(R.string.engine_load_value, reportViewModel.engineLoad))
         fuel_pressure.text = fromHtml(getString(R.string.fuel_pressure_value, reportViewModel.fuelPressure))
         fuel_rail_pressure.text = fromHtml(getString(R.string.fuel_rail_pressure_value, reportViewModel.fuelRailPressure))
+        relative_fuel_rail_pressure.text = fromHtml(getString(R.string.relative_fuel_rail_pressure_value, reportViewModel.relativeFuelRailPressure))
+        absolute_fuel_rail_pressure.text = fromHtml(getString(R.string.absolute_fuel_rail_pressure_value, reportViewModel.absoluteFuelRailPressure))
         barometric_pressure.text = fromHtml(getString(R.string.barometric_pressure_value, reportViewModel.barometricPressure))
         intake_manifold_pressure.text = fromHtml(getString(R.string.intake_manifold_pressure_value, reportViewModel.intakeManifoldPressure))
         timing_advance.text = fromHtml(getString(R.string.timing_advance_value, reportViewModel.timingAdvance))
@@ -110,6 +112,7 @@ internal class ReportView : Fragment() {
         commanded_throttle_actuator.text = fromHtml(getString(R.string.commanded_throttle_actuator_value, reportViewModel.commandedThrottleActuator))
         commanded_egr.text = fromHtml(getString(R.string.commanded_egr_value, reportViewModel.commandedEGR))
         commanded_egr_error.text = fromHtml(getString(R.string.commanded_egr_error_value, reportViewModel.commandedEGRError))
+        commanded_evaporative_purge.text = fromHtml(getString(R.string.commanded_evaporative_purge_value, reportViewModel.commandedEvaporativePurge))
         ft_st_bank1.text = fromHtml(getString(R.string.fuel_trim_short_term_bank1_value, reportViewModel.fuelTrimShortTermBank1))
         ft_st_bank2.text = fromHtml(getString(R.string.fuel_trim_short_term_bank2_value, reportViewModel.fuelTrimShortTermBank2))
         ft_lt_bank1.text = fromHtml(getString(R.string.fuel_trim_long_term_bank1_value, reportViewModel.fuelTrimLongTermBank1))
@@ -118,6 +121,7 @@ internal class ReportView : Fragment() {
         fuel_injection_timing.text = fromHtml(getString(R.string.fuel_injection_timing_value, reportViewModel.fuelInjectionTiming))
         abs_evap_pressure.text = fromHtml(getString(R.string.abs_evap_system_vapor_pressure_value, reportViewModel.absoluteEvapSystempVaporPressure))
         evap_pressure.text = fromHtml(getString(R.string.evap_system_vapor_pressure_value, reportViewModel.evapSystemVaporPressure))
+        warmups.text = fromHtml(getString(R.string.warmups_value, reportViewModel.warmupsSinceCodeCleared))
 
         monitor_status_grid.removeAllViews()
         addNewRowMonitorStatusGrid(getString(R.string.test), getString(R.string.available), getString(R.string.complete), 0)
@@ -249,9 +253,12 @@ internal class ReportViewModel(app: Application) : AndroidViewModel(app) {
                             engineLoad = report.engineLoad.toString(),
                             fuelPressure = report.fuelPressure.toString(),
                             fuelRailPressure = report.fuelRailPressure.toString(),
+                            relativeFuelRailPressure = report.relativeFuelRailPressure.toString(),
+                            absoluteFuelRailPressure = report.absoluteFuelRailPressure.toString(),
                             barometricPressure = report.barometricPressure.toString(),
                             intakeManifoldPressure = report.intakeManifoldPressure.toString(),
                             timingAdvance = report.timingAdvance.toString(),
+                            //todo mass air flow response does not match with what is being set in ECUISM, check again
                             massAirFlow = report.massAirFlow.toString(),
                             runtimeSinceEngineStart = report.runTimeSinceEngineStart.toString(),
                             runtimeSinceDTCCleared = report.runTimeSinceDTCCleared.toString(),
@@ -274,6 +281,7 @@ internal class ReportViewModel(app: Application) : AndroidViewModel(app) {
                             commandedThrottleActuator = report.commandedThrottleActuator.toString(),
                             commandedEGR = report.commandedEGR.toString(),
                             commandedEGRError = report.egrError.toString(),
+                            commandedEvaporativePurge = report.commandedEvaporativePurge.toString(),
                             fuelTrimShortTermBank1 = report.fuelTrimShortTermBank1.toString(),
                             fuelTrimShortTermBank2 = report.fuelTrimShortTermBank2.toString(),
                             fuelTrimLongTermBank1 = report.fuelTrimLongTermBank1.toString(),
@@ -282,6 +290,7 @@ internal class ReportViewModel(app: Application) : AndroidViewModel(app) {
                             fuelInjectionTiming = report.fuelInjectionTiming.toString(),
                             absoluteEvapSystempVaporPressure = report.absoluteEvapSystempVaporPressure.toString(),
                             evapSystemVaporPressure = report.evapSystemVaporPressure.toString(),
+                            warmupsSinceCodeCleared = report.warmupsSinceCodeCleared.toString(),
                             monitorStatusTests = tests)
 
                 }

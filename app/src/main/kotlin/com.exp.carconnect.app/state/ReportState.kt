@@ -12,7 +12,8 @@ data class ReportData(val name: String = "N/A", val model: String = "N/A", val m
                       val fuelConsumptionRate: String = "N/A", val airIntakeTemperature: String = "N/A", val ambientTemperature: String = "N/A",
                       val milStatus: String = "N/A", val pendingDTCs: String = "N/A",
                       val engineLoad: String = "N/A", val fuelPressure: String = "N/A",
-                      val fuelRailPressure: String = "N/A", val barometricPressure: String = "N/A",
+                      val fuelRailPressure: String = "N/A", val relativeFuelRailPressure: String = "N/A",
+                      val absoluteFuelRailPressure: String = "N/A", val barometricPressure: String = "N/A",
                       val intakeManifoldPressure: String = "N/A", val timingAdvance: String = "N/A",
                       val massAirFlow: String = "N/A", val runtimeSinceEngineStart: String = "N/A",
                       val runtimeSinceDTCCleared: String = "N/A", val runtimeWithMIlOn: String = "N/A",
@@ -24,12 +25,12 @@ data class ReportData(val name: String = "N/A", val model: String = "N/A", val m
                       val absoluteThrottlePositionC: String = "N/A", val accelPedalPositionD: String = "N/A",
                       val accelPedalPositionE: String = "N/A", val accelPedalPositionF: String = "N/A",
                       val relativeAccelPedalPosition: String = "N/A", val commandedThrottleActuator: String = "N/A",
-                      val commandedEGR: String = "N/A", val commandedEGRError: String = "N/A",
+                      val commandedEGR: String = "N/A", val commandedEGRError: String = "N/A", val commandedEvaporativePurge: String = "N/A",
                       val fuelTrimShortTermBank1: String = "N/A", val fuelTrimShortTermBank2: String = "N/A",
                       val fuelTrimLongTermBank1: String = "N/A", val fuelTrimLongTermBank2: String = "N/A",
                       val ethanolFuelPercent: String = "N/A", val fuelInjectionTiming: String = "N/A",
                       val absoluteEvapSystempVaporPressure: String = "N/A", val evapSystemVaporPressure: String = "N/A",
-                      val monitorStatusTests: Array<MonitorStatusTest> = emptyArray()
+                      val warmupsSinceCodeCleared: String = "N/A", val monitorStatusTests: Array<MonitorStatusTest> = emptyArray()
 ) {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
@@ -57,6 +58,8 @@ data class ReportData(val name: String = "N/A", val model: String = "N/A", val m
         if (engineLoad != other.engineLoad) return false
         if (fuelPressure != other.fuelPressure) return false
         if (fuelRailPressure != other.fuelRailPressure) return false
+        if (relativeFuelRailPressure != other.relativeFuelRailPressure) return false
+        if (absoluteFuelRailPressure != other.absoluteFuelRailPressure) return false
         if (barometricPressure != other.barometricPressure) return false
         if (intakeManifoldPressure != other.intakeManifoldPressure) return false
         if (timingAdvance != other.timingAdvance) return false
@@ -82,6 +85,7 @@ data class ReportData(val name: String = "N/A", val model: String = "N/A", val m
         if (commandedThrottleActuator != other.commandedThrottleActuator) return false
         if (commandedEGR != other.commandedEGR) return false
         if (commandedEGRError != other.commandedEGRError) return false
+        if (commandedEvaporativePurge != other.commandedEvaporativePurge) return false
         if (fuelTrimShortTermBank1 != other.fuelTrimShortTermBank1) return false
         if (fuelTrimShortTermBank2 != other.fuelTrimShortTermBank2) return false
         if (fuelTrimLongTermBank1 != other.fuelTrimLongTermBank1) return false
@@ -90,6 +94,7 @@ data class ReportData(val name: String = "N/A", val model: String = "N/A", val m
         if (fuelInjectionTiming != other.fuelInjectionTiming) return false
         if (absoluteEvapSystempVaporPressure != other.absoluteEvapSystempVaporPressure) return false
         if (evapSystemVaporPressure != other.evapSystemVaporPressure) return false
+        if (warmupsSinceCodeCleared != other.warmupsSinceCodeCleared) return false
         if (!Arrays.equals(monitorStatusTests, other.monitorStatusTests)) return false
 
         return true
@@ -116,6 +121,8 @@ data class ReportData(val name: String = "N/A", val model: String = "N/A", val m
         result = 31 * result + engineLoad.hashCode()
         result = 31 * result + fuelPressure.hashCode()
         result = 31 * result + fuelRailPressure.hashCode()
+        result = 31 * result + relativeFuelRailPressure.hashCode()
+        result = 31 * result + absoluteFuelRailPressure.hashCode()
         result = 31 * result + barometricPressure.hashCode()
         result = 31 * result + intakeManifoldPressure.hashCode()
         result = 31 * result + timingAdvance.hashCode()
@@ -141,6 +148,7 @@ data class ReportData(val name: String = "N/A", val model: String = "N/A", val m
         result = 31 * result + commandedThrottleActuator.hashCode()
         result = 31 * result + commandedEGR.hashCode()
         result = 31 * result + commandedEGRError.hashCode()
+        result = 31 * result + commandedEvaporativePurge.hashCode()
         result = 31 * result + fuelTrimShortTermBank1.hashCode()
         result = 31 * result + fuelTrimShortTermBank2.hashCode()
         result = 31 * result + fuelTrimLongTermBank1.hashCode()
@@ -149,6 +157,7 @@ data class ReportData(val name: String = "N/A", val model: String = "N/A", val m
         result = 31 * result + fuelInjectionTiming.hashCode()
         result = 31 * result + absoluteEvapSystempVaporPressure.hashCode()
         result = 31 * result + evapSystemVaporPressure.hashCode()
+        result = 31 * result + warmupsSinceCodeCleared.hashCode()
         result = 31 * result + Arrays.hashCode(monitorStatusTests)
         return result
     }

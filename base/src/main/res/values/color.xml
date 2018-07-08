@@ -1,7 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="primaryAccent">#f43b47</color>
-    <color name="primaryDark">#000000</color>
-    <color name="primary">#ffffff</color>
-
+    <color name="accent">#f43b47</color>
+    <color name="secondary">#212121</color>
+    <color name="secondaryLight">#484848</color>
+    <color name="secondaryDark">#000000</color>
+    <color name="primary">#fafafa</color>
+    <color name="primaryLight">#ffffff</color>
+    <color name="primaryDark">#c7c7c7</color>
+    <color name="textColorOnPrimary">#000000</color>
+    <color name="textColorOnSecondary">#ffffff</color>
 </resources>

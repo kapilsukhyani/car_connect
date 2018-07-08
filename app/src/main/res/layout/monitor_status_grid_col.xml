@@ -3,6 +3,6 @@
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:text="@string/test"
-    android:textColor="@color/primaryDark"
+    android:textColor="@color/textColorOnPrimary"
     android:textSize="18dp"
     android:textStyle="bold" />

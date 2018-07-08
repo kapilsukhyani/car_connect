@@ -30,7 +30,7 @@ import java.util.concurrent.TimeUnit
 internal class ReportView : Fragment() {
 
     companion object {
-      private const val SHARE_REPORT_REQUEST_ID = 1112
+        private const val SHARE_REPORT_REQUEST_ID = 1112
     }
 
     lateinit var reportVM: ReportViewModel
@@ -87,8 +87,8 @@ internal class ReportView : Fragment() {
         intentShareFile.type = "application/pdf"
         intentShareFile.putExtra(Intent.EXTRA_STREAM, Uri.parse("file://$fileUrl"))
         intentShareFile.putExtra(Intent.EXTRA_SUBJECT,
-                "Sharing File...")
-        intentShareFile.putExtra(Intent.EXTRA_TEXT, "Sharing File...")
+                "OBD Report captured by CarConnect")
+        intentShareFile.putExtra(Intent.EXTRA_TEXT, "OBD Report captured by CarConnect")
         startActivityForResult(Intent.createChooser(intentShareFile, "Share File"), SHARE_REPORT_REQUEST_ID)
     }
 

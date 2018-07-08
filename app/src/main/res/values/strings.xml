@@ -59,5 +59,6 @@
     <string name="capture_report">Share Report</string>
     <string name="cature_report_error">Failed to share report</string>
     <string name="capturing_report">Capturing Report</string>
+    <string name="car_connect_captured_label">Captured By CarConnect</string>
 
 </resources>

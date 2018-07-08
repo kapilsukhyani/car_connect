@@ -75,7 +75,7 @@ class CarConnectApp : Application(),
 
         persistenceStore = BaseStore(this, Schedulers.io())
 
-        val sessionManager = OBDDeviceSessionManager(ioScheduler, computationScheduler,
+        val sessionManager = OBDDeviceSessionManager(this, ioScheduler, computationScheduler,
                 mainScheduler, VehicleInfoLoaderFactoryImpl().getVehicleInfoLoader())
 
         val reducers = combineReducers(AppStateNavigationReducer(),
@@ -142,10 +142,15 @@ class CarConnectApp : Application(),
     }
 
     override fun onDataLoadingStartedFor(info: Vehicle) {
-        store.dispatch(CommonAppAction.PushViewToBackStack(DashboardScreen(DashboardScreenState.ShowNewSnapshot(info, LiveVehicleData(), DashboardTheme.Dark))))
+        //replace connection view with dashboard
+        store.dispatch(CommonAppAction.ReplaceViewOnBackStackTop(DashboardScreen(DashboardScreenState.ShowNewSnapshot(info, LiveVehicleData(), DashboardTheme.Dark))))
     }
 
     override fun onReportRequested() {
         store.dispatch(CommonAppAction.PushViewToBackStack(ReportScreen(ReportScreenState.ShowNewSnapshot(ReportData()))))
+    }
+
+    override fun killSession() {
+        store.dispatch(BaseAppAction.KillActiveSession)
     }
 }

@@ -2,6 +2,8 @@ package com.exp.carconnect.base
 
 import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothSocket
+import android.content.Context
+import android.content.Intent
 import com.exp.carconnect.Logger
 import com.exp.carconnect.base.network.VehicleInfoLoader
 import com.exp.carconnect.base.state.*
@@ -13,7 +15,8 @@ import io.reactivex.Observable
 import io.reactivex.Scheduler
 import java.util.concurrent.TimeUnit
 
-class OBDDeviceSessionManager(private val ioScheduler: Scheduler,
+class OBDDeviceSessionManager(private val context: Context,
+                              private val ioScheduler: Scheduler,
                               private val computationScheduler: Scheduler,
                               private val mainScheduler: Scheduler,
                               private val vehicleInfoLoader: VehicleInfoLoader) {
@@ -57,6 +60,15 @@ class OBDDeviceSessionManager(private val ioScheduler: Scheduler,
 
     fun fetchReport(engine: OBDEngine, availablePIDs: Set<String>): Observable<BaseAppAction> {
         return activeSession?.fetchReport(engine, availablePIDs) ?: Observable.empty()
+    }
+
+    fun startBackgroundSession() {
+        context.startService(Intent(context, SessionForegroundService::class.java))
+
+    }
+
+    fun stopBackgroundSession() {
+        context.stopService(Intent(context, SessionForegroundService::class.java))
     }
 
 
@@ -292,7 +304,7 @@ class OBDSession(val device: BluetoothDevice,
                                 is ThrottlePositionResponse -> BaseAppAction.AddThrottlePosition(response.throttle)
                                 is ConsumptionRateResponse -> BaseAppAction.AddFuelConsumptionRate(response.fuelRate)
                             //could be received if one the request in multi request failed
-                                is FailedOBDResponse -> BaseAppAction.AddFailedOBDResnseError(response.exception)
+                                is FailedOBDResponse -> BaseAppAction.AddFailedOBDResponseError(response.exception)
                                 else -> BaseAppAction.AddIgnition((response as IgnitionMonitorResponse).ignitionOn)
                             }
                         })

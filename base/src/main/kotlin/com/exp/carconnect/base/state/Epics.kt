@@ -49,6 +49,8 @@ class OBDSessionManagementEpic(private val ioScheduler: Scheduler,
         return actions
                 .filter {
                     it is BaseAppAction.StartNewSession ||
+                            it === BaseAppAction.StartBackgroundOrKillActiveSession ||
+                            it === BaseAppAction.StopBackgroundSession ||
                             it === BaseAppAction.KillActiveSession ||
                             it is BaseAppAction.RefreshActiveSessionDataFetchRate
                 }
@@ -60,9 +62,35 @@ class OBDSessionManagementEpic(private val ioScheduler: Scheduler,
                                     .subscribeOn(ioScheduler)
                                     .observeOn(mainThreadScheduler)
                         }
+                        BaseAppAction.StartBackgroundOrKillActiveSession -> {
+                            if (store.state.getAppSettings().backgroundConnectionEnabled) {
+                                sessionManager.startBackgroundSession()
+                                if (!store.state.isAnActiveSessionAvailable()) {
+                                    Observable.empty()
+                                } else {
+                                    val activeSession = store.state.getActiveSession()
+                                    sessionManager
+                                            .updateDataLoadFrequencyForActiveSession(activeSession.engine, store.state.getAppSettings())
+                                            .subscribeOn(ioScheduler)
+                                            .observeOn(mainThreadScheduler)
+
+                                }
+
+                            } else {
+                                sessionManager.killActiveSession()
+                                Observable.just(BaseAppAction.CloseSocketAndClearActiveSessionState)
+                            }
+
+                        }
+                        BaseAppAction.StopBackgroundSession -> {
+                            sessionManager.stopBackgroundSession()
+                            Observable.empty()
+
+                        }
                         BaseAppAction.KillActiveSession -> {
                             sessionManager.killActiveSession()
                             Observable.just(BaseAppAction.CloseSocketAndClearActiveSessionState)
+
                         }
                         is BaseAppAction.RefreshActiveSessionDataFetchRate -> {
                             if (!store.state.isAnActiveSessionAvailable()) {

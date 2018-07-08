@@ -38,7 +38,10 @@ sealed class BaseAppAction {
     data class AddFuelConsumptionRate(val fuelConsumptionRate: Float) : BaseAppAction()
     data class AddVehicleDataLoadError(val error: Throwable) : BaseAppAction()
     //todo handle this
-    data class AddFailedOBDResnseError(val error: Throwable): BaseAppAction()
+    data class AddFailedOBDResponseError(val error: Throwable) : BaseAppAction()
+
+    object StartBackgroundOrKillActiveSession : BaseAppAction()
+    object StopBackgroundSession : BaseAppAction()
     object KillActiveSession : BaseAppAction()
     object CloseSocketAndClearActiveSessionState : BaseAppAction()
     data class RefreshActiveSessionDataFetchRate(val settings: AppSettings) : BaseAppAction()
@@ -177,6 +180,7 @@ class ActiveSessionReducer : Reducer<AppState> {
                     state
                 }
             }
+
             is BaseAppAction.AddVehicleDataLoadError -> {
                 if (state.getBaseAppState().activeSession is UnAvailableAvailableData.Available<ActiveSession>) {
                     state.copyAndReplaceActiveSession(state.getActiveSession().copy(liveVehicleData = LoadableState.LoadingError(action.error)))

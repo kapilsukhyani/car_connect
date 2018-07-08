@@ -18,6 +18,7 @@
             android:exported="false"
             android:initOrder="100"
             tools:replace="android:authorities" />
+        <service android:name=".SessionForegroundService" />
     </application>
 
 </manifest>

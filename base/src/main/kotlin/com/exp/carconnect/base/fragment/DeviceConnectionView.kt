@@ -138,7 +138,6 @@ class DeviceConnectionVM(app: Application) : AndroidViewModel(app) {
                 .filter { it.isVehicleInfoLoaded() }
                 .take(1)
                 .subscribe {
-                    store.dispatch(CommonAppAction.FinishCurrentView)
                     (getApplication<Application>() as BaseAppContract)
                             .onDataLoadingStartedFor(it.getCurrentVehicleInfo())
                 })
@@ -157,7 +156,7 @@ class DeviceConnectionVM(app: Application) : AndroidViewModel(app) {
     }
 
     fun onBackPressed() {
-        store.dispatch(BaseAppAction.KillActiveSession)
+        store.dispatch(BaseAppAction.StartBackgroundOrKillActiveSession)
     }
 
 }

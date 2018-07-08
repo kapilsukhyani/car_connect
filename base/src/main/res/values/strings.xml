@@ -78,6 +78,9 @@
     <string name="clear_dtc_error_message">Something went wrong while clearing DTCs</string>
     <string name="please_wait">Please Wait</string>
     <string name="clearing_dtcs">Clearing DTCs</string>
+    <string name="foreground_notification_title">OBD Connection Active</string>
+    <string name="foreground_notification_description">Connection to your vehicle is active in background.</string>
+    <string name="stop">Drop Connection</string>
 
 
     <string-array name="unit_systems">

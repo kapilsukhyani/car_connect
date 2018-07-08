@@ -187,7 +187,7 @@ class DashboardVM(app: Application) : AndroidViewModel(app) {
     }
 
     fun onBackPressed() {
-        store.dispatch(BaseAppAction.KillActiveSession)
+        store.dispatch(BaseAppAction.StartBackgroundOrKillActiveSession)
     }
 
     fun onSettingsIconClicked() {

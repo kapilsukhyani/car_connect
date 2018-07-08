@@ -32,7 +32,7 @@ import com.exp.carconnect.base.BaseAppContract
 import com.exp.carconnect.base.R
 import com.exp.carconnect.base.asCustomObservable
 import com.exp.carconnect.base.state.*
-import io.reactivex.disposables.Disposable
+import io.reactivex.disposables.CompositeDisposable
 import redux.api.Reducer
 
 
@@ -198,10 +198,12 @@ class DeviceManagementVM(app: Application) : AndroidViewModel(app) {
 
     private val deviceManagementViewLiveData = MutableLiveData<DeviceManagementScreenState>()
     private val store = (app as BaseAppContract).store
-    private val storeSubscription: Disposable
+    private val storeSubscription: CompositeDisposable = CompositeDisposable()
+    private var backgroundConnectionEnabled = false
 
     init {
-        storeSubscription = store
+        //todo kill the screen if an active session is already available, this is required if bg connection was enabled being on dashboard.
+        storeSubscription.add(store
                 .asCustomObservable()
                 .filter { it.uiState.currentView is DeviceManagementScreen }
                 .map {
@@ -210,7 +212,15 @@ class DeviceManagementVM(app: Application) : AndroidViewModel(app) {
                 .distinctUntilChanged()
                 .subscribe {
                     deviceManagementViewLiveData.value = it
-                }
+                })
+        storeSubscription.add(store
+                .asCustomObservable()
+                .filter { it.isBaseStateLoaded() }
+                .map { it.getAppSettings().backgroundConnectionEnabled }
+                .distinctUntilChanged()
+                .subscribe {
+                    backgroundConnectionEnabled = it
+                })
 
         loadDevices()
     }
@@ -255,9 +265,15 @@ class DeviceManagementVM(app: Application) : AndroidViewModel(app) {
     }
 
     fun onDeviceSelected(device: BluetoothDevice) {
-        store.dispatch(CommonAppAction.PushViewToBackStack(ConnectionScreen(ConnectionScreenState
-                .ShowStatus(getApplication<Application>()
-                        .getString(R.string.connecting_message, device.name)))))
+        if (backgroundConnectionEnabled) {
+            store.dispatch(CommonAppAction.ReplaceViewOnBackStackTop(ConnectionScreen(ConnectionScreenState
+                    .ShowStatus(getApplication<Application>()
+                            .getString(R.string.connecting_message, device.name)))))
+        } else {
+            store.dispatch(CommonAppAction.PushViewToBackStack(ConnectionScreen(ConnectionScreenState
+                    .ShowStatus(getApplication<Application>()
+                            .getString(R.string.connecting_message, device.name)))))
+        }
         store.dispatch(BaseAppAction.StartNewSession(device))
     }
 

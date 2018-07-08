@@ -15,6 +15,7 @@ interface BaseAppContract {
     var newOBDConnectionComponent: NewOBDConnectionComponent?
     fun onDataLoadingStartedFor(info: Vehicle)
     fun onReportRequested()
+    fun killSession()
 
     val store: Store<AppState>
     val persistenceStore: BaseStore

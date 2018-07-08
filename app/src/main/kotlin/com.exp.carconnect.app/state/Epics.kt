@@ -28,7 +28,9 @@ internal class CaptureReportEpic(private val ioScheduler: Scheduler,
                                 .generateReportPDF((it as ReportAction.CaptureReport).data, it.view)
                                 .map { ReportAction.UpdateCaptureReportOperationStateToSuccessful(it) as ReportAction }
                                 .onErrorReturn { ReportAction.UpdateCaptureReportOperationStateToFailed(it) }
-                                .toObservable()
+                                .flatMapObservable {
+                                    Observable.fromArray(it, ReportAction.UpdateCaptureReportOperationStateToToNone)
+                                }
                                 .startWith(ReportAction.UpdateCaptureReportOperationStateToCapturing)
                                 .subscribeOn(ioScheduler)
                                 .observeOn(mainThreadScheduler)

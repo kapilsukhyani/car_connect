@@ -125,6 +125,11 @@ fun AppState.getMaxSpeedThresholdFromSettings(): Int {
             .appSettings.notificationSettings.speedNotificationSettings as SpeedNotificationSettings.On).maxSpeedThreshold
 }
 
+fun AppState.getDashboardTheme(): DashboardTheme {
+    return this.getBaseAppState().baseAppPersistedState
+            .appSettings.displaySettings.dashboardTheme
+}
+
 fun AppState.getMinFuelThresholdFromSettings(): Float {
     return (this.getBaseAppState().baseAppPersistedState
             .appSettings.notificationSettings.fuelNotificationSettings as FuelNotificationSettings.On).minFuelPercentageThreshold

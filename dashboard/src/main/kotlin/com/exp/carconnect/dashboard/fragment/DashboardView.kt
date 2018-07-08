@@ -57,7 +57,7 @@ class DashboardView : Fragment(), BackInterceptor {
     private fun onNewState(it: DashboardScreenState) {
         when (it) {
             is DashboardScreenState.ShowNewSnapshot -> {
-                showNewSnapshot(it.vehicle, it.data)
+                showNewSnapshot(it.vehicle, it.data, it.theme)
             }
             is DashboardScreenState.ShowError -> {
                 showError(it.error)
@@ -81,7 +81,12 @@ class DashboardView : Fragment(), BackInterceptor {
                 .show()
     }
 
-    private fun showNewSnapshot(vehicle: Vehicle, dashboardData: LiveVehicleData) {
+    private fun showNewSnapshot(vehicle: Vehicle, dashboardData: LiveVehicleData, theme: DashboardTheme) {
+        if (theme == DashboardTheme.Light) {
+            dashboard.theme = Dashboard.Theme.Light
+        } else {
+            dashboard.theme = Dashboard.Theme.Dark
+        }
         dashboard.currentSpeed = dashboardData.speed.getValueOrDefault(0.toFloat())
         dashboard.currentRPM = dashboardData.rpm.getValueOrDefault(0.toFloat())
         dashboard.vin = vehicle.vin
@@ -138,27 +143,28 @@ class DashboardVM(app: Application) : AndroidViewModel(app) {
     private val store = (app as BaseAppContract).store
     private val storeSubscription: CompositeDisposable = CompositeDisposable()
 
+    data class DashboardState(val vehicle: Vehicle, val liveVehicleData: LoadableState<LiveVehicleData, Throwable>, val theme: DashboardTheme)
+
     init {
         storeSubscription.add(store
                 .asCustomObservable()
-                .filter { it.uiState.currentView is DashboardScreen }
-                .filter { it.getBaseAppState().activeSession is UnAvailableAvailableData.Available<ActiveSession> }
-                .filter { it.getActiveSession().vehicle is LoadableState.Loaded }
+                .filter { it.uiState.currentView is DashboardScreen && it.isVehicleInfoLoaded() }
                 .map {
-                    Pair((it.getActiveSession().vehicle as LoadableState.Loaded).savedState,
-                            it.getActiveSession().liveVehicleData)
+                    DashboardState((it.getActiveSession().vehicle as LoadableState.Loaded).savedState,
+                            it.getActiveSession().liveVehicleData, it.getDashboardTheme())
+
                 }
                 .distinctUntilChanged()
                 .subscribe {
-                    if (it.second is LoadableState.Loaded) {
-                        store.dispatch(DashboardAction.AddNewDashboardState(DashboardScreenState.ShowNewSnapshot(it.first,
-                                (it.second as LoadableState.Loaded).savedState)))
+                    if (it.liveVehicleData is LoadableState.Loaded) {
+                        store.dispatch(DashboardAction.AddNewDashboardState(DashboardScreenState.ShowNewSnapshot(it.vehicle,
+                                (it.liveVehicleData).savedState, it.theme)))
 
-                    } else if (it.second is LoadableState.LoadingError) {
+                    } else if (it.liveVehicleData is LoadableState.LoadingError) {
                         store.dispatch(DashboardAction.AddNewDashboardState(DashboardScreenState
                                 .ShowError(getApplication<Application>()
                                         .getString(R.string.data_load_error,
-                                                (it.second as LoadableState.LoadingError<Throwable>).error.localizedMessage))))
+                                                (it.liveVehicleData).error.localizedMessage))))
                     }
                 })
 

@@ -34,34 +34,39 @@ class Dashboard @JvmOverloads constructor(context: Context,
 
 
     companion object {
-        private val FUEL_PERCENTAGE_KEY = "fuel_percentage"
-        private val CURRENT_SPEED_KEY = "current_speed"
-        private val SHOW_CHECK_ENGINE_LIGHT_KEY = "check_engine_light"
-        private val SHOW_IGNITION_ICON_KEY = "show_ignition_icon"
-        private val CURRENT_RPM_KEY = "current_rpm"
-        private val ONLINE_KEY = "online"
-        private val VIN_KEY = "vin"
+        private const val FUEL_PERCENTAGE_KEY = "fuel_percentage"
+        private const val CURRENT_SPEED_KEY = "current_speed"
+        private const val SHOW_CHECK_ENGINE_LIGHT_KEY = "check_engine_light"
+        private const val SHOW_IGNITION_ICON_KEY = "show_ignition_icon"
+        private const val CURRENT_RPM_KEY = "current_rpm"
+        private const val ONLINE_KEY = "online"
+        private const val VIN_KEY = "vin"
 
-        private val LABEL_TEXT = "Car Connect"
-        private val LABEL_REFERENCE_TEXT_SIZE = 50f
+        private const val LABEL_TEXT = "Car Connect"
+        private const val LABEL_REFERENCE_TEXT_SIZE = 50f
 
-        private val MIDDLE_GAUGE_START_ANGLE = 135
-        private val MIDDLE_GAUGE_SWEEP_ANGLE = 270
-        private val LEFT_GAUGE_START_ANGLE = 55
-        private val LEFT_GAUGE_SWEEP_ANGLE = 250
-        private val RIGHT_GAUGE_START_ANGLE = 235
-        private val RIGHT_GAUGE_SWEEP_ANGLE = 250
-        private val VIN_START_ANGLE = 130f
-        private val VIN_SWEEP = 85f
+        private const val MIDDLE_GAUGE_START_ANGLE = 135
+        private const val MIDDLE_GAUGE_SWEEP_ANGLE = 270
+        private const val LEFT_GAUGE_START_ANGLE = 55
+        private const val LEFT_GAUGE_SWEEP_ANGLE = 250
+        private const val RIGHT_GAUGE_START_ANGLE = 235
+        private const val RIGHT_GAUGE_SWEEP_ANGLE = 250
+        private const val VIN_START_ANGLE = 130f
+        private const val VIN_SWEEP = 85f
 
-        private val VIN_LENGTH = 17
+        private const val VIN_LENGTH = 17
 
-        private val MIDDLE_GAUGE_WIDTH_PERCENTAGE = 0.4f
-        private val LEFT_GAUGE_WIDTH_PERCENTAGE = 0.3f
-        private val DASHBOARD_LABEL_MARGIN_PERCENTAGE_OF_AVAILABLE_HEIGHT = 0.05f
-        private val RIGHT_GAUGE_WIDTH_PERCENTAGE = LEFT_GAUGE_WIDTH_PERCENTAGE
-        private val MINIMUM_WIDTH = 800
-        private val MINIMUM_HEIGHT = 400 // fifty percent of height
+        private const val MIDDLE_GAUGE_WIDTH_PERCENTAGE = 0.4f
+        private const val LEFT_GAUGE_WIDTH_PERCENTAGE = 0.3f
+        private const val DASHBOARD_LABEL_MARGIN_PERCENTAGE_OF_AVAILABLE_HEIGHT = 0.05f
+        private const val RIGHT_GAUGE_WIDTH_PERCENTAGE = LEFT_GAUGE_WIDTH_PERCENTAGE
+        private const val MINIMUM_WIDTH = 800
+        private const val MINIMUM_HEIGHT = 400 // fifty percent of height
+    }
+
+    enum class Theme {
+        Light,
+        Dark
     }
 
     private val vinCharGapInDegrees = VIN_SWEEP / VIN_LENGTH
@@ -82,6 +87,24 @@ class Dashboard @JvmOverloads constructor(context: Context,
     private var layedOut = false
     var onOnlineChangedListener: ((Boolean) -> Unit)? = null
     var onVINChangedListener: ((String) -> Unit)? = null
+
+
+    var theme: Theme = Theme.Dark
+        set(value) {
+            if (value != field) {
+                onlineColor = if (value == Theme.Dark) {
+                    darkOnlineColor
+                } else {
+                    lightOnlineColor
+                }
+                speedometerGauge.setOnlineColor(onlineColor)
+                rpmGauge.setOnlineColor(onlineColor)
+                fuelAndTemperatureGauge.setOnlineColor(onlineColor)
+                field = value
+                adoptOnlineStatus()
+                invalidate()
+            }
+        }
 
     var fuelPercentage = 0.0f
         set(value) {
@@ -197,9 +220,12 @@ class Dashboard @JvmOverloads constructor(context: Context,
     //private val onlineColor = Color.rgb(89, 134, 0)
     //    private val onlineColor = Color.rgb(101, 57, 244)
 
+    private val lightOnlineColor = Color.rgb(179, 157, 219)
+    private val darkOnlineColor = Color.rgb(104, 82, 168)
 
-    private val onlineColor = Color.rgb(104, 82, 168)
+    private var onlineColor = darkOnlineColor
     private val offlineColor = Color.argb(100, 104, 82, 168)
+
 
     private val vinOnlineColor = context.getColor(android.R.color.holo_orange_dark)
     private val vinOfflineColor = context.getColor(android.R.color.white)

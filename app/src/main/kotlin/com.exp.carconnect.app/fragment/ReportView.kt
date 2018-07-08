@@ -30,7 +30,7 @@ import java.util.concurrent.TimeUnit
 internal class ReportView : Fragment() {
 
     companion object {
-        val SHARE_REPORT_REQUEST_ID = 1112
+      private const val SHARE_REPORT_REQUEST_ID = 1112
     }
 
     lateinit var reportVM: ReportViewModel

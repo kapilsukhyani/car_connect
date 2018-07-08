@@ -5,7 +5,7 @@ import android.view.MotionEvent
 
 
 internal abstract class Gauge(val dashboard: Dashboard,
-                              val onlineColor: Int,
+                              var onlineColor: Int,
                               val offlineColor: Int) {
     companion object {
         val GAUGE_STROKE_WIDTH = 20f
@@ -37,6 +37,10 @@ internal abstract class Gauge(val dashboard: Dashboard,
     open fun onDisconnected() {
         gaugePaint.color = offlineColor
 
+    }
+
+    internal fun setOnlineColor(onlineColor: Int) {
+        this.onlineColor = onlineColor
     }
 
     abstract fun onBoundChanged(bounds: RectF)

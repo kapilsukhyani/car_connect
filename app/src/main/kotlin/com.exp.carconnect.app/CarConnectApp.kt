@@ -142,7 +142,7 @@ class CarConnectApp : Application(),
     }
 
     override fun onDataLoadingStartedFor(info: Vehicle) {
-        store.dispatch(CommonAppAction.PushViewToBackStack(DashboardScreen(DashboardScreenState.ShowNewSnapshot(info, LiveVehicleData()))))
+        store.dispatch(CommonAppAction.PushViewToBackStack(DashboardScreen(DashboardScreenState.ShowNewSnapshot(info, LiveVehicleData(), DashboardTheme.Dark))))
     }
 
     override fun onReportRequested() {

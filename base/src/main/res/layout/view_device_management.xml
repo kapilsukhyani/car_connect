@@ -102,9 +102,7 @@
                 android:id="@+id/bonded_devices_list"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:layout_marginBottom="10dp"
-                android:layout_marginLeft="20dp"
-                android:layout_marginRight="20dp" />
+                android:layout_marginBottom="10dp" />
         </LinearLayout>
 
     </android.support.v7.widget.CardView>
@@ -122,11 +120,11 @@
         app:layout_constraintTop_toTopOf="parent">
 
         <TextView
-            android:gravity="center"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:fontFamily="@font/atomic_age"
+            android:gravity="center"
             android:text="@string/car_connect"
             android:textColor="@color/primaryAccent"
             android:textSize="35dp"

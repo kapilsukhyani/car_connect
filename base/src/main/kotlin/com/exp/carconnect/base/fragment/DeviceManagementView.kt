@@ -329,6 +329,7 @@ private class BondedDeviceAdapter(val context: Context, val bondedDevices: List<
 
 private class BondedDeviceRowViewHolder(val textView: TextView, itemClickListener: (BluetoothDevice) -> Unit) : RecyclerView.ViewHolder(textView) {
     init {
+        textView.layoutParams = ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
         textView.setOnClickListener {
             itemClickListener.invoke(textView.tag as BluetoothDevice)
         }

@@ -167,5 +167,7 @@ data class ReportScreen(override val screenState: ReportScreenState) : CarConnec
 
 sealed class ReportScreenState : CarConnectIndividualViewState {
     data class ShowNewSnapshot(val report: ReportData) : ReportScreenState()
+    object ShowReportCapturingProgressDialog : ReportScreenState()
+    data class InitReportShare(val fileUrl: String) : ReportScreenState()
     data class ShowError(val error: String) : ReportScreenState()
 }

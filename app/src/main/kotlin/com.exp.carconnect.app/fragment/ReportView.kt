@@ -2,9 +2,12 @@ package com.exp.carconnect.app.fragment
 
 import android.app.AlertDialog
 import android.app.Application
+import android.app.ProgressDialog
 import android.arch.lifecycle.*
 import android.content.Context
+import android.content.Intent
 import android.content.pm.ActivityInfo
+import android.net.Uri
 import android.os.Bundle
 import android.support.v4.app.Fragment
 import android.text.Html.fromHtml
@@ -23,8 +26,15 @@ import kotlinx.android.synthetic.main.report_view.*
 import redux.api.Reducer
 import java.util.concurrent.TimeUnit
 
+
 internal class ReportView : Fragment() {
+
+    companion object {
+        val SHARE_REPORT_REQUEST_ID = 1112
+    }
+
     lateinit var reportVM: ReportViewModel
+    private var progressDialog: ProgressDialog? = null
 
     override fun onAttach(context: Context?) {
         super.onAttach(context)
@@ -46,6 +56,9 @@ internal class ReportView : Fragment() {
                 })
         report_toolbar.setNavigationOnClickListener { reportVM.onBackPressed() }
         refresh_report_button.setOnClickListener { reportVM.fetchReport() }
+        capture_report.setOnClickListener {
+            reportVM.captureReport(report_container)
+        }
     }
 
     private fun onNewState(state: ReportScreenState) {
@@ -54,9 +67,38 @@ internal class ReportView : Fragment() {
                 onNewSpanShot(state.report)
             }
             is ReportScreenState.ShowError -> {
+                hideReportCapturingDialogIfAny()
                 showError(state.error)
             }
+
+            is ReportScreenState.ShowReportCapturingProgressDialog -> {
+                showReportCapturingProgressDialog()
+            }
+
+            is ReportScreenState.InitReportShare -> {
+                hideReportCapturingDialogIfAny()
+                initReportShare(state.fileUrl)
+            }
         }
+    }
+
+    private fun initReportShare(fileUrl: String) {
+        val intentShareFile = Intent(Intent.ACTION_SEND)
+        intentShareFile.type = "application/pdf"
+        intentShareFile.putExtra(Intent.EXTRA_STREAM, Uri.parse("file://$fileUrl"))
+        intentShareFile.putExtra(Intent.EXTRA_SUBJECT,
+                "Sharing File...")
+        intentShareFile.putExtra(Intent.EXTRA_TEXT, "Sharing File...")
+        startActivityForResult(Intent.createChooser(intentShareFile, "Share File"), SHARE_REPORT_REQUEST_ID)
+    }
+
+    private fun hideReportCapturingDialogIfAny() {
+        progressDialog?.dismiss()
+        progressDialog = null
+    }
+
+    private fun showReportCapturingProgressDialog() {
+        progressDialog = ProgressDialog.show(activity, getString(R.string.capturing_report), getString(R.string.please_wait))
     }
 
 
@@ -320,10 +362,38 @@ internal class ReportViewModel(app: Application) : AndroidViewModel(app) {
                 .subscribe {
                     store.dispatch(BaseAppAction.FetchReport)
                 })
+
+        storeSubscription.add(store
+                .asCustomObservable()
+                .filter { it.isAnActiveSessionAvailable() }
+                .map { it.getActiveSession().captureReportOperationState }
+                .distinctUntilChanged()
+                .subscribe {
+                    when (it) {
+                        CaptureReportOperationState.Capturing -> {
+                            store.dispatch(ReportAction.AddNewReportState(ReportScreenState.ShowReportCapturingProgressDialog))
+                        }
+                        is CaptureReportOperationState.Error -> {
+                            store.dispatch(ReportAction.AddNewReportState(ReportScreenState.ShowError(getApplication<Application>()
+                                    .getString(R.string.cature_report_error))))
+                        }
+                        is CaptureReportOperationState.Successful -> {
+                            store.dispatch(ReportAction.AddNewReportState(ReportScreenState.InitReportShare(it.fileUrl)))
+                        }
+                    }
+                })
     }
 
     fun fetchReport() {
         fetchReportCommandObservable.onNext(true)
+    }
+
+    fun captureReport(view: View) {
+        val value = reportLiveData.value
+        if (value is ReportScreenState.ShowNewSnapshot) {
+            store.dispatch(ReportAction.CaptureReport(value.report, view))
+        }
+
     }
 
     fun getReportLiveData(): LiveData<ReportScreenState> {
@@ -344,7 +414,7 @@ internal class ReportViewModel(app: Application) : AndroidViewModel(app) {
     }
 }
 
-class ReportReducer : Reducer<AppState> {
+class ReportScreenStateReducer : Reducer<AppState> {
 
     override fun reduce(state: AppState, action: Any): AppState {
         return when (action) {

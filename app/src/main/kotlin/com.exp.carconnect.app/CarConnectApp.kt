@@ -1,10 +1,9 @@
 package com.exp.carconnect.app
 
 import android.app.Application
-import com.exp.carconnect.app.fragment.ReportReducer
-import com.exp.carconnect.app.state.ReportData
-import com.exp.carconnect.app.state.ReportScreen
-import com.exp.carconnect.app.state.ReportScreenState
+import com.exp.carconnect.app.fragment.ReportScreenStateReducer
+import com.exp.carconnect.app.pdf.ReportPDFGenerator
+import com.exp.carconnect.app.state.*
 import com.exp.carconnect.base.*
 import com.exp.carconnect.base.di.CarConnectGlobalComponent
 import com.exp.carconnect.base.di.DaggerCarConnectGlobalComponent
@@ -20,7 +19,7 @@ import com.exp.carconnect.base.store.BaseStore
 import com.exp.carconnect.dashboard.DashboardAppContract
 import com.exp.carconnect.dashboard.di.DashboardComponent
 import com.exp.carconnect.dashboard.di.DashboardModule
-import com.exp.carconnect.dashboard.fragment.DashboardReducer
+import com.exp.carconnect.dashboard.fragment.DashboardScreenStateReducer
 import com.exp.carconnect.dashboard.state.DashboardScreen
 import com.exp.carconnect.dashboard.state.DashboardScreenState
 import io.reactivex.Scheduler
@@ -81,11 +80,12 @@ class CarConnectApp : Application(),
 
         val reducers = combineReducers(AppStateNavigationReducer(),
                 BaseAppStateReducer(),
+                ActiveSessionReducer(),
+                ReportModuleReducer(),
                 DeviceManagementScreenStateReducer(),
                 DeviceConnectionScreenStateReducer(this),
-                ActiveSessionReducer(),
-                DashboardReducer(),
-                ReportReducer(),
+                DashboardScreenStateReducer(),
+                ReportScreenStateReducer(),
                 SettingsScreenStateReducer())
         val initialState = AppState(mapOf(Pair(BaseAppState.STATE_KEY, LoadableState.NotLoaded)),
                 CarConnectUIState(Stack()))
@@ -97,6 +97,8 @@ class CarConnectApp : Application(),
                 , sessionManager))
         val fetchReportMiddleWare = createEpicMiddleware(FetchReportEpic(ioScheduler, mainScheduler
                 , sessionManager))
+        val captureReportMiddleWare = createEpicMiddleware(CaptureReportEpic(ioScheduler, mainScheduler
+                , ReportPDFGenerator((this))))
 
         println("debugtag: creating store")
         store = createStore(reducers,
@@ -104,7 +106,8 @@ class CarConnectApp : Application(),
                 applyMiddleware(appStateLoadingMiddleware,
                         obdSessionManagementMiddleware,
                         clearDTCsMiddleware,
-                        fetchReportMiddleWare))
+                        fetchReportMiddleWare,
+                        captureReportMiddleWare))
         println("debugtag: created store")
 
 

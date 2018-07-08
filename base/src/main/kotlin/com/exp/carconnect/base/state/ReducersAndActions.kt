@@ -163,11 +163,11 @@ class ActiveSessionReducer : Reducer<AppState> {
     override fun reduce(state: AppState, action: Any): AppState {
         return when (action) {
             is BaseAppAction.AddActiveSession -> {
-                state.addActiveSession(ActiveSession(Dongle(action.device.address, action.device.name),
+                state.copyAndReplaceActiveSession(ActiveSession(Dongle(action.device.address, action.device.name),
                         action.socket, action.engine))
             }
             is BaseAppAction.AddVehicleInfoToActiveSession -> {
-                state.addActiveSession(state.getActiveSession().copy(vehicle = LoadableState.Loaded(action.info)))
+                state.copyAndReplaceActiveSession(state.getActiveSession().copy(vehicle = LoadableState.Loaded(action.info)))
             }
             is BaseAppAction.CloseSocketAndClearActiveSessionState -> {
                 if (state.isAnActiveSessionAvailable()) {
@@ -179,7 +179,7 @@ class ActiveSessionReducer : Reducer<AppState> {
             }
             is BaseAppAction.AddVehicleDataLoadError -> {
                 if (state.getBaseAppState().activeSession is UnAvailableAvailableData.Available<ActiveSession>) {
-                    state.addActiveSession(state.getActiveSession().copy(liveVehicleData = LoadableState.LoadingError(action.error)))
+                    state.copyAndReplaceActiveSession(state.getActiveSession().copy(liveVehicleData = LoadableState.LoadingError(action.error)))
                 } else {
                     state
                 }
@@ -187,7 +187,7 @@ class ActiveSessionReducer : Reducer<AppState> {
 
             is BaseAppAction.AddFailedToLoadReportErrorToState -> {
                 if (state.getBaseAppState().activeSession is UnAvailableAvailableData.Available<ActiveSession>) {
-                    state.addActiveSession(state.getActiveSession().copy(report = LoadableState.LoadingError(action.error)))
+                    state.copyAndReplaceActiveSession(state.getActiveSession().copy(report = LoadableState.LoadingError(action.error)))
                 } else {
                     state
                 }
@@ -251,16 +251,16 @@ class ActiveSessionReducer : Reducer<AppState> {
                         }
 
                         is BaseAppAction.UpdateClearDTCsOperationStateToClearing -> {
-                            state.addActiveSession(state.getActiveSession().copy(clearDTCsOperationState = ClearDTCOperationState.Clearing))
+                            state.copyAndReplaceActiveSession(state.getActiveSession().copy(clearDTCsOperationState = ClearDTCOperationState.Clearing))
                         }
                         is BaseAppAction.UpdateClearDTCsOperationStateToSuccessful -> {
-                            state.addActiveSession(state.getActiveSession().copy(clearDTCsOperationState = ClearDTCOperationState.Successful))
+                            state.copyAndReplaceActiveSession(state.getActiveSession().copy(clearDTCsOperationState = ClearDTCOperationState.Successful))
                         }
                         is BaseAppAction.UpdateClearDTCsOperationStateToFailed -> {
-                            state.addActiveSession(state.getActiveSession().copy(clearDTCsOperationState = ClearDTCOperationState.Error(action.error)))
+                            state.copyAndReplaceActiveSession(state.getActiveSession().copy(clearDTCsOperationState = ClearDTCOperationState.Error(action.error)))
                         }
                         is BaseAppAction.UpdateClearDTCsOperationStateToNone -> {
-                            state.addActiveSession(state.getActiveSession().copy(clearDTCsOperationState = ClearDTCOperationState.None))
+                            state.copyAndReplaceActiveSession(state.getActiveSession().copy(clearDTCsOperationState = ClearDTCOperationState.None))
                         }
 
 
@@ -452,7 +452,7 @@ class ActiveSessionReducer : Reducer<AppState> {
 
 
     private fun addNewLiveVehicleDataSnapShot(state: AppState, data: LiveVehicleData): AppState {
-        return state.addActiveSession(state.getActiveSession().copy(liveVehicleData = LoadableState.Loaded(data)))
+        return state.copyAndReplaceActiveSession(state.getActiveSession().copy(liveVehicleData = LoadableState.Loaded(data)))
 
     }
 
@@ -466,7 +466,7 @@ class ActiveSessionReducer : Reducer<AppState> {
 
 
     private fun addNewReportSnapShot(state: AppState, data: Report): AppState {
-        return state.addActiveSession(state.getActiveSession().copy(report = LoadableState.Loaded(data)))
+        return state.copyAndReplaceActiveSession(state.getActiveSession().copy(report = LoadableState.Loaded(data)))
 
     }
 

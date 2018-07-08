@@ -56,5 +56,8 @@
     <string name="test">Test</string>
     <string name="available">Available</string>
     <string name="complete">Complete</string>
+    <string name="capture_report">Share Report</string>
+    <string name="cature_report_error">Failed to share report</string>
+    <string name="capturing_report">Capturing Report</string>
 
 </resources>

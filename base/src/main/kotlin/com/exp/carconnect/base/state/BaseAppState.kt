@@ -100,7 +100,7 @@ fun AppState.isFuelNotificationOn(): Boolean {
     return this.getBaseAppState().baseAppPersistedState.appSettings.notificationSettings.fuelNotificationSettings is FuelNotificationSettings.On
 }
 
-fun AppState.addActiveSession(activeSession: ActiveSession): AppState {
+fun AppState.copyAndReplaceActiveSession(activeSession: ActiveSession): AppState {
     return this.copyAndReplaceBaseAppState(LoadableState.Loaded(this.getBaseAppState()
             .copy(activeSession = UnAvailableAvailableData.Available(activeSession))))
 }
@@ -280,7 +280,8 @@ data class ActiveSession(val dongle: Dongle,
                          val liveVehicleData: LoadableState<LiveVehicleData, Throwable>
                          = LoadableState.NotLoaded,
                          val clearDTCsOperationState: ClearDTCOperationState = ClearDTCOperationState.None,
-                         val report: LoadableState<Report, Throwable> = LoadableState.NotLoaded)
+                         val report: LoadableState<Report, Throwable> = LoadableState.NotLoaded,
+                         val captureReportOperationState: CaptureReportOperationState = CaptureReportOperationState.None)
 
 sealed class ClearDTCOperationState {
 
@@ -291,6 +292,18 @@ sealed class ClearDTCOperationState {
     object Successful : ClearDTCOperationState()
 
     data class Error(val error: ClearDTCError) : ClearDTCOperationState()
+}
+
+//todo lets see if this state can be in its own module state instead of baseappstate
+sealed class CaptureReportOperationState {
+
+    object None : CaptureReportOperationState()
+
+    object Capturing : CaptureReportOperationState()
+
+    data class Successful(val fileUrl: String) : CaptureReportOperationState()
+
+    data class Error(val error: Throwable) : CaptureReportOperationState()
 }
 
 data class LiveVehicleData(val rpm: UnAvailableAvailableData<Float>

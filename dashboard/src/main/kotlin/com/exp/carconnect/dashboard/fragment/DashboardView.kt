@@ -197,7 +197,7 @@ class DashboardVM(app: Application) : AndroidViewModel(app) {
     }
 }
 
-class DashboardReducer : Reducer<AppState> {
+class DashboardScreenStateReducer : Reducer<AppState> {
     override fun reduce(state: AppState, action: Any): AppState {
         return when (action) {
             is DashboardAction.AddNewDashboardState -> {

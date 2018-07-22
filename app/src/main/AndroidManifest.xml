@@ -5,7 +5,7 @@
     <application
         android:name=".CarConnectApp"
         android:label="CarConnect"
-        tools:replace="android:name">
+        tools:replace="android:name,android:label">
         <activity
             android:name=".activity.CarConnectWindow"
             android:theme="@style/AppTheme">

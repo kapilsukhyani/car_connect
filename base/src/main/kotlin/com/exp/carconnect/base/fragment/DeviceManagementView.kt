@@ -40,9 +40,6 @@ class DeviceManagementView : Fragment() {
 
     companion object {
         const val TAG = "DeviceManagementView"
-        fun getSharedElementTransitionName(): String {
-            return "app_logo_transition"
-        }
     }
 
     private lateinit var deviceManagementVM: DeviceManagementVM
@@ -128,8 +125,6 @@ class DeviceManagementView : Fragment() {
 
 
     private fun animateDeviceContainer(onAnimationComplete: () -> Unit) {
-
-
         val guidelineAnimator = ValueAnimator.ofFloat(1f, .465f)
         guidelineAnimator.startDelay = 1000
         guidelineAnimator.addUpdateListener { it ->
@@ -216,10 +211,14 @@ class DeviceManagementVM(app: Application) : AndroidViewModel(app) {
         storeSubscription.add(store
                 .asCustomObservable()
                 .filter { it.isBaseStateLoaded() }
-                .map { it.getAppSettings().backgroundConnectionEnabled }
+                .map { Pair(it.getAppSettings().backgroundConnectionEnabled, it.isAnActiveSessionAvailable()) }
                 .distinctUntilChanged()
                 .subscribe {
-                    backgroundConnectionEnabled = it
+                    backgroundConnectionEnabled = it.first
+                    //finish if session is still alive, this happened because background session setting was enabled being on dashboard
+                    if (it.second) {
+                        store.dispatch(CommonAppAction.FinishCurrentView)
+                    }
                 })
 
         loadDevices()

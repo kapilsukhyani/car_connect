@@ -37,6 +37,9 @@ dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     api project(":obdlib")
 
+    api 'com.android.support:design:26.1.0'
+
+    api 'com.android.billingclient:billing:1.1'
     api 'com.facebook.shimmer:shimmer:0.1.0@aar'
 
 //    api 'com.google.android.instantapps:instantapps:1.1.0'
@@ -92,6 +95,8 @@ dependencies {
     api 'com.squareup.retrofit2:converter-gson:2.4.0'
 
     api 'com.google.code.gson:gson:2.8.4'
+
+    api 'com.github.varunest:sparkbutton:1.0.5'
     // Test helpers for LiveData
     testApi "android.arch.core:core-testing:1.0.0"
 

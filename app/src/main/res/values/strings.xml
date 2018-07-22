@@ -60,5 +60,12 @@
     <string name="cature_report_error">Failed to share report</string>
     <string name="capturing_report">Capturing Report</string>
     <string name="car_connect_captured_label">Captured By CarConnect</string>
+    <string name="donate">Donate</string>
+    <string name="donate_label">Want to show some love!</string>
+    <string name="later">Later</string>
+    <string name="show_us_some_love">Show us some Love!</string>
+    <string name="you_are_awesome_nthank_you">You are Awesome!\nThank You</string>
+    <string name="amount_of_love">Amount of Love</string>
+    <string name="loading">Loading</string>
 
 </resources>

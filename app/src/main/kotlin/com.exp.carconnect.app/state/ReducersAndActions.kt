@@ -10,7 +10,7 @@ import redux.api.Reducer
 
 sealed class ReportAction {
     data class AddNewReportState(val state: ReportScreenState) : ReportAction()
-    data class CaptureReport(val data: ReportData,val view: View) : ReportAction()
+    data class CaptureReport(val data: ReportData, val view: View) : ReportAction()
     object UpdateCaptureReportOperationStateToCapturing : ReportAction()
     data class UpdateCaptureReportOperationStateToSuccessful(val fileUrl: String) : ReportAction()
     object UpdateCaptureReportOperationStateToToNone : ReportAction()
@@ -48,4 +48,8 @@ internal class ReportModuleReducer : Reducer<AppState> {
         }
     }
 
+}
+
+sealed class DonationAction {
+    data class AddNewDonationState(val state: DonationScreenState) : DonationAction()
 }

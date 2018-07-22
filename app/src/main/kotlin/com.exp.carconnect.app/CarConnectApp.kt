@@ -1,6 +1,7 @@
 package com.exp.carconnect.app
 
 import android.app.Application
+import com.exp.carconnect.app.fragment.DonationScreenStateReducer
 import com.exp.carconnect.app.fragment.ReportScreenStateReducer
 import com.exp.carconnect.app.pdf.ReportPDFGenerator
 import com.exp.carconnect.app.state.*
@@ -86,7 +87,8 @@ class CarConnectApp : Application(),
                 DeviceConnectionScreenStateReducer(this),
                 DashboardScreenStateReducer(),
                 ReportScreenStateReducer(),
-                SettingsScreenStateReducer())
+                SettingsScreenStateReducer(),
+                DonationScreenStateReducer())
         val initialState = AppState(mapOf(Pair(BaseAppState.STATE_KEY, LoadableState.NotLoaded)),
                 CarConnectUIState(Stack()))
 

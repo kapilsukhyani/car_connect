@@ -1,6 +1,7 @@
 package com.exp.carconnect.app.fragment
 
 import android.app.Activity
+import android.app.AlertDialog
 import android.app.Application
 import android.app.ProgressDialog
 import android.arch.lifecycle.*
@@ -17,15 +18,18 @@ import android.view.ViewGroup
 import android.widget.ArrayAdapter
 import com.android.billingclient.api.*
 import com.android.billingclient.api.BillingClient.BillingResponse
-import com.exp.carconnect.Logger
 import com.exp.carconnect.app.R
+import com.exp.carconnect.app.state.DonationAction
 import com.exp.carconnect.app.state.DonationScreen
 import com.exp.carconnect.app.state.DonationScreenState
 import com.exp.carconnect.app.state.Product
+import com.exp.carconnect.base.AppState
 import com.exp.carconnect.base.BaseAppContract
 import com.exp.carconnect.base.asCustomObservable
+import com.exp.carconnect.base.state.CommonAppAction
 import io.reactivex.disposables.CompositeDisposable
 import kotlinx.android.synthetic.main.donation_view.*
+import redux.api.Reducer
 
 
 internal class DonationView : Fragment() {
@@ -73,7 +77,7 @@ internal class DonationView : Fragment() {
 
             is DonationScreenState.ShowError -> {
                 hideLoading()
-                showError(it.errorMessage)
+                showError(it.errorMessage, it.errorCode)
             }
 
             is DonationScreenState.ShowDonatedMessage -> {
@@ -99,7 +103,18 @@ internal class DonationView : Fragment() {
     }
 
 
-    private fun showError(errorMessage: String) {
+    private fun showError(errorMessage: String, errorCode: Int) {
+        AlertDialog
+                .Builder(activity)
+                .setTitle(getString(R.string.donation_error_title))
+                .setMessage(errorMessage)
+                .setCancelable(false)
+                .setPositiveButton(android.R.string.ok) { dialog, which ->
+                    viewModel.onErrorAcknowledged(errorCode)
+                    dialog.dismiss()
+                }
+                .create()
+                .show()
     }
 
     private fun showProducts(products: List<Product>) {
@@ -126,7 +141,8 @@ internal class DonationVM(app: Application) : AndroidViewModel(app), PurchasesUp
     private val store = (app as BaseAppContract).store
 
     companion object {
-        private const val DONATION_PRODUCT_ID = "carconnectdonationproduct"
+        private val DONATION_PRODUCT_IDs = arrayOf("carconnectdonationproduct",
+                "carconnectdonationproduct2", "carconnectdonationproduct3")
     }
 
     init {
@@ -155,6 +171,9 @@ internal class DonationVM(app: Application) : AndroidViewModel(app), PurchasesUp
             override fun onBillingServiceDisconnected() {
                 // Try to restart the connection on the next request to
                 // Google Play by calling the startConnection() method.
+                handlePurchaseTerminated(getApplication<Application>()
+                        .getString(R.string.donation_service_disconnected_message),
+                        BillingResponse.SERVICE_DISCONNECTED)
             }
         })
     }
@@ -164,26 +183,23 @@ internal class DonationVM(app: Application) : AndroidViewModel(app), PurchasesUp
             for (purchase in purchases) {
                 handlePurchase(purchase)
             }
-        } else if (responseCode === BillingResponse.USER_CANCELED) {
-            // Handle an error caused by a user canceling the purchase flow.
-            handlePurchaseCanceled()
         } else {
             // Handle any other error codes.
-            handlePurchaseCanceled()
+            handleUnSuccessfulResponse(responseCode)
         }
     }
 
     private fun handlePurchase(purchase: Purchase) {
-        donationViewScreenStateLiveData.value = DonationScreenState.ShowDonatedMessage
+        store.dispatch(DonationAction.AddNewDonationState(DonationScreenState.ShowDonatedMessage))
     }
 
-    private fun handlePurchaseCanceled() {
-        donationViewScreenStateLiveData.value = DonationScreenState.ShowError("Could not complete transaction")
+    private fun handlePurchaseTerminated(message: String, errorCode: Int) {
+        store.dispatch(DonationAction.AddNewDonationState(DonationScreenState.ShowError(message, errorCode)))
     }
 
     private fun queryProducts() {
         val skuList = ArrayList<String>()
-        skuList.add(DONATION_PRODUCT_ID)
+        skuList.addAll(DONATION_PRODUCT_IDs)
         val params = SkuDetailsParams.newBuilder()
         params.setSkusList(skuList).setType(BillingClient.SkuType.INAPP)
         billingClient.querySkuDetailsAsync(params.build(), { responseCode, skuDetailsList ->
@@ -192,7 +208,8 @@ internal class DonationVM(app: Application) : AndroidViewModel(app), PurchasesUp
                 for (skuDetails in skuDetailsList) {
                     products.add(Product(skuDetails.price, skuDetails.priceCurrencyCode, skuDetails.title, skuDetails.sku))
                 }
-                donationViewScreenStateLiveData.value = DonationScreenState.ShowProducts(products)
+
+                store.dispatch(DonationAction.AddNewDonationState(DonationScreenState.ShowProducts(products)))
             }
 
         })
@@ -201,11 +218,53 @@ internal class DonationVM(app: Application) : AndroidViewModel(app), PurchasesUp
     fun startDonationFlow(activity: Activity, product: Product) {
         val flowParams = BillingFlowParams.newBuilder()
                 .setSku(product.id)
+//                .setSku("android.test.purchased") // test product id. https://developer.android.com/google/play/billing/billing_testing
+//                .setSku("android.test.canceled") // test product id. https://developer.android.com/google/play/billing/billing_testing
+//                .setSku("android.test.item_unavailable") // test product id. https://developer.android.com/google/play/billing/billing_testing
                 .setType(BillingClient.SkuType.INAPP) // SkuType.SUB for subscription
                 .build()
         val responseCode = billingClient.launchBillingFlow(activity, flowParams)
         if (responseCode != BillingResponse.OK) {
-            handlePurchaseCanceled()
+            handleUnSuccessfulResponse(responseCode)
+        }
+    }
+
+    //message uses unicode defined here http://wrttn.me/30dbfd/
+    private fun handleUnSuccessfulResponse(responseCode: Int) {
+        when (responseCode) {
+            BillingResponse.BILLING_UNAVAILABLE -> {
+                handlePurchaseTerminated(getApplication<Application>().getString(R.string.donation_feature_not_available_message), responseCode)
+            }
+            BillingResponse.DEVELOPER_ERROR -> {
+                handlePurchaseTerminated(getApplication<Application>().getString(R.string.donation_feature_not_available_message), responseCode)
+            }
+            BillingResponse.ITEM_ALREADY_OWNED -> {
+                handlePurchaseTerminated(getApplication<Application>().getString(R.string.donation_item_already_owned_message), responseCode)
+            }
+            BillingResponse.ITEM_NOT_OWNED -> {
+                handlePurchaseTerminated(getApplication<Application>().getString(R.string.donation_item_not_owned_message), responseCode)
+            }
+
+            BillingResponse.ITEM_UNAVAILABLE -> {
+                handlePurchaseTerminated(getApplication<Application>().getString(R.string.donation_item_unavailable_message), responseCode)
+            }
+
+            BillingResponse.FEATURE_NOT_SUPPORTED -> {
+                handlePurchaseTerminated(getApplication<Application>().getString(R.string.donation_feature_not_available_message), responseCode)
+            }
+
+            BillingResponse.SERVICE_DISCONNECTED -> {
+                handlePurchaseTerminated(getApplication<Application>().getString(R.string.donation_service_disconnected_message), responseCode)
+            }
+            BillingResponse.SERVICE_UNAVAILABLE -> {
+                handlePurchaseTerminated(getApplication<Application>().getString(R.string.donation_network_error_message), responseCode)
+            }
+            BillingResponse.USER_CANCELED -> {
+                handlePurchaseTerminated(getApplication<Application>().getString(R.string.donation_user_canceled_message), responseCode)
+            }
+            BillingResponse.ERROR -> {
+                handlePurchaseTerminated(getApplication<Application>().getString(R.string.donation_something_went_wrong_message), responseCode)
+            }
         }
     }
 
@@ -216,6 +275,44 @@ internal class DonationVM(app: Application) : AndroidViewModel(app), PurchasesUp
     override fun onCleared() {
         disposables.dispose()
         disposables.clear()
+    }
+
+    fun onErrorAcknowledged(errorCode: Int) {
+        when (errorCode) {
+            BillingResponse.BILLING_UNAVAILABLE,
+            BillingResponse.DEVELOPER_ERROR,
+            BillingResponse.ITEM_ALREADY_OWNED,
+            BillingResponse.ITEM_NOT_OWNED,
+            BillingResponse.FEATURE_NOT_SUPPORTED,
+            BillingResponse.SERVICE_DISCONNECTED -> {
+                store.dispatch(CommonAppAction.FinishCurrentView)
+            }
+        }
+    }
+
+}
+
+class DonationScreenStateReducer : Reducer<AppState> {
+    override fun reduce(state: AppState, action: Any): AppState {
+        return when (action) {
+            is DonationAction.AddNewDonationState -> {
+                updateState(state, action.state)
+            }
+            else -> {
+                state
+            }
+        }
+    }
+
+    private fun updateState(state: AppState, reportScreenState: DonationScreenState): AppState {
+        //todo maintain products if available in state if changing state to error, this will be required once error is acknowledged and view is being restored from scratch
+        return state.copy(uiState = state
+                .uiState
+                .copy(backStack = state
+                        .uiState
+                        .backStack
+                        .subList(0, state.uiState.backStack.size - 1) +
+                        DonationScreen(reportScreenState)))
     }
 
 }

@@ -60,22 +60,4 @@
     <string name="cature_report_error">Failed to share report</string>
     <string name="capturing_report">Capturing Report</string>
     <string name="car_connect_captured_label">Captured By CarConnect</string>
-    <string name="donate">Donate</string>
-    <string name="donate_label">Want to show some love!</string>
-    <string name="later">Later</string>
-    <string name="show_us_some_love">Show us some Love!</string>
-    <string name="you_are_awesome_nthank_you">You are Awesome!\nThank You</string>
-    <string name="amount_of_love">Amount of Love</string>
-    <string name="loading">Loading</string>
-    <!--Some donation messages use expression unicode characters defined here http://wrttn.me/30dbfd/-->
-    <string name="donation_user_canceled_message">We would have liked some love ♥╭╮♥</string>
-    <string name="donation_something_went_wrong_message">Something went wrong while processing transaction. Please try again.</string>
-    <string name="donation_network_error_message">Please check your network connection.</string>
-    <string name="donation_service_disconnected_message">Something went wrong please try again sometime later.</string>
-    <string name="donation_feature_not_available_message">Not possible to receive your love ⊙﹏⊙</string>
-    <string name="donation_item_unavailable_message">Please try using a different donation amount ⋋_⋌</string>
-    <string name="donation_item_not_owned_message">Please try again ਉ_ਉ.</string>
-    <string name="donation_item_already_owned_message">You already donated ｡･_･｡</string>
-    <string name="donation_error_title">Donation Error</string>
-
 </resources>

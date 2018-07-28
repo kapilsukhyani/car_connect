@@ -1,8 +1,11 @@
-package com.exp.carconnect.app.state
+package com.exp.carconnect.donation.state
 
 import com.android.billingclient.api.BillingClient
 import com.exp.carconnect.base.CarConnectIndividualViewState
 import com.exp.carconnect.base.CarConnectView
+import com.exp.carconnect.base.ModuleState
+
+data class DonationModuleState(val donated: Boolean = false) : ModuleState
 
 data class Product(val price: String, val currencyCode: String, val name: String, val id: String) {
     override fun toString(): String {
@@ -64,17 +67,17 @@ sealed class DonationScreenState : CarConnectIndividualViewState {
         override fun handleAction(action: DonationAction): DonationScreenState {
             return when (action) {
                 is DonationAction.ErrorAcknowledged -> {
-                    when (action.errorCode){
+                    when (action.errorCode) {
                         BillingClient.BillingResponse.BILLING_UNAVAILABLE,
                         BillingClient.BillingResponse.DEVELOPER_ERROR,
                         BillingClient.BillingResponse.ITEM_ALREADY_OWNED,
                         BillingClient.BillingResponse.ITEM_NOT_OWNED,
                         BillingClient.BillingResponse.FEATURE_NOT_SUPPORTED,
-                        BillingClient.BillingResponse.SERVICE_DISCONNECTED  -> {
+                        BillingClient.BillingResponse.SERVICE_DISCONNECTED -> {
                             FinishDonationView
                         }
                         else -> {
-                            if(null != products){
+                            if (null != products) {
                                 ShowProducts(products)
                             } else {
                                 FinishDonationView

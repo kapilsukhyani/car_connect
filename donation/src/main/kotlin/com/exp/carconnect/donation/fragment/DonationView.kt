@@ -1,4 +1,4 @@
-package com.exp.carconnect.app.fragment
+package com.exp.carconnect.donation.fragment
 
 import android.app.Activity
 import android.app.AlertDialog
@@ -18,23 +18,24 @@ import android.view.ViewGroup
 import android.widget.ArrayAdapter
 import com.android.billingclient.api.*
 import com.android.billingclient.api.BillingClient.BillingResponse
-import com.exp.carconnect.app.R
-import com.exp.carconnect.app.state.DonationAction
-import com.exp.carconnect.app.state.DonationScreen
-import com.exp.carconnect.app.state.DonationScreenState
-import com.exp.carconnect.app.state.Product
 import com.exp.carconnect.base.AppState
 import com.exp.carconnect.base.BaseAppContract
 import com.exp.carconnect.base.asCustomObservable
 import com.exp.carconnect.base.state.CommonAppAction
+import com.exp.carconnect.donation.state.DonationAction
+import com.exp.carconnect.donation.state.DonationScreen
+import com.exp.carconnect.donation.state.DonationScreenState
+import com.exp.carconnect.donation.state.Product
 import io.reactivex.disposables.CompositeDisposable
 import kotlinx.android.synthetic.main.donation_view.*
 import redux.api.Reducer
+import com.exp.carconnect.donation.R
 
-
-internal class DonationView : Fragment() {
+public class DonationView : Fragment {
     private lateinit var viewModel: DonationVM
     private var progressDialog: ProgressDialog? = null
+
+    constructor() : super()
 
     override fun onAttach(context: Context?) {
         super.onAttach(context)
@@ -122,7 +123,7 @@ internal class DonationView : Fragment() {
     }
 
     private fun showLoading() {
-        progressDialog = ProgressDialog.show(activity, activity.getString(R.string.loading), activity.getString(R.string.please_wait))
+        progressDialog = ProgressDialog.show(activity, activity.getString(R.string.loading), activity.getString(com.exp.carconnect.base.R.string.please_wait))
     }
 
     private fun hideLoading() {
@@ -223,8 +224,8 @@ internal class DonationVM(app: Application) : AndroidViewModel(app), PurchasesUp
     fun startDonationFlow(activity: Activity, product: Product) {
         store.dispatch(DonationAction.StartPaymentFlow(product))
         val flowParams = BillingFlowParams.newBuilder()
-//                .setSku(product.id)
-                .setSku("android.test.purchased") // test product id. https://developer.android.com/google/play/billing/billing_testing
+                .setSku(product.id)
+//                .setSku("android.test.purchased") // test product id. https://developer.android.com/google/play/billing/billing_testing
 //                .setSku("android.test.canceled") // test product id. https://developer.android.com/google/play/billing/billing_testing
 //                .setSku("android.test.item_unavailable") // test product id. https://developer.android.com/google/play/billing/billing_testing
                 .setType(BillingClient.SkuType.INAPP) // SkuType.SUB for subscription

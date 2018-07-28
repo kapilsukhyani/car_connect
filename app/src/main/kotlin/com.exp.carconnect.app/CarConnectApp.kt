@@ -1,7 +1,6 @@
 package com.exp.carconnect.app
 
 import android.app.Application
-import com.exp.carconnect.app.fragment.DonationScreenStateReducer
 import com.exp.carconnect.app.fragment.ReportScreenStateReducer
 import com.exp.carconnect.app.pdf.ReportPDFGenerator
 import com.exp.carconnect.app.state.*
@@ -23,6 +22,7 @@ import com.exp.carconnect.dashboard.di.DashboardModule
 import com.exp.carconnect.dashboard.fragment.DashboardScreenStateReducer
 import com.exp.carconnect.dashboard.state.DashboardScreen
 import com.exp.carconnect.dashboard.state.DashboardScreenState
+import com.exp.carconnect.donation.fragment.DonationScreenStateReducer
 import io.reactivex.Scheduler
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers

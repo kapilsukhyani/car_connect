@@ -3,7 +3,6 @@ package com.exp.carconnect.app.activity
 import android.app.Application
 import android.arch.lifecycle.*
 import android.os.Bundle
-import android.support.design.widget.BottomSheetDialog
 import android.support.v4.app.Fragment
 import android.support.v4.app.FragmentTransaction
 import android.support.v7.app.AppCompatActivity
@@ -14,10 +13,7 @@ import android.transition.TransitionSet
 import android.view.View
 import com.exp.carconnect.app.CarConnectApp
 import com.exp.carconnect.app.R
-import com.exp.carconnect.app.fragment.DonationView
 import com.exp.carconnect.app.fragment.ReportView
-import com.exp.carconnect.app.state.DonationScreen
-import com.exp.carconnect.app.state.DonationScreenState
 import com.exp.carconnect.app.state.ReportScreen
 import com.exp.carconnect.base.*
 import com.exp.carconnect.base.fragment.DeviceConnectionView
@@ -27,8 +23,11 @@ import com.exp.carconnect.base.fragment.SplashView
 import com.exp.carconnect.base.state.*
 import com.exp.carconnect.dashboard.fragment.DashboardView
 import com.exp.carconnect.dashboard.state.DashboardScreen
+import com.exp.carconnect.donation.fragment.DonationView
+import com.exp.carconnect.donation.showDonationBottomSheet
+import com.exp.carconnect.donation.state.DonationScreen
+import com.exp.carconnect.donation.state.DonationScreenState
 import io.reactivex.disposables.Disposable
-import kotlinx.android.synthetic.main.donation_bottom_sheet.view.*
 import redux.api.Store
 
 
@@ -138,18 +137,7 @@ class CarConnectWindow : AppCompatActivity() {
     }
 
     private fun showDonationSheet() {
-        val bottomSheetDialog = BottomSheetDialog(this)
-        bottomSheetDialog.setCancelable(true)
-        val donateSheet = layoutInflater.inflate(R.layout.donation_bottom_sheet, null)
-        donateSheet.donateButton.setOnClickListener {
-            bottomSheetDialog.dismiss()
-            windowVM.showDonationFragment()
-        }
-        donateSheet.laterButton.setOnClickListener {
-            bottomSheetDialog.dismiss()
-        }
-        bottomSheetDialog.setContentView(donateSheet)
-        bottomSheetDialog.show()
+        showDonationBottomSheet(this, { windowVM.showDonationFragment() })
     }
 }
 

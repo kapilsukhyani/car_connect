@@ -111,4 +111,5 @@ dependencies {
 
     feature project(':dashboard')
     application project(':app')
+    feature project(':donation')
 }

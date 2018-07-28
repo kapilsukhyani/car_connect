@@ -77,7 +77,7 @@ internal class DonationView : Fragment() {
 
             is DonationScreenState.ShowError -> {
                 hideLoading()
-                showError(it.errorMessage, it.errorCode)
+                showError(it.errorMessage, it.errorCode, it.products)
             }
 
             is DonationScreenState.ShowDonatedMessage -> {
@@ -103,14 +103,14 @@ internal class DonationView : Fragment() {
     }
 
 
-    private fun showError(errorMessage: String, errorCode: Int) {
+    private fun showError(errorMessage: String, errorCode: Int, products: List<Product>?) {
         AlertDialog
                 .Builder(activity)
                 .setTitle(getString(R.string.donation_error_title))
                 .setMessage(errorMessage)
                 .setCancelable(false)
                 .setPositiveButton(android.R.string.ok) { dialog, which ->
-                    viewModel.onErrorAcknowledged(errorCode)
+                    viewModel.onErrorAcknowledged(errorCode, products)
                     dialog.dismiss()
                 }
                 .create()
@@ -152,7 +152,12 @@ internal class DonationVM(app: Application) : AndroidViewModel(app), PurchasesUp
                 .map { (it.uiState.currentView as DonationScreen).screenState }
                 .distinctUntilChanged()
                 .subscribe {
-                    donationViewScreenStateLiveData.value = it
+                    if (it == DonationScreenState.FinishDonationView) {
+                        store.dispatch(CommonAppAction.FinishCurrentView)
+                    } else {
+                        donationViewScreenStateLiveData.value = it
+
+                    }
                 })
 
         setupBilling()
@@ -190,11 +195,11 @@ internal class DonationVM(app: Application) : AndroidViewModel(app), PurchasesUp
     }
 
     private fun handlePurchase(purchase: Purchase) {
-        store.dispatch(DonationAction.AddNewDonationState(DonationScreenState.ShowDonatedMessage))
+        store.dispatch(DonationAction.PaymentSuccessful)
     }
 
     private fun handlePurchaseTerminated(message: String, errorCode: Int) {
-        store.dispatch(DonationAction.AddNewDonationState(DonationScreenState.ShowError(message, errorCode)))
+        store.dispatch(DonationAction.ShowError(message, errorCode))
     }
 
     private fun queryProducts() {
@@ -209,16 +214,17 @@ internal class DonationVM(app: Application) : AndroidViewModel(app), PurchasesUp
                     products.add(Product(skuDetails.price, skuDetails.priceCurrencyCode, skuDetails.title, skuDetails.sku))
                 }
 
-                store.dispatch(DonationAction.AddNewDonationState(DonationScreenState.ShowProducts(products)))
+                store.dispatch(DonationAction.ShowProducts(products))
             }
 
         })
     }
 
     fun startDonationFlow(activity: Activity, product: Product) {
+        store.dispatch(DonationAction.StartPaymentFlow(product))
         val flowParams = BillingFlowParams.newBuilder()
-                .setSku(product.id)
-//                .setSku("android.test.purchased") // test product id. https://developer.android.com/google/play/billing/billing_testing
+//                .setSku(product.id)
+                .setSku("android.test.purchased") // test product id. https://developer.android.com/google/play/billing/billing_testing
 //                .setSku("android.test.canceled") // test product id. https://developer.android.com/google/play/billing/billing_testing
 //                .setSku("android.test.item_unavailable") // test product id. https://developer.android.com/google/play/billing/billing_testing
                 .setType(BillingClient.SkuType.INAPP) // SkuType.SUB for subscription
@@ -277,17 +283,8 @@ internal class DonationVM(app: Application) : AndroidViewModel(app), PurchasesUp
         disposables.clear()
     }
 
-    fun onErrorAcknowledged(errorCode: Int) {
-        when (errorCode) {
-            BillingResponse.BILLING_UNAVAILABLE,
-            BillingResponse.DEVELOPER_ERROR,
-            BillingResponse.ITEM_ALREADY_OWNED,
-            BillingResponse.ITEM_NOT_OWNED,
-            BillingResponse.FEATURE_NOT_SUPPORTED,
-            BillingResponse.SERVICE_DISCONNECTED -> {
-                store.dispatch(CommonAppAction.FinishCurrentView)
-            }
-        }
+    fun onErrorAcknowledged(errorCode: Int, products: List<Product>?) {
+        store.dispatch(DonationAction.ErrorAcknowledged(errorCode))
     }
 
 }
@@ -295,8 +292,8 @@ internal class DonationVM(app: Application) : AndroidViewModel(app), PurchasesUp
 class DonationScreenStateReducer : Reducer<AppState> {
     override fun reduce(state: AppState, action: Any): AppState {
         return when (action) {
-            is DonationAction.AddNewDonationState -> {
-                updateState(state, action.state)
+            is DonationAction -> {
+                updateState(state, action)
             }
             else -> {
                 state
@@ -304,15 +301,15 @@ class DonationScreenStateReducer : Reducer<AppState> {
         }
     }
 
-    private fun updateState(state: AppState, reportScreenState: DonationScreenState): AppState {
-        //todo maintain products if available in state if changing state to error, this will be required once error is acknowledged and view is being restored from scratch
+    private fun updateState(state: AppState, donationAction: DonationAction): AppState {
+        val screenState = (state.uiState.currentView as DonationScreen).screenState
         return state.copy(uiState = state
                 .uiState
                 .copy(backStack = state
                         .uiState
                         .backStack
                         .subList(0, state.uiState.backStack.size - 1) +
-                        DonationScreen(reportScreenState)))
+                        DonationScreen(screenState.handleAction(donationAction))))
     }
 
 }

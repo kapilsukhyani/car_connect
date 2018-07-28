@@ -285,6 +285,7 @@ data class ActiveSession(val dongle: Dongle,
                          val liveVehicleData: LoadableState<LiveVehicleData, Throwable>
                          = LoadableState.NotLoaded,
                          val clearDTCsOperationState: ClearDTCOperationState = ClearDTCOperationState.None,
+                         //todo think of moving report to its own module state
                          val report: LoadableState<Report, Throwable> = LoadableState.NotLoaded,
                          val captureReportOperationState: CaptureReportOperationState = CaptureReportOperationState.None)
 

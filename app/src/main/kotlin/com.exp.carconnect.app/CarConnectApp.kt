@@ -1,6 +1,7 @@
 package com.exp.carconnect.app
 
 import android.app.Application
+import android.preference.PreferenceManager
 import com.exp.carconnect.app.fragment.ReportScreenStateReducer
 import com.exp.carconnect.app.state.*
 import com.exp.carconnect.base.*
@@ -21,8 +22,16 @@ import com.exp.carconnect.dashboard.di.DashboardModule
 import com.exp.carconnect.dashboard.fragment.DashboardScreenStateReducer
 import com.exp.carconnect.dashboard.state.DashboardScreen
 import com.exp.carconnect.dashboard.state.DashboardScreenState
+import com.exp.carconnect.donation.DonationAppContract
 import com.exp.carconnect.donation.fragment.DonationScreenStateReducer
+import com.exp.carconnect.donation.state.DonationModuleState
+import com.exp.carconnect.donation.state.DonationModuleStateReducer
+import com.exp.carconnect.donation.state.DonationStateLoadingEpic
+import com.exp.carconnect.donation.state.UpdateDonationEpic
+import com.exp.carconnect.donation.store.DonationStore
+import com.exp.carconnect.donation.store.DonationStoreImpl
 import com.exp.carconnect.report.pdf.ReportPDFGenerator
+import com.google.gson.Gson
 import io.reactivex.Scheduler
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
@@ -42,7 +51,8 @@ import javax.inject.Inject
 
 class CarConnectApp : Application(),
         BaseAppContract,
-        DashboardAppContract {
+        DashboardAppContract,
+        DonationAppContract {
     override val mainScheduler: Scheduler = AndroidSchedulers.mainThread()
     override val ioScheduler: Scheduler = Schedulers.io()
     override val computationScheduler: Scheduler = Schedulers.computation()
@@ -55,6 +65,7 @@ class CarConnectApp : Application(),
     lateinit var globalComponent: CarConnectGlobalComponent
     override lateinit var store: Store<AppState>
     override lateinit var persistenceStore: BaseStore
+    override lateinit var donationStore: DonationStore
 
     @Inject
     lateinit var newConnectionComponentBuilder: NewOBDConnectionComponent.Builder
@@ -64,7 +75,7 @@ class CarConnectApp : Application(),
 
     override var newOBDConnectionComponent: NewOBDConnectionComponent? = null
     override var dashboardComponent: DashboardComponent? = null
-
+    private val gson = Gson()
 
     override fun onCreate() {
         super.onCreate()
@@ -75,6 +86,7 @@ class CarConnectApp : Application(),
         //        Fabric.with(this, Crashlytics())
 
         persistenceStore = BaseStore(this, Schedulers.io())
+        donationStore = DonationStoreImpl(PreferenceManager.getDefaultSharedPreferences(this), gson)
 
         val sessionManager = OBDDeviceSessionManager(this, ioScheduler, computationScheduler,
                 mainScheduler, VehicleInfoLoaderFactoryImpl().getVehicleInfoLoader())
@@ -88,11 +100,14 @@ class CarConnectApp : Application(),
                 DashboardScreenStateReducer(),
                 ReportScreenStateReducer(),
                 SettingsScreenStateReducer(),
+                DonationModuleStateReducer(),
                 DonationScreenStateReducer())
-        val initialState = AppState(mapOf(Pair(BaseAppState.STATE_KEY, LoadableState.NotLoaded)),
+        val initialState = AppState(mapOf(Pair(BaseAppState.STATE_KEY, LoadableState.NotLoaded),
+                Pair(DonationModuleState.DONATION_STATE_KEY, LoadableState.NotLoaded)),
                 CarConnectUIState(Stack()))
 
         val appStateLoadingMiddleware = createEpicMiddleware(BaseSateLoadingEpic(ioScheduler, mainScheduler, this))
+        val donationLoadingMiddleWare = createEpicMiddleware(DonationStateLoadingEpic(ioScheduler, mainScheduler, donationStore))
         val obdSessionManagementMiddleware = createEpicMiddleware(OBDSessionManagementEpic(ioScheduler, mainScheduler
                 , sessionManager))
         val clearDTCsMiddleware = createEpicMiddleware(ClearDTCsEpic(ioScheduler, mainScheduler
@@ -101,15 +116,18 @@ class CarConnectApp : Application(),
                 , sessionManager))
         val captureReportMiddleWare = createEpicMiddleware(CaptureReportEpic(ioScheduler, mainScheduler
                 , ReportPDFGenerator((this))))
+        val updateDonationStatusEpic = createEpicMiddleware(UpdateDonationEpic(ioScheduler, mainScheduler, donationStore))
 
         println("debugtag: creating store")
         store = createStore(reducers,
                 initialState,
                 applyMiddleware(appStateLoadingMiddleware,
+                        donationLoadingMiddleWare,
                         obdSessionManagementMiddleware,
                         clearDTCsMiddleware,
                         fetchReportMiddleWare,
-                        captureReportMiddleWare))
+                        captureReportMiddleWare,
+                        updateDonationStatusEpic))
         println("debugtag: created store")
 
 

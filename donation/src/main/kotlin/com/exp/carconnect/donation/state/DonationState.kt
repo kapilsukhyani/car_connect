@@ -5,7 +5,21 @@ import com.exp.carconnect.base.CarConnectIndividualViewState
 import com.exp.carconnect.base.CarConnectView
 import com.exp.carconnect.base.ModuleState
 
-data class DonationModuleState(val donated: Boolean = false) : ModuleState
+data class DonationModuleState(val donationPersistedState: DonationPersistedState) : ModuleState {
+    companion object {
+        const val DONATION_STATE_KEY = "DONATION_STATE_KEY"
+    }
+}
+
+data class DonationPersistedState(val state: DonationState = DonationState.NotDonated)
+
+sealed class DonationState {
+    object NotDonated : DonationState()
+    data class Donated(val productId: String,
+                       val orderId: String,
+                       val purchaseTime: Long,
+                       val purchaseToken: String) : DonationState()
+}
 
 data class Product(val price: String, val currencyCode: String, val name: String, val id: String) {
     override fun toString(): String {
@@ -16,15 +30,15 @@ data class Product(val price: String, val currencyCode: String, val name: String
 data class DonationScreen(override val screenState: DonationScreenState) : CarConnectView
 
 sealed class DonationScreenState : CarConnectIndividualViewState {
-    abstract fun handleAction(action: DonationAction): DonationScreenState
+    abstract fun handleAction(action: DonationViewAction): DonationScreenState
 
     object ShowLoading : DonationScreenState() {
-        override fun handleAction(action: DonationAction): DonationScreenState {
+        override fun handleAction(action: DonationViewAction): DonationScreenState {
             return when (action) {
-                is DonationAction.ShowProducts -> {
+                is DonationViewAction.ShowProducts -> {
                     ShowProducts(action.products)
                 }
-                is DonationAction.ShowError -> {
+                is DonationViewAction.ShowError -> {
                     ShowError(action.message, action.errorCode)
                 }
                 else -> {
@@ -35,9 +49,9 @@ sealed class DonationScreenState : CarConnectIndividualViewState {
     }
 
     data class ShowProducts(val products: List<Product>) : DonationScreenState() {
-        override fun handleAction(action: DonationAction): DonationScreenState {
+        override fun handleAction(action: DonationViewAction): DonationScreenState {
             return when (action) {
-                is DonationAction.StartPaymentFlow -> {
+                is DonationViewAction.StartPaymentFlow -> {
                     StartPaymentFlow(action.selectedProduct, products)
                 }
                 else -> {
@@ -48,12 +62,12 @@ sealed class DonationScreenState : CarConnectIndividualViewState {
     }
 
     data class StartPaymentFlow(val selectedProduct: Product, val allProducts: List<Product>) : DonationScreenState() {
-        override fun handleAction(action: DonationAction): DonationScreenState {
+        override fun handleAction(action: DonationViewAction): DonationScreenState {
             return when (action) {
-                is DonationAction.PaymentSuccessful -> {
+                is DonationViewAction.PaymentSuccessful -> {
                     ShowDonatedMessage
                 }
-                is DonationAction.ShowError -> {
+                is DonationViewAction.ShowError -> {
                     ShowError(action.message, action.errorCode, allProducts)
                 }
                 else -> {
@@ -64,9 +78,9 @@ sealed class DonationScreenState : CarConnectIndividualViewState {
     }
 
     data class ShowError(val errorMessage: String, val errorCode: Int, val products: List<Product>? = null) : DonationScreenState() {
-        override fun handleAction(action: DonationAction): DonationScreenState {
+        override fun handleAction(action: DonationViewAction): DonationScreenState {
             return when (action) {
-                is DonationAction.ErrorAcknowledged -> {
+                is DonationViewAction.ErrorAcknowledged -> {
                     when (action.errorCode) {
                         BillingClient.BillingResponse.BILLING_UNAVAILABLE,
                         BillingClient.BillingResponse.DEVELOPER_ERROR,
@@ -93,13 +107,13 @@ sealed class DonationScreenState : CarConnectIndividualViewState {
     }
 
     object ShowDonatedMessage : DonationScreenState() {
-        override fun handleAction(action: DonationAction): DonationScreenState {
+        override fun handleAction(action: DonationViewAction): DonationScreenState {
             return this
         }
     }
 
     object FinishDonationView : DonationScreenState() {
-        override fun handleAction(action: DonationAction): DonationScreenState {
+        override fun handleAction(action: DonationViewAction): DonationScreenState {
             return this
         }
     }

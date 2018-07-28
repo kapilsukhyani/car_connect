@@ -22,14 +22,11 @@ import com.exp.carconnect.base.AppState
 import com.exp.carconnect.base.BaseAppContract
 import com.exp.carconnect.base.asCustomObservable
 import com.exp.carconnect.base.state.CommonAppAction
-import com.exp.carconnect.donation.state.DonationAction
-import com.exp.carconnect.donation.state.DonationScreen
-import com.exp.carconnect.donation.state.DonationScreenState
-import com.exp.carconnect.donation.state.Product
+import com.exp.carconnect.donation.R
+import com.exp.carconnect.donation.state.*
 import io.reactivex.disposables.CompositeDisposable
 import kotlinx.android.synthetic.main.donation_view.*
 import redux.api.Reducer
-import com.exp.carconnect.donation.R
 
 public class DonationView : Fragment {
     private lateinit var viewModel: DonationVM
@@ -196,11 +193,12 @@ internal class DonationVM(app: Application) : AndroidViewModel(app), PurchasesUp
     }
 
     private fun handlePurchase(purchase: Purchase) {
-        store.dispatch(DonationAction.PaymentSuccessful)
+        store.dispatch(DonationAction.StoreDonation(purchase.sku, purchase.orderId, purchase.purchaseTime, purchase.purchaseToken))
+        store.dispatch(DonationViewAction.PaymentSuccessful)
     }
 
     private fun handlePurchaseTerminated(message: String, errorCode: Int) {
-        store.dispatch(DonationAction.ShowError(message, errorCode))
+        store.dispatch(DonationViewAction.ShowError(message, errorCode))
     }
 
     private fun queryProducts() {
@@ -215,14 +213,14 @@ internal class DonationVM(app: Application) : AndroidViewModel(app), PurchasesUp
                     products.add(Product(skuDetails.price, skuDetails.priceCurrencyCode, skuDetails.title, skuDetails.sku))
                 }
 
-                store.dispatch(DonationAction.ShowProducts(products))
+                store.dispatch(DonationViewAction.ShowProducts(products))
             }
 
         })
     }
 
     fun startDonationFlow(activity: Activity, product: Product) {
-        store.dispatch(DonationAction.StartPaymentFlow(product))
+        store.dispatch(DonationViewAction.StartPaymentFlow(product))
         val flowParams = BillingFlowParams.newBuilder()
                 .setSku(product.id)
 //                .setSku("android.test.purchased") // test product id. https://developer.android.com/google/play/billing/billing_testing
@@ -285,7 +283,7 @@ internal class DonationVM(app: Application) : AndroidViewModel(app), PurchasesUp
     }
 
     fun onErrorAcknowledged(errorCode: Int, products: List<Product>?) {
-        store.dispatch(DonationAction.ErrorAcknowledged(errorCode))
+        store.dispatch(DonationViewAction.ErrorAcknowledged(errorCode))
     }
 
 }
@@ -293,7 +291,7 @@ internal class DonationVM(app: Application) : AndroidViewModel(app), PurchasesUp
 class DonationScreenStateReducer : Reducer<AppState> {
     override fun reduce(state: AppState, action: Any): AppState {
         return when (action) {
-            is DonationAction -> {
+            is DonationViewAction -> {
                 updateState(state, action)
             }
             else -> {
@@ -302,7 +300,7 @@ class DonationScreenStateReducer : Reducer<AppState> {
         }
     }
 
-    private fun updateState(state: AppState, donationAction: DonationAction): AppState {
+    private fun updateState(state: AppState, action: DonationViewAction): AppState {
         val screenState = (state.uiState.currentView as DonationScreen).screenState
         return state.copy(uiState = state
                 .uiState
@@ -310,7 +308,7 @@ class DonationScreenStateReducer : Reducer<AppState> {
                         .uiState
                         .backStack
                         .subList(0, state.uiState.backStack.size - 1) +
-                        DonationScreen(screenState.handleAction(donationAction))))
+                        DonationScreen(screenState.handleAction(action))))
     }
 
 }

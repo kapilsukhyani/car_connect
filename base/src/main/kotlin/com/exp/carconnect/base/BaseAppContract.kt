@@ -1,8 +1,10 @@
 package com.exp.carconnect.base
 
+import android.content.SharedPreferences
 import com.exp.carconnect.base.di.NewOBDConnectionComponent
 import com.exp.carconnect.base.state.Vehicle
 import com.exp.carconnect.base.store.BaseStore
+import com.google.gson.Gson
 import io.reactivex.Scheduler
 import redux.api.Store
 import java.io.InputStream
@@ -15,6 +17,7 @@ interface BaseAppContract {
     var newOBDConnectionComponent: NewOBDConnectionComponent?
     fun onDataLoadingStartedFor(info: Vehicle)
     fun onReportRequested()
+
     fun killSession()
 
     val store: Store<AppState>

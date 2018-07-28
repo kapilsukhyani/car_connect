@@ -8,8 +8,6 @@ apply plugin: 'kotlin-android-extensions'
 android {
     compileSdkVersion 26
 
-
-
     defaultConfig {
         minSdkVersion 23
         targetSdkVersion 26

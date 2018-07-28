@@ -1,0 +1,791 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/primary"
+    android:orientation="vertical">
+
+    <Toolbar
+        android:id="@+id/report_toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:layout_alignParentTop="true"
+        android:background="@color/secondary"
+        android:elevation="5dp"
+        android:navigationIcon="@drawable/toolbar_back"
+        android:title="@string/report"
+        android:titleTextAppearance="@android:style/TextAppearance.Material.WindowTitle"
+        android:titleTextColor="@color/primary" />
+
+    <Button
+        android:id="@+id/capture_report"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_margin="8dp"
+        android:backgroundTint="@color/secondary"
+        android:clickable="true"
+        android:elevation="5dp"
+        android:gravity="center"
+        android:padding="16dp"
+        android:text="@string/capture_report"
+        android:textColor="@color/accent"
+        android:textSize="16dp"
+        android:textStyle="bold" />
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_above="@id/capture_report"
+        android:layout_below="@id/report_toolbar">
+
+        <android.support.constraint.ConstraintLayout
+            android:id="@+id/report_container"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@color/primary"
+            android:padding="16dp">
+
+            <android.support.constraint.Guideline
+                android:id="@+id/horizontal_guideline_25"
+                android:layout_width="1dp"
+                android:layout_height="1dp"
+                android:orientation="vertical"
+                app:layout_constraintGuide_percent=".25" />
+
+            <android.support.constraint.Guideline
+                android:id="@+id/horizontal_guideline_50"
+                android:layout_width="1dp"
+                android:layout_height="1dp"
+                android:orientation="vertical"
+                app:layout_constraintGuide_percent=".5" />
+
+            <android.support.constraint.Guideline
+                android:id="@+id/horizontal_guideline_75"
+                android:layout_width="1dp"
+                android:layout_height="1dp"
+                android:orientation="vertical"
+                app:layout_constraintGuide_percent=".75" />
+
+            <android.support.constraint.Guideline
+                android:id="@+id/horizontal_guideline_60"
+                android:layout_width="1dp"
+                android:layout_height="1dp"
+                android:orientation="vertical"
+                app:layout_constraintGuide_percent=".6" />
+
+
+            <android.support.v7.widget.CardView
+                android:id="@+id/header"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintRight_toRightOf="parent"
+                app:layout_constraintTop_toTopOf="parent">
+
+                <TextView
+                    android:id="@+id/vehicle_info"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="8dp"
+                    android:text="@string/vehicle_info_value"
+                    android:textColor="@color/textColorOnPrimary"
+                    android:textSize="24dp"
+                    android:textStyle="bold"
+                    tools:text="Chevy Volt, 1986 /nFJ12444nNIHHH244NNI" />
+
+            </android.support.v7.widget.CardView>
+
+
+            <TextView
+                android:id="@+id/live_data_label"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:background="@color/secondary"
+                android:gravity="center"
+                android:text="@string/live_data"
+                android:textColor="@color/primary"
+                android:textSize="22dp"
+                android:textStyle="bold"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintRight_toRightOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/header" />
+
+            <TextView
+                android:id="@+id/mil"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:gravity="left"
+                android:text="@string/mil_value"
+                android:textColor="@color/textColorOnPrimary"
+                android:textSize="18dp"
+                android:textStyle="bold"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintRight_toRightOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/live_data_label" />
+
+            <TextView
+                android:id="@+id/speed"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:gravity="left"
+                android:text="@string/speed_value"
+                android:textColor="@color/textColorOnPrimary"
+                android:textSize="18dp"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintRight_toLeftOf="@id/horizontal_guideline_25"
+                app:layout_constraintTop_toBottomOf="@id/mil" />
+
+            <TextView
+                android:id="@+id/rpm"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:gravity="left"
+                android:text="@string/rpm_value"
+                android:textColor="@color/textColorOnPrimary"
+                android:textSize="18dp"
+                app:layout_constraintLeft_toRightOf="@id/horizontal_guideline_25"
+                app:layout_constraintRight_toLeftOf="@id/horizontal_guideline_50"
+                app:layout_constraintTop_toBottomOf="@id/mil" />
+
+            <TextView
+                android:id="@+id/throttle_position"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="8dp"
+                android:layout_marginTop="8dp"
+                android:gravity="left"
+                android:text="@string/throttle_value"
+                android:textColor="@color/textColorOnPrimary"
+                android:textSize="18dp"
+                app:layout_constraintLeft_toRightOf="@id/horizontal_guideline_50"
+                app:layout_constraintRight_toRightOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/mil" />
+
+            <TextView
+                android:id="@+id/fuel"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:gravity="left"
+                android:text="@string/fuel_value"
+                android:textColor="@color/textColorOnPrimary"
+                android:textSize="18dp"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintRight_toLeftOf="@id/horizontal_guideline_50"
+                app:layout_constraintTop_toBottomOf="@id/speed" />
+
+            <TextView
+                android:id="@+id/temperature"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="8dp"
+                android:layout_marginTop="8dp"
+                android:gravity="left"
+                android:text="@string/temperature_value"
+                android:textColor="@color/textColorOnPrimary"
+                android:textSize="18dp"
+                app:layout_constraintLeft_toRightOf="@id/horizontal_guideline_50"
+                app:layout_constraintRight_toRightOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/speed" />
+
+
+            <TextView
+                android:id="@+id/monitor_status_label"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:background="@color/secondary"
+                android:gravity="center"
+                android:text="@string/monitor_status"
+                android:textColor="@color/primary"
+                android:textSize="22dp"
+                android:textStyle="bold"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintRight_toRightOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/fuel" />
+
+            <GridLayout
+                android:id="@+id/monitor_status_grid"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:columnCount="3"
+                android:padding="8dp"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintRight_toRightOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/monitor_status_label" />
+
+
+            <TextView
+                android:id="@+id/report_label"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:background="@color/secondary"
+                android:gravity="center"
+                android:text="@string/report"
+                android:textColor="@color/primary"
+                android:textSize="22dp"
+                android:textStyle="bold"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintRight_toLeftOf="@id/horizontal_guideline_50"
+                app:layout_constraintTop_toBottomOf="@id/monitor_status_grid" />
+
+            <ImageView
+                android:id="@+id/refresh_report_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginRight="8dp"
+                android:layout_marginTop="16dp"
+                android:src="@drawable/ic_refresh"
+                app:layout_constraintRight_toRightOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/monitor_status_grid" />
+
+            <TextView
+                android:id="@+id/engine_load"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:gravity="left"
+                android:text="@string/engine_load_value"
+                android:textSize="18dp"
+                android:textColor="@color/textColorOnPrimary"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintRight_toRightOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/report_label" />
+
+            <TextView
+                android:id="@+id/fuel_pressure"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:gravity="left"
+                android:text="@string/fuel_pressure_value"
+                android:textColor="@color/textColorOnPrimary"
+                android:textSize="18dp"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintRight_toRightOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/engine_load" />
+
+            <TextView
+                android:id="@+id/fuel_rail_pressure"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:gravity="left"
+                android:text="@string/fuel_rail_pressure_value"
+                android:textColor="@color/textColorOnPrimary"
+                android:textSize="18dp"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintRight_toRightOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/fuel_pressure" />
+
+            <TextView
+                android:id="@+id/relative_fuel_rail_pressure"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:gravity="left"
+                android:text="@string/relative_fuel_rail_pressure_value"
+                android:textColor="@color/textColorOnPrimary"
+                android:textSize="18dp"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintRight_toRightOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/fuel_rail_pressure" />
+
+            <TextView
+                android:id="@+id/absolute_fuel_rail_pressure"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:gravity="left"
+                android:text="@string/absolute_fuel_rail_pressure_value"
+                android:textColor="@color/textColorOnPrimary"
+                android:textSize="18dp"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintRight_toRightOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/relative_fuel_rail_pressure" />
+
+            <TextView
+                android:id="@+id/barometric_pressure"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:gravity="left"
+                android:text="@string/barometric_pressure_value"
+                android:textColor="@color/textColorOnPrimary"
+                android:textSize="18dp"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintRight_toRightOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/absolute_fuel_rail_pressure" />
+
+            <TextView
+                android:id="@+id/intake_manifold_pressure"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:gravity="left"
+                android:text="@string/intake_manifold_pressure_value"
+                android:textColor="@color/textColorOnPrimary"
+                android:textSize="18dp"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintRight_toRightOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/barometric_pressure" />
+
+
+            <TextView
+                android:id="@+id/timing_advance"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:gravity="left"
+                android:text="@string/timing_advance_value"
+                android:textColor="@color/textColorOnPrimary"
+                android:textSize="18dp"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintRight_toRightOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/intake_manifold_pressure" />
+
+            <TextView
+                android:id="@+id/mass_air_flow"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:gravity="left"
+                android:text="@string/mass_air_flow_value"
+                android:textColor="@color/textColorOnPrimary"
+                android:textSize="18dp"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintRight_toRightOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/timing_advance" />
+
+            <TextView
+                android:id="@+id/runtime_since_engine_start"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:gravity="left"
+                android:text="@string/runtime_since_engine_start_value"
+                android:textColor="@color/textColorOnPrimary"
+                android:textSize="18dp"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintRight_toRightOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/mass_air_flow" />
+
+            <TextView
+                android:id="@+id/runtime_since_dtc_cleared"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:gravity="left"
+                android:text="@string/runtime_since_dtc_cleared_value"
+                android:textSize="18dp"
+                android:textColor="@color/textColorOnPrimary"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintRight_toRightOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/runtime_since_engine_start" />
+
+            <TextView
+                android:id="@+id/runtime_with_mil_on"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:gravity="left"
+                android:text="@string/runtime_with_mil_on_value"
+                android:textColor="@color/textColorOnPrimary"
+                android:textSize="18dp"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintRight_toRightOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/runtime_since_dtc_cleared" />
+
+
+            <TextView
+                android:id="@+id/distance_since_mil_on"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:gravity="left"
+                android:text="@string/distance_since_mil_on_value"
+                android:textColor="@color/textColorOnPrimary"
+                android:textSize="18dp"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintRight_toRightOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/runtime_with_mil_on" />
+
+            <TextView
+                android:id="@+id/distance_since_cc_cleared"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:gravity="left"
+                android:text="@string/distance_since_cc_cleared_value"
+                android:textColor="@color/textColorOnPrimary"
+                android:textSize="18dp"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintRight_toRightOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/distance_since_mil_on" />
+
+            <TextView
+                android:id="@+id/wide_band_air_fuel_ratio"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:gravity="left"
+                android:text="@string/wide_band_fuel_ratio_value"
+                android:textColor="@color/textColorOnPrimary"
+                android:textSize="18dp"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintRight_toRightOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/distance_since_cc_cleared" />
+
+            <TextView
+                android:id="@+id/module_voltage"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:gravity="left"
+                android:text="@string/module_voltage_value"
+                android:textColor="@color/textColorOnPrimary"
+                android:textSize="18dp"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintRight_toRightOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/wide_band_air_fuel_ratio" />
+
+            <TextView
+                android:id="@+id/absolute_load"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:gravity="left"
+                android:text="@string/absolute_load_value"
+                android:textColor="@color/textColorOnPrimary"
+                android:textSize="18dp"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintRight_toRightOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/module_voltage" />
+
+            <TextView
+                android:id="@+id/fuel_air_commanded_equivalence_ratio"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:gravity="left"
+                android:text="@string/fuel_air_commanded_equivalence_ratio_value"
+                android:textColor="@color/textColorOnPrimary"
+                android:textSize="18dp"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintRight_toRightOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/absolute_load" />
+
+            <TextView
+                android:id="@+id/oil_temperature"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:gravity="left"
+                android:text="@string/oil_temperature_value"
+                android:textColor="@color/textColorOnPrimary"
+                android:textSize="18dp"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintRight_toRightOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/fuel_air_commanded_equivalence_ratio" />
+
+            <TextView
+                android:id="@+id/engine_coolant_temperature"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:gravity="left"
+                android:text="@string/engine_coolant_temperature_value"
+                android:textColor="@color/textColorOnPrimary"
+                android:textSize="18dp"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintRight_toRightOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/oil_temperature" />
+
+            <TextView
+                android:id="@+id/relative_throttle_position"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:gravity="left"
+                android:text="@string/relative_throttle_position_value"
+                android:textColor="@color/textColorOnPrimary"
+                android:textSize="18dp"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintRight_toRightOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/engine_coolant_temperature" />
+
+            <TextView
+                android:id="@+id/abs_throttle_b"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:gravity="left"
+                android:text="@string/absolute_throttle_position_b_value"
+                android:textColor="@color/textColorOnPrimary"
+                android:textSize="18dp"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintRight_toRightOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/relative_throttle_position" />
+
+            <TextView
+                android:id="@+id/abs_throttle_c"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:gravity="left"
+                android:text="@string/absolute_throttle_position_c_value"
+                android:textColor="@color/textColorOnPrimary"
+                android:textSize="18dp"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintRight_toRightOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/abs_throttle_b" />
+
+            <TextView
+                android:id="@+id/accel_pedal_d"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:gravity="left"
+                android:text="@string/accel_pedal_position_d_value"
+                android:textColor="@color/textColorOnPrimary"
+                android:textSize="18dp"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintRight_toRightOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/abs_throttle_c" />
+
+            <TextView
+                android:id="@+id/accel_pedal_e"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:gravity="left"
+                android:text="@string/accel_pedal_position_e_value"
+                android:textColor="@color/textColorOnPrimary"
+                android:textSize="18dp"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintRight_toRightOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/accel_pedal_d" />
+
+            <TextView
+                android:id="@+id/accel_pedal_f"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:gravity="left"
+                android:text="@string/accel_pedal_position_f_value"
+                android:textColor="@color/textColorOnPrimary"
+                android:textSize="18dp"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintRight_toRightOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/accel_pedal_e" />
+
+            <TextView
+                android:id="@+id/relative_accel_position"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:gravity="left"
+                android:text="@string/relative_accel_pedal_position_value"
+                android:textColor="@color/textColorOnPrimary"
+                android:textSize="18dp"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintRight_toRightOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/accel_pedal_f" />
+
+            <TextView
+                android:id="@+id/commanded_throttle_actuator"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:gravity="left"
+                android:text="@string/commanded_throttle_actuator_value"
+                android:textColor="@color/textColorOnPrimary"
+                android:textSize="18dp"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintRight_toRightOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/relative_accel_position" />
+
+            <TextView
+                android:id="@+id/commanded_egr"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:gravity="left"
+                android:text="@string/commanded_egr_value"
+                android:textColor="@color/textColorOnPrimary"
+                android:textSize="18dp"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintRight_toRightOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/commanded_throttle_actuator" />
+
+            <TextView
+                android:id="@+id/commanded_egr_error"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:gravity="left"
+                android:text="@string/commanded_egr_error_value"
+                android:textColor="@color/textColorOnPrimary"
+                android:textSize="18dp"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintRight_toRightOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/commanded_egr" />
+
+            <TextView
+                android:id="@+id/commanded_evaporative_purge"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:gravity="left"
+                android:text="@string/commanded_evaporative_purge_value"
+                android:textColor="@color/textColorOnPrimary"
+                android:textSize="18dp"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintRight_toRightOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/commanded_egr_error" />
+
+            <TextView
+                android:id="@+id/ft_st_bank1"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:gravity="left"
+                android:text="@string/fuel_trim_short_term_bank1_value"
+                android:textColor="@color/textColorOnPrimary"
+                android:textSize="18dp"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintRight_toRightOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/commanded_evaporative_purge" />
+
+            <TextView
+                android:id="@+id/ft_st_bank2"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:gravity="left"
+                android:text="@string/fuel_trim_short_term_bank2_value"
+                android:textColor="@color/textColorOnPrimary"
+                android:textSize="18dp"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintRight_toRightOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/ft_st_bank1" />
+
+            <TextView
+                android:id="@+id/ft_lt_bank1"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:gravity="left"
+                android:text="@string/fuel_trim_long_term_bank1_value"
+                android:textColor="@color/textColorOnPrimary"
+                android:textSize="18dp"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintRight_toRightOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/ft_st_bank2" />
+
+            <TextView
+                android:id="@+id/ft_lt_bank2"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:gravity="left"
+                android:text="@string/fuel_trim_long_term_bank2_value"
+                android:textColor="@color/textColorOnPrimary"
+                android:textSize="18dp"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintRight_toRightOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/ft_lt_bank1" />
+
+            <TextView
+                android:id="@+id/ethanol_percentage"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:gravity="left"
+                android:text="@string/ethanol_fuel_percent_value"
+                android:textSize="18dp"
+                android:textColor="@color/textColorOnPrimary"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintRight_toRightOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/ft_lt_bank2" />
+
+            <TextView
+                android:id="@+id/fuel_injection_timing"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:gravity="left"
+                android:text="@string/fuel_injection_timing_value"
+                android:textColor="@color/textColorOnPrimary"
+                android:textSize="18dp"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintRight_toRightOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/ethanol_percentage" />
+
+            <TextView
+                android:id="@+id/abs_evap_pressure"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:gravity="left"
+                android:text="@string/abs_evap_system_vapor_pressure_value"
+                android:textColor="@color/textColorOnPrimary"
+                android:textSize="18dp"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintRight_toRightOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/fuel_injection_timing" />
+
+            <TextView
+                android:id="@+id/evap_pressure"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:gravity="left"
+                android:text="@string/evap_system_vapor_pressure_value"
+                android:textColor="@color/textColorOnPrimary"
+                android:textSize="18dp"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintRight_toRightOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/abs_evap_pressure" />
+
+            <TextView
+                android:id="@+id/warmups"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:gravity="left"
+                android:text="@string/warmups_value"
+                android:textColor="@color/textColorOnPrimary"
+                android:textSize="18dp"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintRight_toRightOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/evap_pressure" />
+
+
+            <TextView
+                android:id="@+id/carconnect_label"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:gravity="right"
+                android:text="@string/car_connect_captured_label"
+                android:textColor="@color/accent"
+                android:textSize="12dp"
+                android:textStyle="bold|italic"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintRight_toRightOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/warmups" />
+
+        </android.support.constraint.ConstraintLayout>
+    </ScrollView>
+
+
+</RelativeLayout>

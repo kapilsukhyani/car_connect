@@ -1,16 +1,16 @@
 package com.exp.carconnect.app.state
 
-import com.exp.carconnect.app.pdf.ReportPDFGenerator
 import com.exp.carconnect.base.AppState
 import com.exp.carconnect.base.state.CaptureReportOperationState
 import com.exp.carconnect.base.state.getActiveSession
 import com.exp.carconnect.base.state.isAnActiveSessionAvailable
+import com.exp.carconnect.report.pdf.ReportPDFGenerator
 import io.reactivex.Observable
 import io.reactivex.Scheduler
 import redux.api.Store
 import redux.observable.Epic
 
-internal class CaptureReportEpic(private val ioScheduler: Scheduler,
+class CaptureReportEpic(private val ioScheduler: Scheduler,
                                  private val mainThreadScheduler: Scheduler,
                                  private val reportGenerator: ReportPDFGenerator) : Epic<AppState> {
 

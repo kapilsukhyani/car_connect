@@ -67,9 +67,6 @@ class CarConnectWindow : AppCompatActivity() {
             is DeviceManagementScreen -> {
                 replaceFragment(DeviceManagementView(), viewTransition = false)
                 showDonationSheet()
-//                replaceFragment(DeviceManagementView(),
-//                        SplashView.finSharedElement(windowContainer),
-//                        DeviceManagementView.getSharedElementTransitionName(), false)
             }
 
             is ConnectionScreen -> {

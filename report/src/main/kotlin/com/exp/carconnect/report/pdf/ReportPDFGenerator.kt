@@ -1,4 +1,4 @@
-package com.exp.carconnect.app.pdf
+package com.exp.carconnect.report.pdf
 
 import android.content.Context
 import android.graphics.Rect
@@ -12,7 +12,7 @@ import java.io.FileOutputStream
 import java.util.*
 
 
-internal class ReportPDFGenerator(private val context: Context) {
+class ReportPDFGenerator(private val context: Context) {
 
 
     fun generateReportPDF(report: ReportData, view: View): Single<String> {

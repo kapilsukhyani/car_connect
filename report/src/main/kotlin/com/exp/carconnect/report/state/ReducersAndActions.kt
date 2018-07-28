@@ -17,7 +17,7 @@ sealed class ReportAction {
     data class UpdateCaptureReportOperationStateToFailed(val error: Throwable) : ReportAction()
 }
 
-internal class ReportModuleReducer : Reducer<AppState> {
+class ReportModuleReducer : Reducer<AppState> {
 
     override fun reduce(state: AppState, action: Any): AppState {
         return when (action) {

@@ -16,7 +16,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.GridLayout
 import android.widget.TextView
-import com.exp.carconnect.app.R
+import com.exp.carconnect.report.R
 import com.exp.carconnect.app.state.*
 import com.exp.carconnect.base.*
 import com.exp.carconnect.base.state.*
@@ -27,13 +27,13 @@ import redux.api.Reducer
 import java.util.concurrent.TimeUnit
 
 
-internal class ReportView : Fragment() {
+class ReportView : Fragment() {
 
     companion object {
         private const val SHARE_REPORT_REQUEST_ID = 1112
     }
 
-    lateinit var reportVM: ReportViewModel
+    private lateinit var reportVM: ReportViewModel
     private var progressDialog: ProgressDialog? = null
 
     override fun onAttach(context: Context?) {
@@ -98,7 +98,7 @@ internal class ReportView : Fragment() {
     }
 
     private fun showReportCapturingProgressDialog() {
-        progressDialog = ProgressDialog.show(activity, getString(R.string.capturing_report), getString(R.string.please_wait))
+        progressDialog = ProgressDialog.show(activity, getString(R.string.capturing_report), getString(com.exp.carconnect.base.R.string.please_wait))
     }
 
 
@@ -342,7 +342,7 @@ internal class ReportViewModel(app: Application) : AndroidViewModel(app) {
                     store.dispatch(ReportAction.AddNewReportState(ReportScreenState.ShowNewSnapshot(it)))
                 }, {
                     store.dispatch(ReportAction.AddNewReportState(ReportScreenState.ShowError(getApplication<Application>()
-                            .getString(R.string.data_load_error,
+                            .getString(com.exp.carconnect.base.R.string.data_load_error,
                                     "Unknown"))))
                 }))
 

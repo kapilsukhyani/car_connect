@@ -56,6 +56,3 @@ class DonationModuleStateReducer : Reducer<AppState> {
 }
 
 
-fun AppState.copyAndReplaceDonationState(state: LoadableState<DonationModuleState, Throwable>): AppState {
-    return this.copy(moduleStateMap = moduleStateMap + Pair(DonationModuleState.DONATION_STATE_KEY, state))
-}

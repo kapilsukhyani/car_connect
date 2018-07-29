@@ -1,9 +1,27 @@
 package com.exp.carconnect.donation.state
 
 import com.android.billingclient.api.BillingClient
-import com.exp.carconnect.base.CarConnectIndividualViewState
-import com.exp.carconnect.base.CarConnectView
-import com.exp.carconnect.base.ModuleState
+import com.exp.carconnect.base.*
+import com.exp.carconnect.donation.state.DonationModuleState.Companion.DONATION_STATE_KEY
+
+
+fun AppState.copyAndReplaceDonationState(state: LoadableState<DonationModuleState, Throwable>): AppState {
+    return this.copy(moduleStateMap = moduleStateMap + Pair(DonationModuleState.DONATION_STATE_KEY, state))
+}
+
+fun AppState.isDonationStateLoaded(): Boolean {
+    return this.moduleStateMap[DONATION_STATE_KEY] is LoadableState.Loaded
+}
+
+
+fun AppState.getDonationState(): DonationState {
+    return ((this.moduleStateMap[DONATION_STATE_KEY] as LoadableState.Loaded).savedState as DonationModuleState)
+            .donationPersistedState.state
+}
+
+fun AppState.hasUserDonated(): Boolean {
+    return getDonationState() is DonationState.Donated
+}
 
 data class DonationModuleState(val donationPersistedState: DonationPersistedState) : ModuleState {
     companion object {

@@ -3,7 +3,11 @@ apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-kapt'
 
 apply plugin: 'kotlin-android-extensions'
+apply plugin: 'io.fabric'
 
+repositories {
+    maven { url 'https://maven.fabric.io/public' }
+}
 android {
     compileSdkVersion 26
     buildToolsVersion '26.0.2'

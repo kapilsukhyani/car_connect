@@ -214,10 +214,15 @@ class SettingsVM(app: Application) : AndroidViewModel(app), SharedPreferences.On
         val appSettings = store.state.getBaseAppState().baseAppPersistedState.appSettings
         var updatedSettings: AppSettings? = null
         when (key) {
+            app.getString(R.string.collect_usage_data_pref_key) -> {
+                updatedSettings = appSettings
+                        .copy(usageReportingEnabled = defaultSharedPref
+                                .getBoolean(key, AppSettings.DEFAULT_USAGE_REPORTING_ENABLED))
+            }
             app.getString(R.string.background_connection_pref_key) -> {
                 updatedSettings = appSettings
                         .copy(backgroundConnectionEnabled = defaultSharedPref
-                                .getBoolean(key, AppSettings.DEFAULT_BACKGROND_OPERATION_ENABLED))
+                                .getBoolean(key, AppSettings.DEFAULT_BACKGROUND_OPERATION_ENABLED))
             }
             app.getString(R.string.auto_connect_pref_key) -> {
                 updatedSettings = appSettings

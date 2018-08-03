@@ -106,5 +106,9 @@
 
     </PreferenceCategory>
 
+    <CheckBoxPreference
+        android:defaultValue="true"
+        android:key="@string/collect_usage_data_pref_key"
+        android:title="@string/collect_usage_data" />
 </PreferenceScreen>
 

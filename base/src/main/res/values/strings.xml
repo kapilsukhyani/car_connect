@@ -46,6 +46,8 @@
     <string name="display_settings" translatable="false">Display Settings</string>
     <string name="Maintain_background_connection" translatable="false">Maintain Background Connection</string>
     <string name="auto_connect_to_last_connected" translatable="false">Auto Connect To Recent Device</string>
+    <string name="collect_usage_data_pref_key" translatable="false">collect_usage_data_pref_key</string>
+    <string name="collect_usage_data">Collect Usage Data</string>
 
     <string name="unit_system">Unit System</string>
     <string name="matrix">Matrix</string>
@@ -81,6 +83,7 @@
     <string name="foreground_notification_title">OBD Connection Active</string>
     <string name="foreground_notification_description">Connection to your vehicle is active in background.</string>
     <string name="stop">Drop Connection</string>
+    <string name="usage_report_banner_text">This app collects usage report to improve experience. Goto Settings to turn this off anytime.</string>
 
 
     <string-array name="unit_systems">

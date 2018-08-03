@@ -269,11 +269,13 @@ data class DataSettings(val unitSystem: UnitSystem = DEFAULT_MATRIX_SYSTEM,
 data class AppSettings(val dataSettings: DataSettings = DataSettings(),
                        val notificationSettings: NotificationSettings = NotificationSettings(),
                        val displaySettings: DisplaySettings = DisplaySettings(),
-                       val backgroundConnectionEnabled: Boolean = DEFAULT_BACKGROND_OPERATION_ENABLED,
-                       val autoConnectToLastConnectedDongleOnLaunch: Boolean = DEFAULT_AUTO_CONNECTED_ENABLED) {
+                       val backgroundConnectionEnabled: Boolean = DEFAULT_BACKGROUND_OPERATION_ENABLED,
+                       val autoConnectToLastConnectedDongleOnLaunch: Boolean = DEFAULT_AUTO_CONNECTED_ENABLED,
+                       val usageReportingEnabled: Boolean = DEFAULT_USAGE_REPORTING_ENABLED) {
     companion object {
-        const val DEFAULT_BACKGROND_OPERATION_ENABLED = false
+        const val DEFAULT_BACKGROUND_OPERATION_ENABLED = false
         const val DEFAULT_AUTO_CONNECTED_ENABLED = true
+        const val DEFAULT_USAGE_REPORTING_ENABLED = true
     }
 }
 
@@ -285,7 +287,7 @@ data class ActiveSession(val dongle: Dongle,
                          val liveVehicleData: LoadableState<LiveVehicleData, Throwable>
                          = LoadableState.NotLoaded,
                          val clearDTCsOperationState: ClearDTCOperationState = ClearDTCOperationState.None,
-                         //todo think of moving report to its own module state
+        //todo think of moving report to its own module state
                          val report: LoadableState<Report, Throwable> = LoadableState.NotLoaded,
                          val captureReportOperationState: CaptureReportOperationState = CaptureReportOperationState.None)
 
@@ -454,7 +456,7 @@ sealed class DeviceManagementScreenState : CarConnectIndividualViewState {
     //connect action will move state to connecting
     object LoadingDevices : DeviceManagementScreenState()
 
-    data class ShowingDevices(val devices: Set<BluetoothDevice>) : DeviceManagementScreenState()
+    data class ShowingDevices(val devices: Set<BluetoothDevice>, val showUsageReportBanner: Boolean = false) : DeviceManagementScreenState()
 
     object ShowingBluetoothUnAvailableError : DeviceManagementScreenState()
 }

@@ -80,6 +80,11 @@ class SplashVM(app: Application) : AndroidViewModel(app) {
                         }
                     }
                     val baseAppState = (it[BaseAppState.STATE_KEY] as LoadableState.Loaded<BaseAppState>).savedState
+                    if(baseAppState.baseAppPersistedState
+                                    .appSettings
+                                    .usageReportingEnabled){
+                        (app as BaseAppContract).enableReporting()
+                    }
                     if (baseAppState.activeSession is UnAvailableAvailableData.Available) {
                         //moving background session to foreground
                         store.dispatch(BaseAppAction.StopBackgroundSession)

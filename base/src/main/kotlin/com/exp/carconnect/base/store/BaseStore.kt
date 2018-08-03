@@ -129,7 +129,7 @@ class BaseStore(val context: Context, val ioScheduler: Scheduler) {
                     val defaultSharedPref = PreferenceManager.getDefaultSharedPreferences(context)
 
                     val backgroundConnectionEnabled = defaultSharedPref
-                            .getBoolean(context.getString(R.string.background_connection_pref_key), AppSettings.DEFAULT_BACKGROND_OPERATION_ENABLED)
+                            .getBoolean(context.getString(R.string.background_connection_pref_key), AppSettings.DEFAULT_BACKGROUND_OPERATION_ENABLED)
                     val autoConnectEnabled = defaultSharedPref
                             .getBoolean(context.getString(R.string.auto_connect_pref_key), AppSettings.DEFAULT_AUTO_CONNECTED_ENABLED)
 

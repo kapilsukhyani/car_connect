@@ -2,6 +2,9 @@ package com.exp.carconnect.app
 
 import android.app.Application
 import android.preference.PreferenceManager
+import com.crashlytics.android.Crashlytics
+import com.crashlytics.android.answers.Answers
+import com.crashlytics.android.core.CrashlyticsCore
 import com.exp.carconnect.app.fragment.ReportScreenStateReducer
 import com.exp.carconnect.app.state.*
 import com.exp.carconnect.base.*
@@ -32,6 +35,7 @@ import com.exp.carconnect.donation.store.DonationStore
 import com.exp.carconnect.donation.store.DonationStoreImpl
 import com.exp.carconnect.report.pdf.ReportPDFGenerator
 import com.google.gson.Gson
+import io.fabric.sdk.android.Fabric
 import io.reactivex.Scheduler
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
@@ -83,7 +87,6 @@ class CarConnectApp : Application(),
                 .builder()
                 .build()
         globalComponent.inject(this)
-        //        Fabric.with(this, Crashlytics())
 
         persistenceStore = BaseStore(this, Schedulers.io())
         donationStore = DonationStoreImpl(PreferenceManager.getDefaultSharedPreferences(this), gson)
@@ -102,6 +105,7 @@ class CarConnectApp : Application(),
                 SettingsScreenStateReducer(),
                 DonationModuleStateReducer(),
                 DonationScreenStateReducer())
+        
         val initialState = AppState(mapOf(Pair(BaseAppState.STATE_KEY, LoadableState.NotLoaded),
                 Pair(DonationModuleState.DONATION_STATE_KEY, LoadableState.NotLoaded)),
                 CarConnectUIState(Stack()))
@@ -172,5 +176,10 @@ class CarConnectApp : Application(),
 
     override fun killSession() {
         store.dispatch(BaseAppAction.KillActiveSession)
+    }
+
+    override fun enableReporting() {
+        Fabric.with(this, Crashlytics())
+        Fabric.with(this, Answers())
     }
 }

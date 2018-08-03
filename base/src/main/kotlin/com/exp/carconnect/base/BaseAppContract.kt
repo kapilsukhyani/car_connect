@@ -17,6 +17,8 @@ interface BaseAppContract {
     var newOBDConnectionComponent: NewOBDConnectionComponent?
     fun onDataLoadingStartedFor(info: Vehicle)
     fun onReportRequested()
+    fun enableReporting()
+
 
     fun killSession()
 

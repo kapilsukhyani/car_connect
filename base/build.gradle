@@ -97,6 +97,8 @@ dependencies {
     api 'com.google.code.gson:gson:2.8.4'
 
     api 'com.github.varunest:sparkbutton:1.0.5'
+
+    api 'com.jakewharton.timber:timber:4.7.1'
     // Test helpers for LiveData
     testApi "android.arch.core:core-testing:1.0.0"
 

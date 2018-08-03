@@ -11,6 +11,8 @@ import android.transition.ChangeTransform
 import android.transition.Fade
 import android.transition.TransitionSet
 import android.view.View
+import com.crashlytics.android.answers.Answers
+import com.crashlytics.android.answers.ContentViewEvent
 import com.exp.carconnect.app.CarConnectApp
 import com.exp.carconnect.app.R
 import com.exp.carconnect.app.fragment.ReportView
@@ -24,9 +26,7 @@ import com.exp.carconnect.base.state.*
 import com.exp.carconnect.dashboard.fragment.DashboardView
 import com.exp.carconnect.dashboard.state.DashboardScreen
 import com.exp.carconnect.donation.fragment.DonationView
-import com.exp.carconnect.donation.showDonationBottomSheet
 import com.exp.carconnect.donation.state.DonationScreen
-import com.exp.carconnect.donation.state.DonationScreenState
 import io.reactivex.disposables.Disposable
 import redux.api.Store
 
@@ -50,8 +50,6 @@ class CarConnectWindow : AppCompatActivity() {
                 .observe(this, Observer {
                     showView(it)
                 })
-
-
     }
 
 

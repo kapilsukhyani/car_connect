@@ -27,12 +27,15 @@ import android.view.ViewGroup
 import android.view.animation.LinearInterpolator
 import android.widget.ImageView
 import android.widget.TextView
+import com.crashlytics.android.answers.Answers
+import com.crashlytics.android.answers.ContentViewEvent
 import com.exp.carconnect.base.AppState
 import com.exp.carconnect.base.BaseAppContract
 import com.exp.carconnect.base.R
 import com.exp.carconnect.base.asCustomObservable
 import com.exp.carconnect.base.state.*
 import io.reactivex.disposables.CompositeDisposable
+import kotlinx.android.synthetic.main.view_device_management.*
 import redux.api.Reducer
 
 
@@ -92,13 +95,30 @@ class DeviceManagementView : Fragment() {
     private fun onNewState(it: DeviceManagementScreenState) {
         Log.d(TAG, "Received new state : $it")
         when (it) {
-            is DeviceManagementScreenState.ShowingDevices -> showDevices(it.devices)
+            is DeviceManagementScreenState.ShowingDevices -> {
+                showDevices(it.devices)
+                if (it.showUsageReportBanner) {
+                    showUsageBanner()
+                }
+            }
 
             DeviceManagementScreenState.ShowingBluetoothUnAvailableError -> {
                 showBluetoothNotAvailableError()
             }
         }
 
+    }
+
+    private val hideBannerRunnable = Runnable {
+        usage_report_banner
+                .animate()
+                .translationYBy(-usage_report_banner.height.toFloat())
+                .alpha(0.toFloat()).start()
+    }
+
+    private fun showUsageBanner() {
+        usage_report_banner.visibility = View.VISIBLE
+        usage_report_banner.postDelayed(hideBannerRunnable, 3500)
     }
 
     private fun showBluetoothNotAvailableError() {
@@ -113,6 +133,12 @@ class DeviceManagementView : Fragment() {
                 }
                 .create()
                 .show()
+    }
+
+    override fun onStop() {
+        super.onStop()
+        usage_report_banner
+                .removeCallbacks(hideBannerRunnable)
     }
 
     private fun showDevices(devices: Set<BluetoothDevice>) {
@@ -197,7 +223,6 @@ class DeviceManagementVM(app: Application) : AndroidViewModel(app) {
     private var backgroundConnectionEnabled = false
 
     init {
-        //todo kill the screen if an active session is already available, this is required if bg connection was enabled being on dashboard.
         storeSubscription.add(store
                 .asCustomObservable()
                 .filter { it.uiState.currentView is DeviceManagementScreen }
@@ -208,6 +233,8 @@ class DeviceManagementVM(app: Application) : AndroidViewModel(app) {
                 .subscribe {
                     deviceManagementViewLiveData.value = it
                 })
+
+        //kill the screen if an active session is already available, this is required if bg connection was enabled being on dashboard.
         storeSubscription.add(store
                 .asCustomObservable()
                 .filter { it.isBaseStateLoaded() }
@@ -241,8 +268,8 @@ class DeviceManagementVM(app: Application) : AndroidViewModel(app) {
                                         onDeviceSelected(bluetoothAdapter.getRemoteDevice(persistedState.lastConnectedDongle.address))
                                     } else {
                                         store.dispatch(DeviceManagementViewAction
-                                                .ShowBondedDevices(bluetoothAdapter
-                                                        .bondedDevices))
+                                                .ShowBondedDevicesAndUsageReportBanner(bluetoothAdapter
+                                                        .bondedDevices, persistedState.appSettings.usageReportingEnabled))
                                     }
                                 }
 
@@ -264,6 +291,11 @@ class DeviceManagementVM(app: Application) : AndroidViewModel(app) {
     }
 
     fun onDeviceSelected(device: BluetoothDevice) {
+        Answers.getInstance().logContentView(ContentViewEvent()
+                .putContentName("Bonded Device Selected")
+                .putContentType("Bluetooth device")
+                .putContentId("[${device.name} - ${device.address}]"))
+
         if (backgroundConnectionEnabled) {
             store.dispatch(CommonAppAction.ReplaceViewOnBackStackTop(ConnectionScreen(ConnectionScreenState
                     .ShowStatus(getApplication<Application>()
@@ -287,7 +319,7 @@ class DeviceManagementVM(app: Application) : AndroidViewModel(app) {
 
 
 sealed class DeviceManagementViewAction {
-    data class ShowBondedDevices(val devices: Set<BluetoothDevice>) : DeviceManagementViewAction()
+    data class ShowBondedDevicesAndUsageReportBanner(val devices: Set<BluetoothDevice>, val showBanner: Boolean = false) : DeviceManagementViewAction()
     object ShowBluetoothError : DeviceManagementViewAction()
 }
 
@@ -295,7 +327,7 @@ sealed class DeviceManagementViewAction {
 class DeviceManagementScreenStateReducer : Reducer<AppState> {
     override fun reduce(state: AppState, action: Any): AppState {
         return when (action) {
-            is DeviceManagementViewAction.ShowBondedDevices -> {
+            is DeviceManagementViewAction.ShowBondedDevicesAndUsageReportBanner -> {
 
                 state.copy(uiState = state
                         .uiState
@@ -303,7 +335,7 @@ class DeviceManagementScreenStateReducer : Reducer<AppState> {
                                 .uiState
                                 .backStack
                                 .subList(0, state.uiState.backStack.size - 1) +
-                                DeviceManagementScreen(DeviceManagementScreenState.ShowingDevices(action.devices))))
+                                DeviceManagementScreen(DeviceManagementScreenState.ShowingDevices(action.devices, action.showBanner))))
             }
 
             is DeviceManagementViewAction.ShowBluetoothError -> {

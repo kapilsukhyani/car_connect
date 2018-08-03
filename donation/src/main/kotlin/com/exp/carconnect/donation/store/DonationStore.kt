@@ -19,7 +19,6 @@ class DonationStoreImpl(val preferences: SharedPreferences,
                         val gson: Gson) : DonationStore {
 
     companion object {
-        private const val HAS_DONATED_PROPERTY_KEY = "has_donated"
         private const val DONATION_PROPERTY_KEY = "donation"
     }
 
@@ -36,9 +35,6 @@ class DonationStoreImpl(val preferences: SharedPreferences,
 
     override fun getDonationState(): Single<DonationState> {
         return Single.fromCallable {
-            if (!preferences.getBoolean(HAS_DONATED_PROPERTY_KEY, false)) {
-                return@fromCallable DonationState.NotDonated
-            }
             val donation = preferences.getString(DONATION_PROPERTY_KEY, "")
             if (donation.isEmpty()) {
                 return@fromCallable DonationState.NotDonated

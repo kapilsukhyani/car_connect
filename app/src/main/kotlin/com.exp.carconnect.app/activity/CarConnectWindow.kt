@@ -66,7 +66,7 @@ class CarConnectWindow : AppCompatActivity() {
 
             is DeviceManagementScreen -> {
                 replaceFragment(DeviceManagementView(), viewTransition = false)
-                showDonationSheet()
+                windowVM.showDonationBottomSheet(this)
             }
 
             is ConnectionScreen -> {
@@ -133,9 +133,6 @@ class CarConnectWindow : AppCompatActivity() {
         windowVM.onBackPressed()
     }
 
-    private fun showDonationSheet() {
-        showDonationBottomSheet(this, { windowVM.showDonationFragment() })
-    }
 }
 
 class SharedElementTransition : TransitionSet() {
@@ -187,8 +184,8 @@ class WindowVM(app: Application) : AndroidViewModel(app) {
         store.dispatch(CommonAppAction.BackPressed)
     }
 
-    fun showDonationFragment() {
-        store.dispatch(CommonAppAction.PushViewToBackStack(DonationScreen(DonationScreenState.ShowLoading)))
+    fun showDonationBottomSheet(activity: AppCompatActivity) {
+        com.exp.carconnect.donation.showDonationBottomSheet(activity, store, getApplication())
     }
 
     fun init(savedInstanceState: Bundle?) {

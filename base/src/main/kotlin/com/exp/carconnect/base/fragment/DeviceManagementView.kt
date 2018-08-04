@@ -250,7 +250,7 @@ class DeviceManagementVM(app: Application) : AndroidViewModel(app) {
                         loadDevices()
                     }
                 })
-        
+
     }
 
     private fun loadDevices() {

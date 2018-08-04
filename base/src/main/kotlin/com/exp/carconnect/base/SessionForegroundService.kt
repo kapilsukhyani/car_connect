@@ -6,6 +6,7 @@ import android.content.Intent
 import android.os.Binder
 import android.os.IBinder
 import android.support.v4.app.NotificationCompat
+import com.crashlytics.android.answers.CustomEvent
 
 class SessionForegroundService : Service() {
 
@@ -24,7 +25,7 @@ class SessionForegroundService : Service() {
 
     override fun onCreate() {
         super.onCreate()
-
+        application.logContentViewEvent("BackgroundSessionNotification")
         val builder = NotificationCompat.Builder(this, CHANNEL_ID)
         builder.mContentTitle = getString(R.string.foreground_notification_title)
         builder.mContentText = getString(R.string.foreground_notification_description)
@@ -41,8 +42,9 @@ class SessionForegroundService : Service() {
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         if (intent?.getBooleanExtra(STOP_CONNECTION_REQUEST, false) == true) {
             stopForeground(true)
-            (application as BaseAppContract).killSession()
+            application.killSession()
             stopSelf()
+            application.logEvent(CustomEvent("stop_background_connection_clicked"))
         }
         return START_NOT_STICKY
     }

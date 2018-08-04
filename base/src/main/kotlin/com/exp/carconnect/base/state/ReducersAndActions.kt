@@ -41,7 +41,7 @@ sealed class BaseAppAction {
     data class AddFailedOBDResponseError(val error: Throwable) : BaseAppAction()
 
     object StartBackgroundOrKillActiveSession : BaseAppAction()
-    object StopBackgroundSession : BaseAppAction()
+    object MoveBackgroundSessionToForeground : BaseAppAction()
     object KillActiveSession : BaseAppAction()
     object CloseSocketAndClearActiveSessionState : BaseAppAction()
     data class RefreshActiveSessionDataFetchRate(val settings: AppSettings) : BaseAppAction()

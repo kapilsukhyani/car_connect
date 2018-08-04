@@ -50,7 +50,7 @@ class OBDSessionManagementEpic(private val ioScheduler: Scheduler,
                 .filter {
                     it is BaseAppAction.StartNewSession ||
                             it === BaseAppAction.StartBackgroundOrKillActiveSession ||
-                            it === BaseAppAction.StopBackgroundSession ||
+                            it === BaseAppAction.MoveBackgroundSessionToForeground ||
                             it === BaseAppAction.KillActiveSession ||
                             it is BaseAppAction.RefreshActiveSessionDataFetchRate
                 }
@@ -82,9 +82,13 @@ class OBDSessionManagementEpic(private val ioScheduler: Scheduler,
                             }
 
                         }
-                        BaseAppAction.StopBackgroundSession -> {
+                        BaseAppAction.MoveBackgroundSessionToForeground -> {
                             sessionManager.stopBackgroundSession()
-                            Observable.empty()
+                            val activeSession = store.state.getActiveSession()
+                            sessionManager
+                                    .updateDataLoadFrequencyForActiveSession(activeSession.engine, store.state.getAppSettings())
+                                    .subscribeOn(ioScheduler)
+                                    .observeOn(mainThreadScheduler)
 
                         }
                         BaseAppAction.KillActiveSession -> {

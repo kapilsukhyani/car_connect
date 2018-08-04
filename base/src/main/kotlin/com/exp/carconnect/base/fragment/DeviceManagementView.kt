@@ -27,7 +27,6 @@ import android.view.ViewGroup
 import android.view.animation.LinearInterpolator
 import android.widget.ImageView
 import android.widget.TextView
-import com.crashlytics.android.answers.ContentViewEvent
 import com.crashlytics.android.answers.CustomEvent
 import com.exp.carconnect.base.*
 import com.exp.carconnect.base.R
@@ -231,7 +230,7 @@ class DeviceManagementVM(app: Application) : AndroidViewModel(app) {
                 .distinctUntilChanged()
                 .subscribe {
                     deviceManagementViewLiveData.value = it
-                    if(it == DeviceManagementScreenState.ShowingBluetoothUnAvailableError){
+                    if (it == DeviceManagementScreenState.ShowingBluetoothUnAvailableError) {
                         app.logContentViewEvent("BluetoothErrorDialog")
                     }
                 })
@@ -247,10 +246,11 @@ class DeviceManagementVM(app: Application) : AndroidViewModel(app) {
                     //finish if session is still alive, this happened because background session setting was enabled being on dashboard
                     if (it.second) {
                         store.dispatch(CommonAppAction.FinishCurrentView)
+                    } else {
+                        loadDevices()
                     }
                 })
-
-        loadDevices()
+        
     }
 
     private fun loadDevices() {

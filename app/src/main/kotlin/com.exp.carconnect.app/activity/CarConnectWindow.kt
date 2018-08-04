@@ -11,8 +11,6 @@ import android.transition.ChangeTransform
 import android.transition.Fade
 import android.transition.TransitionSet
 import android.view.View
-import com.crashlytics.android.answers.Answers
-import com.crashlytics.android.answers.ContentViewEvent
 import com.exp.carconnect.app.CarConnectApp
 import com.exp.carconnect.app.R
 import com.exp.carconnect.app.fragment.ReportView
@@ -128,6 +126,12 @@ class CarConnectWindow : AppCompatActivity() {
         if (currentFragment is BackInterceptor && currentFragment.interceptBack()) {
             return
         }
+        val location = if (currentFragment != null) {
+            currentFragment::class.java.simpleName
+        } else {
+            "unkown"
+        }
+        application.logBackPressedEvent(location)
         windowVM.onBackPressed()
     }
 

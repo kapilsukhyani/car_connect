@@ -3,8 +3,11 @@ package com.exp.carconnect.donation
 import android.app.Activity
 import android.app.Application
 import android.support.design.widget.BottomSheetDialog
+import com.crashlytics.android.answers.CustomEvent
 import com.exp.carconnect.base.AppState
 import com.exp.carconnect.base.asCustomObservable
+import com.exp.carconnect.base.logContentViewEvent
+import com.exp.carconnect.base.logEvent
 import com.exp.carconnect.base.state.CommonAppAction
 import com.exp.carconnect.donation.state.DonationScreen
 import com.exp.carconnect.donation.state.DonationScreenState
@@ -29,12 +32,15 @@ fun showDonationBottomSheet(activity: Activity,
                     donateSheet.donateButton.setOnClickListener {
                         bottomSheetDialog.dismiss()
                         store.dispatch(CommonAppAction.PushViewToBackStack(DonationScreen(DonationScreenState.ShowLoading)))
+                        app.logEvent(CustomEvent("bottomsheet_donate_clicked"))
                     }
                     donateSheet.laterButton.setOnClickListener {
                         bottomSheetDialog.dismiss()
+                        app.logEvent(CustomEvent("bottomsheet_later_clicked"))
                     }
                     bottomSheetDialog.setContentView(donateSheet)
                     bottomSheetDialog.show()
+                    app.logContentViewEvent("DonateBottomSheet")
                 }
             })
 

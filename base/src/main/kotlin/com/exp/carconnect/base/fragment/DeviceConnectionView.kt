@@ -11,6 +11,7 @@ import android.support.v4.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import com.crashlytics.android.answers.CustomEvent
 import com.exp.carconnect.base.*
 import com.exp.carconnect.base.R
 import com.exp.carconnect.base.state.*
@@ -124,6 +125,7 @@ class DeviceConnectionVM(app: Application) : AndroidViewModel(app) {
 
 
     init {
+        app.logContentViewEvent("DeviceConnectionView")
         storeSubscription.add(store
                 .asCustomObservable()
                 .filter { it.uiState.currentView is ConnectionScreen }
@@ -131,6 +133,9 @@ class DeviceConnectionVM(app: Application) : AndroidViewModel(app) {
                 .distinctUntilChanged()
                 .subscribe {
                     deviceConnectionViewLiveData.value = it
+                    if(it is ConnectionScreenState.ShowSetupError){
+                        app.logContentViewEvent("SetupErrorDialog")
+                    }
                 })
 
         storeSubscription.add(store
@@ -152,6 +157,7 @@ class DeviceConnectionVM(app: Application) : AndroidViewModel(app) {
     }
 
     fun onSetupErrorAcknowledged() {
+        getApplication<Application>().logEvent(CustomEvent("connection_setup_error_acknowledged"))
         store.dispatch(CommonAppAction.FinishCurrentView)
     }
 

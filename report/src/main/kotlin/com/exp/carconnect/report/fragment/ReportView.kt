@@ -16,10 +16,12 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.GridLayout
 import android.widget.TextView
-import com.exp.carconnect.report.R
+import com.crashlytics.android.answers.CustomEvent
+import com.crashlytics.android.answers.ShareEvent
 import com.exp.carconnect.app.state.*
 import com.exp.carconnect.base.*
 import com.exp.carconnect.base.state.*
+import com.exp.carconnect.report.R
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.subjects.BehaviorSubject
 import kotlinx.android.synthetic.main.report_view.*
@@ -212,8 +214,7 @@ internal class ReportViewModel(app: Application) : AndroidViewModel(app) {
 
 
     init {
-
-
+        app.logContentViewEvent("ReportView")
         storeSubscription.add(store
                 .asCustomObservable()
                 .filter {
@@ -354,6 +355,11 @@ internal class ReportViewModel(app: Application) : AndroidViewModel(app) {
                 .distinctUntilChanged()
                 .subscribe {
                     reportLiveData.value = it
+                    if (it is ReportScreenState.ShowError) {
+                        app.logContentViewEvent("ReportErrorDialog")
+                    } else if (it is ReportScreenState.InitReportShare) {
+                        app.logEvent(ShareEvent().putContentId("share_report"))
+                    }
                 })
 
         storeSubscription.add(fetchReportCommandObservable
@@ -385,6 +391,7 @@ internal class ReportViewModel(app: Application) : AndroidViewModel(app) {
     }
 
     fun fetchReport() {
+        getApplication<Application>().logEvent(CustomEvent("refresh_report_clicked"))
         fetchReportCommandObservable.onNext(true)
     }
 
@@ -410,6 +417,7 @@ internal class ReportViewModel(app: Application) : AndroidViewModel(app) {
     }
 
     fun onDataErrorAcknowledged() {
+        getApplication<Application>().logDataErrorAcknowledgedEvent("ReportView")
         store.dispatch(CommonAppAction.FinishCurrentView)
     }
 }

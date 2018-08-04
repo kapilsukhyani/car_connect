@@ -4,7 +4,11 @@ import android.app.Activity
 import android.app.AlertDialog
 import android.app.Application
 import android.app.ProgressDialog
-import android.arch.lifecycle.*
+import android.arch.lifecycle.AndroidViewModel
+import android.arch.lifecycle.LiveData
+import android.arch.lifecycle.MutableLiveData
+import android.arch.lifecycle.Observer
+import android.arch.lifecycle.ViewModelProviders
 import android.content.Context
 import android.content.pm.ActivityInfo
 import android.os.Bundle
@@ -18,15 +22,17 @@ import android.view.ViewGroup
 import android.widget.ArrayAdapter
 import com.android.billingclient.api.*
 import com.android.billingclient.api.BillingClient.BillingResponse
-import com.exp.carconnect.base.AppState
-import com.exp.carconnect.base.BaseAppContract
-import com.exp.carconnect.base.asCustomObservable
+import com.crashlytics.android.answers.AddToCartEvent
+import com.crashlytics.android.answers.CustomEvent
+import com.crashlytics.android.answers.PurchaseEvent
+import com.exp.carconnect.base.*
 import com.exp.carconnect.base.state.CommonAppAction
 import com.exp.carconnect.donation.R
 import com.exp.carconnect.donation.state.*
 import io.reactivex.disposables.CompositeDisposable
 import kotlinx.android.synthetic.main.donation_view.*
 import redux.api.Reducer
+import java.util.*
 
 public class DonationView : Fragment {
     private lateinit var viewModel: DonationVM
@@ -144,6 +150,7 @@ internal class DonationVM(app: Application) : AndroidViewModel(app), PurchasesUp
     }
 
     init {
+        app.logContentViewEvent("DonationView")
         disposables.add(store
                 .asCustomObservable()
                 .filter { it.uiState.currentView is DonationScreen }
@@ -187,13 +194,28 @@ internal class DonationVM(app: Application) : AndroidViewModel(app), PurchasesUp
                 handlePurchase(purchase)
             }
         } else {
+            if (purchases != null) {
+                for (purchase in purchases) {
+                    getApplication<Application>().logEvent(CustomEvent("purchase_failed")
+                            .putCustomAttribute("response_code", responseCode))
+                }
+            } else {
+                getApplication<Application>().logEvent(CustomEvent("purchase_failed")
+                        .putCustomAttribute("response_code", responseCode))
+            }
             // Handle any other error codes.
             handleUnSuccessfulResponse(responseCode)
         }
     }
 
     private fun handlePurchase(purchase: Purchase) {
-        store.dispatch(DonationAction.StoreDonation(purchase.sku, purchase.orderId, purchase.purchaseTime, purchase.purchaseToken))
+        getApplication<Application>().logEvent(PurchaseEvent()
+                .putItemId(purchase.sku)
+                .putSuccess(true))
+        store.dispatch(DonationAction.StoreDonation(purchase.sku,
+                purchase.orderId,
+                purchase.purchaseTime,
+                purchase.purchaseToken))
         store.dispatch(DonationViewAction.PaymentSuccessful)
     }
 
@@ -220,6 +242,9 @@ internal class DonationVM(app: Application) : AndroidViewModel(app), PurchasesUp
     }
 
     fun startDonationFlow(activity: Activity, product: Product) {
+        getApplication<Application>().logEvent(AddToCartEvent()
+                .putItemId(product.id)
+                .putCurrency(Currency.getInstance(product.currencyCode)))
         store.dispatch(DonationViewAction.StartPaymentFlow(product))
         val flowParams = BillingFlowParams.newBuilder()
                 .setSku(product.id)
@@ -283,6 +308,7 @@ internal class DonationVM(app: Application) : AndroidViewModel(app), PurchasesUp
     }
 
     fun onErrorAcknowledged(errorCode: Int, products: List<Product>?) {
+        getApplication<Application>().logEvent(CustomEvent("donation_error_acknowledged"))
         store.dispatch(DonationViewAction.ErrorAcknowledged(errorCode))
     }
 

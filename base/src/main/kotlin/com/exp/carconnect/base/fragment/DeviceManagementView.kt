@@ -27,12 +27,10 @@ import android.view.ViewGroup
 import android.view.animation.LinearInterpolator
 import android.widget.ImageView
 import android.widget.TextView
-import com.crashlytics.android.answers.Answers
 import com.crashlytics.android.answers.ContentViewEvent
-import com.exp.carconnect.base.AppState
-import com.exp.carconnect.base.BaseAppContract
+import com.crashlytics.android.answers.CustomEvent
+import com.exp.carconnect.base.*
 import com.exp.carconnect.base.R
-import com.exp.carconnect.base.asCustomObservable
 import com.exp.carconnect.base.state.*
 import io.reactivex.disposables.CompositeDisposable
 import kotlinx.android.synthetic.main.view_device_management.*
@@ -223,6 +221,7 @@ class DeviceManagementVM(app: Application) : AndroidViewModel(app) {
     private var backgroundConnectionEnabled = false
 
     init {
+        app.logContentViewEvent("DeviceManagementView")
         storeSubscription.add(store
                 .asCustomObservable()
                 .filter { it.uiState.currentView is DeviceManagementScreen }
@@ -232,6 +231,9 @@ class DeviceManagementVM(app: Application) : AndroidViewModel(app) {
                 .distinctUntilChanged()
                 .subscribe {
                     deviceManagementViewLiveData.value = it
+                    if(it == DeviceManagementScreenState.ShowingBluetoothUnAvailableError){
+                        app.logContentViewEvent("BluetoothErrorDialog")
+                    }
                 })
 
         //kill the screen if an active session is already available, this is required if bg connection was enabled being on dashboard.
@@ -291,10 +293,8 @@ class DeviceManagementVM(app: Application) : AndroidViewModel(app) {
     }
 
     fun onDeviceSelected(device: BluetoothDevice) {
-        Answers.getInstance().logContentView(ContentViewEvent()
-                .putContentName("Bonded Device Selected")
-                .putContentType("Bluetooth device")
-                .putContentId("[${device.name} - ${device.address}]"))
+        getApplication<Application>().logEvent(CustomEvent("bonded_device_selected")
+                .putCustomAttribute("Device", "[${device.name} - ${device.address}]"))
 
         if (backgroundConnectionEnabled) {
             store.dispatch(CommonAppAction.ReplaceViewOnBackStackTop(ConnectionScreen(ConnectionScreenState
@@ -309,10 +309,12 @@ class DeviceManagementVM(app: Application) : AndroidViewModel(app) {
     }
 
     fun onBluetoothErrorAcknowledged() {
+        getApplication<Application>().logEvent(CustomEvent("bluetooth_error_acknowledged"))
         store.dispatch(CommonAppAction.BackPressed)
     }
 
     fun onSettingsIconClicked() {
+        getApplication<Application>().logSettingsClickedEvent("DeviceManagementView")
         store.dispatch(CommonAppAction.PushViewToBackStack(SettingsScreen(SettingsScreenState.ShowingSettings)))
     }
 }

@@ -10,6 +10,7 @@ import android.support.v4.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import com.crashlytics.android.answers.CustomEvent
 import com.exp.carconnect.base.*
 import com.exp.carconnect.base.state.*
 import com.exp.carconnect.dashboard.R
@@ -146,6 +147,7 @@ class DashboardVM(app: Application) : AndroidViewModel(app) {
     data class DashboardState(val vehicle: Vehicle, val liveVehicleData: LoadableState<LiveVehicleData, Throwable>, val theme: DashboardTheme)
 
     init {
+        app.logContentViewEvent("DashboardView")
         storeSubscription.add(store
                 .asCustomObservable()
                 .filter { it.uiState.currentView is DashboardScreen && it.isVehicleInfoLoaded() }
@@ -191,14 +193,18 @@ class DashboardVM(app: Application) : AndroidViewModel(app) {
     }
 
     fun onSettingsIconClicked() {
+        getApplication<Application>().logSettingsClickedEvent("DashboardView")
         store.dispatch(CommonAppAction.PushViewToBackStack(SettingsScreen(SettingsScreenState.ShowingSettings)))
     }
 
     fun onReportIconClicked() {
+        getApplication<Application>().logEvent(CustomEvent("report_icon_clicked")
+                .putCustomAttribute("location", "DashboardView"))
         (getApplication<Application>() as BaseAppContract).onReportRequested()
     }
 
     fun onDataErrorAcknowledged() {
+        getApplication<Application>().logDataErrorAcknowledgedEvent("DashboardView")
         store.dispatch(CommonAppAction.FinishCurrentView)
     }
 }

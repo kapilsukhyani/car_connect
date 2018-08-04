@@ -12,6 +12,7 @@ import android.support.v4.app.Fragment
 import android.support.v7.preference.PreferenceFragmentCompat
 import android.support.v7.preference.PreferenceManager
 import android.view.*
+import com.crashlytics.android.answers.CustomEvent
 import com.exp.carconnect.base.*
 import com.exp.carconnect.base.R
 import com.exp.carconnect.base.state.*
@@ -144,12 +145,19 @@ class SettingsVM(app: Application) : AndroidViewModel(app), SharedPreferences.On
 
 
     init {
+        app.logContentViewEvent("SettingsView")
         defaultSharedPref.registerOnSharedPreferenceChangeListener(this)
 
         val screenStateSubscription = store.asCustomObservable()
                 .map { (it.uiState.currentView as SettingsScreen).screenState }
                 .distinctUntilChanged()
-                .subscribe { settingsScreenStateLiveData.value = it }
+                .subscribe {
+                    settingsScreenStateLiveData.value = it
+
+                    if (it == SettingsScreenState.ClearingDtcsFailed) {
+                        app.logContentViewEvent("ClearDtcFailedErrorDialog")
+                    }
+                }
         subscriptions.add(screenStateSubscription)
 
         listenForActiveSessionMilStatus()
@@ -183,6 +191,7 @@ class SettingsVM(app: Application) : AndroidViewModel(app), SharedPreferences.On
     }
 
     fun clearDtcs() {
+        getApplication<Application>().logEvent(CustomEvent("clear_dtc_clicked"))
         val subscription = store.asCustomObservable()
                 .filter { it.isAnActiveSessionAvailable() }
                 .map { it.getActiveSession().clearDTCsOperationState }
@@ -218,16 +227,22 @@ class SettingsVM(app: Application) : AndroidViewModel(app), SharedPreferences.On
                 updatedSettings = appSettings
                         .copy(usageReportingEnabled = defaultSharedPref
                                 .getBoolean(key, AppSettings.DEFAULT_USAGE_REPORTING_ENABLED))
+                getApplication<Application>().logEvent(CustomEvent("CollectUsageDataSettingUpdated")
+                        .putCustomAttribute("new_value", "${updatedSettings.usageReportingEnabled}"))
             }
             app.getString(R.string.background_connection_pref_key) -> {
                 updatedSettings = appSettings
                         .copy(backgroundConnectionEnabled = defaultSharedPref
                                 .getBoolean(key, AppSettings.DEFAULT_BACKGROUND_OPERATION_ENABLED))
+                getApplication<Application>().logEvent(CustomEvent("BackgroundConnectionSettingUpdated")
+                        .putCustomAttribute("new_value", "${updatedSettings.backgroundConnectionEnabled}"))
             }
             app.getString(R.string.auto_connect_pref_key) -> {
                 updatedSettings = appSettings
                         .copy(autoConnectToLastConnectedDongleOnLaunch = defaultSharedPref
                                 .getBoolean(key, AppSettings.DEFAULT_AUTO_CONNECTED_ENABLED))
+                getApplication<Application>().logEvent(CustomEvent("AutoConnectSettingUpdated")
+                        .putCustomAttribute("new_value", "${updatedSettings.autoConnectToLastConnectedDongleOnLaunch}"))
             }
             app.getString(R.string.unit_system_pref_key) -> {
                 val unitSystem = if (defaultSharedPref.getString(key, app.getString(R.string.matrix))
@@ -237,29 +252,39 @@ class SettingsVM(app: Application) : AndroidViewModel(app), SharedPreferences.On
                     UnitSystem.Imperial
                 }
                 updatedSettings = appSettings.copy(dataSettings = appSettings.dataSettings.copy(unitSystem = unitSystem))
+                getApplication<Application>().logEvent(CustomEvent("UnitSystemSettingUpdated")
+                        .putCustomAttribute("new_value", "${updatedSettings.dataSettings.unitSystem}"))
             }
             app.getString(R.string.fuel_level_pull_frequency_pref_key) -> {
                 val fuelLevelPullFrequency = defaultSharedPref.getString(key, DataSettings.DEFAULT_FUEL_LEVEL_REFRESH_FREQUENCY.toString()).toLong()
                 updatedSettings = appSettings.copy(dataSettings = appSettings
                         .dataSettings.copy(fuelLevelRefreshFrequency = Frequency(fuelLevelPullFrequency, TimeUnit.MINUTES)))
+                getApplication<Application>().logEvent(CustomEvent("FuelLevelPullFrequencySettingUpdated")
+                        .putCustomAttribute("new_value", "${updatedSettings.dataSettings.fuelLevelRefreshFrequency.frequency}"))
             }
 
             app.getString(R.string.fast_changing_data_pull_frequency_pref_key) -> {
                 val fastChangingDataFrequency = defaultSharedPref.getString(key, DataSettings.DEFAULT_FAST_CHANGING_DATA_REFRESH_FREQUENCY.toString()).toLong()
                 updatedSettings = appSettings.copy(dataSettings = appSettings
                         .dataSettings.copy(fastChangingDataRefreshFrequency = Frequency(fastChangingDataFrequency, TimeUnit.MILLISECONDS)))
+                getApplication<Application>().logEvent(CustomEvent("FastChangingDataPullFrequencySettingUpdated")
+                        .putCustomAttribute("new_value", "${updatedSettings.dataSettings.fastChangingDataRefreshFrequency.frequency}"))
 
             }
             app.getString(R.string.temperature_pull_frequency_pref_key) -> {
                 val temperaturePullFrequency = defaultSharedPref.getString(key, DataSettings.DEFAULT_TEMPERATURE_REFRESH_FREQUENCY.toString()).toLong()
                 updatedSettings = appSettings.copy(dataSettings = appSettings
                         .dataSettings.copy(temperatureRefreshFrequency = Frequency(temperaturePullFrequency, TimeUnit.MILLISECONDS)))
+                getApplication<Application>().logEvent(CustomEvent("TemperaturePullFrequencySettingUpdated")
+                        .putCustomAttribute("new_value", "${updatedSettings.dataSettings.temperatureRefreshFrequency.frequency}"))
 
             }
             app.getString(R.string.pressure_pull_frequency_pref_key) -> {
                 val pressurePullFrequency = defaultSharedPref.getString(key, DataSettings.DEFAULT_PRESSURE_REFRESH_FREQUENCY.toString()).toLong()
                 updatedSettings = appSettings.copy(dataSettings = appSettings
                         .dataSettings.copy(pressureRefreshFrequency = Frequency(pressurePullFrequency, TimeUnit.MINUTES)))
+                getApplication<Application>().logEvent(CustomEvent("PressurePullFrequencySettingUpdated")
+                        .putCustomAttribute("new_value", "${updatedSettings.dataSettings.pressureRefreshFrequency.frequency}"))
             }
             app.getString(R.string.fuel_level_notification_pref_key) -> {
                 updatedSettings = if (defaultSharedPref.getBoolean(key, true)) {
@@ -267,12 +292,14 @@ class SettingsVM(app: Application) : AndroidViewModel(app), SharedPreferences.On
                 } else {
                     appSettings.copy(notificationSettings = appSettings.notificationSettings.copy(fuelNotificationSettings = FuelNotificationSettings.Off))
                 }
-
-
+                getApplication<Application>().logEvent(CustomEvent("FuelLevelNotificationSettingUpdated")
+                        .putCustomAttribute("new_value", updatedSettings.notificationSettings.fuelNotificationSettings::class.java.simpleName))
             }
             app.getString(R.string.fuel_level_notification_threshold_pref_key) -> {
                 val fuelLevelNotificationThreshold = defaultSharedPref.getString(key, FuelNotificationSettings.DEFAULT_FUEL_PERCENTAGE_LEVEL.toString()).toFloat() / 100
                 updatedSettings = appSettings.copy(notificationSettings = appSettings.notificationSettings.copy(fuelNotificationSettings = FuelNotificationSettings.On(fuelLevelNotificationThreshold)))
+                getApplication<Application>().logEvent(CustomEvent("FuelLevelNotificationThresholdSettingUpdated")
+                        .putCustomAttribute("new_value", (updatedSettings.notificationSettings.fuelNotificationSettings as FuelNotificationSettings.On).minFuelPercentageThreshold))
             }
 
             app.getString(R.string.speed_notifications_pref_key) -> {
@@ -281,11 +308,14 @@ class SettingsVM(app: Application) : AndroidViewModel(app), SharedPreferences.On
                 } else {
                     appSettings.copy(notificationSettings = appSettings.notificationSettings.copy(speedNotificationSettings = SpeedNotificationSettings.Off))
                 }
+                getApplication<Application>().logEvent(CustomEvent("SpeedNotificationSettingUpdated")
+                        .putCustomAttribute("new_value", updatedSettings.notificationSettings.speedNotificationSettings::class.java.simpleName))
             }
             app.getString(R.string.speed_notification_threshold_pref_key) -> {
                 val speedNotificationThreshold = defaultSharedPref.getString(key, SpeedNotificationSettings.DEFAULT_MAX_SPEED_THRESHOLD.toString()).toInt()
                 updatedSettings = appSettings.copy(notificationSettings = appSettings.notificationSettings.copy(speedNotificationSettings = SpeedNotificationSettings.On(speedNotificationThreshold)))
-
+                getApplication<Application>().logEvent(CustomEvent("SpeedNotificationThresholdSettingUpdated")
+                        .putCustomAttribute("new_value", (updatedSettings.notificationSettings.speedNotificationSettings as SpeedNotificationSettings.On).maxSpeedThreshold))
             }
             app.getString(R.string.dashboard_settings_pref_key) -> {
                 val theme = if (defaultSharedPref.getString(key, app.getString(R.string.dark_dashboard_theme))
@@ -295,6 +325,8 @@ class SettingsVM(app: Application) : AndroidViewModel(app), SharedPreferences.On
                     DashboardTheme.Light
                 }
                 updatedSettings = appSettings.copy(displaySettings = appSettings.displaySettings.copy(dashboardTheme = theme))
+                getApplication<Application>().logEvent(CustomEvent("DashboardThemeSettingUpdated")
+                        .putCustomAttribute("new_value", updatedSettings.displaySettings.dashboardTheme.name))
             }
 
         }

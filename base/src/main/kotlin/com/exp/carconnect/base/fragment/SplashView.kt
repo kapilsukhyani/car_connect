@@ -12,6 +12,7 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import com.crashlytics.android.answers.ContentViewEvent
 import com.exp.carconnect.base.*
 import com.exp.carconnect.base.R
 import com.exp.carconnect.base.state.*
@@ -83,12 +84,13 @@ class SplashVM(app: Application) : AndroidViewModel(app) {
                     if(baseAppState.baseAppPersistedState
                                     .appSettings
                                     .usageReportingEnabled){
-                        (app as BaseAppContract).enableReporting()
+                        app.enableReporting()
+                        app.logContentViewEvent("SplashView")
                     }
                     if (baseAppState.activeSession is UnAvailableAvailableData.Available) {
                         //moving background session to foreground
                         store.dispatch(BaseAppAction.StopBackgroundSession)
-                        (app as BaseAppContract).onDataLoadingStartedFor((baseAppState.activeSession.data.vehicle as LoadableState.Loaded).savedState)
+                        app.onDataLoadingStartedFor((baseAppState.activeSession.data.vehicle as LoadableState.Loaded).savedState)
                     } else {
                         store.dispatch(CommonAppAction.ReplaceViewOnBackStackTop(DeviceManagementScreen(DeviceManagementScreenState.LoadingDevices)))
                     }

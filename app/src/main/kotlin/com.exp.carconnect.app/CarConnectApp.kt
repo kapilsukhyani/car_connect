@@ -3,8 +3,7 @@ package com.exp.carconnect.app
 import android.app.Application
 import android.preference.PreferenceManager
 import com.crashlytics.android.Crashlytics
-import com.crashlytics.android.answers.Answers
-import com.crashlytics.android.core.CrashlyticsCore
+import com.crashlytics.android.answers.*
 import com.exp.carconnect.app.fragment.ReportScreenStateReducer
 import com.exp.carconnect.app.state.*
 import com.exp.carconnect.base.*
@@ -47,6 +46,7 @@ import redux.observable.createEpicMiddleware
 import java.io.InputStream
 import java.io.OutputStream
 import java.util.*
+import java.util.concurrent.atomic.AtomicBoolean
 import javax.inject.Inject
 
 //https://romannurik.github.io/AndroidAssetStudio/icons-launcher.html#foreground.type=image&foreground.space.trim=1&foreground.space.pad=-0.05&foreColor=rgba(96%2C%20125%2C%20139%2C%200)&backColor=rgb(255%2C%20255%2C%20255)&crop=0&backgroundShape=circle&effects=score&name=ic_launcher
@@ -60,7 +60,7 @@ class CarConnectApp : Application(),
     override val mainScheduler: Scheduler = AndroidSchedulers.mainThread()
     override val ioScheduler: Scheduler = Schedulers.io()
     override val computationScheduler: Scheduler = Schedulers.computation()
-
+    private var reportingEnabled = AtomicBoolean(false)
 
     companion object {
         const val TAG = "CarConnectApp"
@@ -105,7 +105,7 @@ class CarConnectApp : Application(),
                 SettingsScreenStateReducer(),
                 DonationModuleStateReducer(),
                 DonationScreenStateReducer())
-        
+
         val initialState = AppState(mapOf(Pair(BaseAppState.STATE_KEY, LoadableState.NotLoaded),
                 Pair(DonationModuleState.DONATION_STATE_KEY, LoadableState.NotLoaded)),
                 CarConnectUIState(Stack()))
@@ -181,5 +181,39 @@ class CarConnectApp : Application(),
     override fun enableReporting() {
         Fabric.with(this, Crashlytics())
         Fabric.with(this, Answers())
+        reportingEnabled.set(true)
+    }
+
+    override fun logEvent(event: AnswersEvent<*>) {
+        //todo disable analytics in debug once tested
+//        if (!BuildConfig.DEBUG) {
+        if (reportingEnabled.get()) {
+            val answers = Answers.getInstance()
+            when (event) {
+                is CustomEvent -> {
+                    answers.logCustom(event)
+                }
+                is PurchaseEvent -> {
+                    answers.logPurchase(event)
+                }
+                is AddToCartEvent -> {
+                    answers.logAddToCart(event)
+                }
+                is ContentViewEvent -> {
+                    answers.logContentView(event)
+                }
+                is LevelStartEvent -> {
+                    answers.logLevelStart(event)
+                }
+                is LevelEndEvent -> {
+                    answers.logLevelEnd(event)
+                }
+                is ShareEvent -> {
+                    answers.logShare(event)
+                }
+
+            }
+        }
+//        }
     }
 }

@@ -74,7 +74,7 @@ class DashboardView : Fragment(), BackInterceptor {
                 .setTitle(getString(com.exp.carconnect.base.R.string.data_loading_error))
                 .setMessage(error)
                 .setCancelable(false)
-                .setPositiveButton(android.R.string.ok) { dialog, which ->
+                .setPositiveButton(android.R.string.ok) { dialog, _ ->
                     dialog.dismiss()
                     dashboardVM.onDataErrorAcknowledged()
                 }

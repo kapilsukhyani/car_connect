@@ -106,7 +106,7 @@ data class CarConnectUIState(val backStack: List<CarConnectView> = emptyList(),
     }
 
     fun isRestoringCurrentViewFromBackStack(): Boolean {
-        return backStackState != null && backStackState!! is BackStackState.PoppingViews
+        return backStackState != null && backStackState is BackStackState.PoppingViews
     }
 }
 

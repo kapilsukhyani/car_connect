@@ -167,7 +167,7 @@ class WindowVM(app: Application) : AndroidViewModel(app) {
                 }
                 .subscribe({ uiState ->
                     currentViewLiveData.value = uiState.currentView
-                }, { error ->
+                }, { _ ->
                     //todo, think what should be done if subscribing to store errors out
                 })
     }

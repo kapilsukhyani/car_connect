@@ -7,10 +7,6 @@ import com.crashlytics.android.answers.*
 import com.exp.carconnect.app.fragment.ReportScreenStateReducer
 import com.exp.carconnect.app.state.*
 import com.exp.carconnect.base.*
-import com.exp.carconnect.base.di.CarConnectGlobalComponent
-import com.exp.carconnect.base.di.DaggerCarConnectGlobalComponent
-import com.exp.carconnect.base.di.NewOBDConnectionComponent
-import com.exp.carconnect.base.di.OBDConnectionModule
 import com.exp.carconnect.base.fragment.DeviceConnectionScreenStateReducer
 import com.exp.carconnect.base.fragment.DeviceManagementScreenStateReducer
 import com.exp.carconnect.base.fragment.SettingsScreenStateReducer
@@ -19,8 +15,6 @@ import com.exp.carconnect.base.notification.Notifier
 import com.exp.carconnect.base.state.*
 import com.exp.carconnect.base.store.BaseStore
 import com.exp.carconnect.dashboard.DashboardAppContract
-import com.exp.carconnect.dashboard.di.DashboardComponent
-import com.exp.carconnect.dashboard.di.DashboardModule
 import com.exp.carconnect.dashboard.fragment.DashboardScreenStateReducer
 import com.exp.carconnect.dashboard.state.DashboardScreen
 import com.exp.carconnect.dashboard.state.DashboardScreenState
@@ -43,11 +37,8 @@ import redux.applyMiddleware
 import redux.combineReducers
 import redux.createStore
 import redux.observable.createEpicMiddleware
-import java.io.InputStream
-import java.io.OutputStream
 import java.util.*
 import java.util.concurrent.atomic.AtomicBoolean
-import javax.inject.Inject
 
 //https://romannurik.github.io/AndroidAssetStudio/icons-launcher.html#foreground.type=image&foreground.space.trim=1&foreground.space.pad=-0.05&foreColor=rgba(96%2C%20125%2C%20139%2C%200)&backColor=rgb(255%2C%20255%2C%20255)&crop=0&backgroundShape=circle&effects=score&name=ic_launcher
 //https://sqliteonline.com/
@@ -66,28 +57,14 @@ class CarConnectApp : Application(),
         const val TAG = "CarConnectApp"
     }
 
-    lateinit var globalComponent: CarConnectGlobalComponent
     override lateinit var store: Store<AppState>
     override lateinit var persistenceStore: BaseStore
     override lateinit var donationStore: DonationStore
 
-    @Inject
-    lateinit var newConnectionComponentBuilder: NewOBDConnectionComponent.Builder
-    @Inject
-    lateinit var dashboardComponentBuilder: DashboardComponent.Builder
-
-
-    override var newOBDConnectionComponent: NewOBDConnectionComponent? = null
-    override var dashboardComponent: DashboardComponent? = null
     private val gson = Gson()
 
     override fun onCreate() {
         super.onCreate()
-        globalComponent = DaggerCarConnectGlobalComponent
-                .builder()
-                .build()
-        globalComponent.inject(this)
-
         persistenceStore = BaseStore(this, Schedulers.io())
         donationStore = DonationStoreImpl(PreferenceManager.getDefaultSharedPreferences(this), gson)
 
@@ -148,22 +125,6 @@ class CarConnectApp : Application(),
 
     //-------------------------------------------------AppContract-------------------------------------------------------------
 
-    override fun buildNewOBDConnectionComponent(inputStream: InputStream, outputStream: OutputStream): NewOBDConnectionComponent {
-        newOBDConnectionComponent = newConnectionComponentBuilder
-                .requestModule(OBDConnectionModule(inputStream, outputStream))
-                .build()
-
-        return newOBDConnectionComponent!!
-    }
-
-
-    override fun buildNewDashboardComponent(): DashboardComponent {
-        dashboardComponent = dashboardComponentBuilder
-                .requestModule(DashboardModule(newOBDConnectionComponent!!
-                        .getOBDEngine()))
-                .build()
-        return dashboardComponent!!
-    }
 
     override fun onDataLoadingStartedFor(info: Vehicle) {
         //replace connection view with dashboard

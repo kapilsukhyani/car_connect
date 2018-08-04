@@ -118,7 +118,7 @@ class SettingsView : Fragment() {
                 .setTitle(getString(R.string.operation_failed))
                 .setMessage(getString(R.string.clear_dtc_error_message))
                 .setCancelable(false)
-                .setPositiveButton(android.R.string.ok) { dialog, which ->
+                .setPositiveButton(android.R.string.ok) { dialog, _ ->
                     dialog.dismiss()
                 }
                 .create()

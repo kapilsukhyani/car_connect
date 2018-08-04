@@ -65,7 +65,7 @@ class CarConnectApp : Application(),
 
     override fun onCreate() {
         super.onCreate()
-        persistenceStore = BaseStore(this, Schedulers.io())
+        persistenceStore = BaseStore(this, ioScheduler)
         donationStore = DonationStoreImpl(PreferenceManager.getDefaultSharedPreferences(this), gson)
 
         val sessionManager = OBDDeviceSessionManager(this, ioScheduler, computationScheduler,

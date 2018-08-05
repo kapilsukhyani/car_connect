@@ -5,7 +5,7 @@ import android.arch.persistence.room.Room
 import android.arch.persistence.room.RoomDatabase
 import android.content.Context
 import android.preference.PreferenceManager
-import com.exp.carconnect.Logger
+import com.crashlytics.android.Crashlytics
 import com.exp.carconnect.base.*
 import com.exp.carconnect.base.state.*
 import io.reactivex.Scheduler
@@ -13,6 +13,7 @@ import io.reactivex.Single
 import io.reactivex.functions.BiFunction
 import redux.api.Store
 import redux.asObservable
+import timber.log.Timber
 import java.util.concurrent.TimeUnit
 
 data class PersistedAppState(val knownDongles: Set<Dongle> = hashSetOf(),
@@ -60,12 +61,12 @@ class BaseStore(val context: Context, val ioScheduler: Scheduler) {
         private fun startListening() {
             recentlyUsedDongleObservable
                     .subscribe {
-                        Logger.log(TAG, "persisting new dongle")
+                        Timber.d("$TAG persisting new dongle")
                         baseAppStateDao.insertDongleAsRecentlyUsed(it.toEntity())
                     }
             recentlyUsedVehicleObservable
                     .subscribe {
-                        Logger.log(TAG, "persisting new vehicle")
+                        Timber.d("$TAG persisting new vehicle")
                         baseAppStateDao.insertVehicleAsRecentlyUsed(it.toEntity())
                     }
         }
@@ -76,12 +77,12 @@ class BaseStore(val context: Context, val ioScheduler: Scheduler) {
             .addCallback(object : RoomDatabase.Callback() {
                 override fun onCreate(db: SupportSQLiteDatabase) {
                     super.onCreate(db)
-                    Logger.log(TAG, "DB created")
+                    Timber.d("[${BaseStore.TAG}] DB created")
                 }
 
                 override fun onOpen(db: SupportSQLiteDatabase) {
                     super.onOpen(db)
-                    Logger.log(TAG, "DB opened")
+                    Timber.d("[${BaseStore.TAG}] DB opened")
                 }
             })
             .build()
@@ -183,7 +184,8 @@ class BaseStore(val context: Context, val ioScheduler: Scheduler) {
 
                 }
                 .onErrorReturn {
-                    Logger.log(TAG, "unexpected error while loading state", it)
+                    Crashlytics.getInstance().core.logException(Exception("Unable to restore state", it))
+                    Timber.d(it, "[${BaseStore.TAG}] unexpected error while loading state")
                     PersistedAppState()
                 }
 

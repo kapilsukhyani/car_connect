@@ -29,7 +29,7 @@ abstract class OBDRequest(val tag: String,
                         is BusInitException,
                         is NoDataException,
                         is UnknownErrorException -> {
-                            Logger.log("[$tag]", "caught retriable exception [$e], retrying")
+                            OBDLogger.log("[$tag]", "caught retriable exception [$e], retrying")
                             true
                         }
                         else -> false
@@ -59,7 +59,7 @@ abstract class OBDRequest(val tag: String,
                     }
                 }
                 .map { rawResponse ->
-                    Logger.log("[$tag]", "raw response [$rawResponse]")
+                    OBDLogger.log("[$tag]", "raw response [$rawResponse]")
                     try {
                         toResponse(rawResponse)
                     } catch (e: NonAlphaNumericException) {

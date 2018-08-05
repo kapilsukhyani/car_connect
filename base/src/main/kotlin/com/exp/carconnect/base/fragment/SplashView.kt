@@ -8,7 +8,6 @@ import android.os.Bundle
 import android.support.constraint.ConstraintLayout
 import android.support.constraint.ConstraintSet
 import android.support.v4.app.Fragment
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -16,6 +15,7 @@ import com.exp.carconnect.base.*
 import com.exp.carconnect.base.R
 import com.exp.carconnect.base.state.*
 import io.reactivex.disposables.CompositeDisposable
+import timber.log.Timber
 
 class SplashView : Fragment() {
     companion object {
@@ -37,7 +37,7 @@ class SplashView : Fragment() {
     }
 
     private fun showStatus(it: SplashScreenState) {
-        Log.d(TAG, "Received status $it")
+        Timber.d("$TAG Received status $it")
     }
 
     override fun onAttach(context: Context?) {
@@ -80,9 +80,9 @@ class SplashVM(app: Application) : AndroidViewModel(app) {
                         }
                     }
                     val baseAppState = (it[BaseAppState.STATE_KEY] as LoadableState.Loaded<BaseAppState>).savedState
-                    if(baseAppState.baseAppPersistedState
+                    if (baseAppState.baseAppPersistedState
                                     .appSettings
-                                    .usageReportingEnabled){
+                                    .usageReportingEnabled) {
                         app.enableReporting()
                         app.logContentViewEvent("SplashView")
                     }

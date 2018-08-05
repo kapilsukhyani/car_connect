@@ -145,7 +145,6 @@ public class SampleView extends View {
     }
 
     public void setPoint(int point) {
-        Log.d(TAG, "setPoint: " + point);
         animateIndicatorTo(getRotationForPoint(point));
     }
 
@@ -168,7 +167,6 @@ public class SampleView extends View {
         indicatorDegrees = degress;
         invalidate();
         requestLayout();
-        Log.d(TAG, "setIndicatorDegree: " + indicatorDegrees);
     }
 
     private void startDribbleAnimation() {

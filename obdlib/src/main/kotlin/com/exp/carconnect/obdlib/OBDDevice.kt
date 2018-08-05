@@ -25,14 +25,14 @@ internal class OBDDevice(private val inputStream: InputStream, private val outpu
             try {
                 if (returnCachedResponse &&
                         latestRequestResponseSnapShot.containsKey(command)) {
-                    Logger.log(TAG, "[ $command  ] returning cached response [  ${latestRequestResponseSnapShot[command]} ]")
+                    OBDLogger.log(TAG, "[ $command  ] returning cached response [  ${latestRequestResponseSnapShot[command]} ]")
                     return@defer Observable.just(latestRequestResponseSnapShot[command])
                 }
                 val startTime = System.currentTimeMillis()
                 writeCommand(command)
                 val response = readResponse(command)
                 val endTime = System.currentTimeMillis()
-                Logger.log(TAG, "[ $command  ] executed in [  ${endTime - startTime}  ]ms")
+                OBDLogger.log(TAG, "[ $command  ] executed in [  ${endTime - startTime}  ]ms")
                 latestRequestResponseSnapShot.put(command, response)
                 Observable.just(response)
             } catch (e: Exception) {

@@ -2,12 +2,13 @@ package com.exp.carconnect.base
 
 import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothSocket
-import android.util.Log
+import com.crashlytics.android.Crashlytics
 import io.reactivex.Observable
 import io.reactivex.ObservableEmitter
 import io.reactivex.ObservableOnSubscribe
 import redux.StoreChangeDisposable
 import redux.api.Store
+import timber.log.Timber
 import java.io.IOException
 import java.util.*
 
@@ -25,12 +26,12 @@ fun BluetoothDevice.connect(): BluetoothSocket {
     var sock: BluetoothSocket
     var sockFallback: BluetoothSocket?
 
-    Log.d("BluetoothDeviceExt", "Starting Bluetooth connection..")
+    Timber.d("BluetoothDeviceExt: Starting Bluetooth connection..")
     try {
         sock = this.createRfcommSocketToServiceRecord(MY_UUID)
         sock.connect()
     } catch (e1: Exception) {
-        Log.e("BluetoothDeviceExt", "There was an error while establishing Bluetooth connection. Falling back..", e1)
+        Timber.d(e1, "BluetoothDeviceExt: There was an error while establishing Bluetooth connection. Falling back..")
         val clazz = this::class.java
         val paramTypes = arrayOf<Class<*>>(Integer.TYPE)
         try {
@@ -40,12 +41,12 @@ fun BluetoothDevice.connect(): BluetoothSocket {
             sockFallback.connect()
             sock = sockFallback
         } catch (e2: Exception) {
-            Log.e("BluetoothDeviceExt", "Couldn't fallback while establishing Bluetooth connection.", e2)
+            Crashlytics.getInstance().core.logException(Exception("Unable to establish Bluetooth Connection", e2))
+            Timber.e(e2, "BluetoothDeviceExt: Couldn't fallback while establishing Bluetooth connection.")
             throw IOException(e2.message)
         }
 
     }
-
     return sock
 }
 

@@ -76,7 +76,6 @@ class SettingsView : Fragment() {
     }
 
     private fun onNewState(newState: SettingsScreenState) {
-        println("Settings New State $newState")
         when (newState) {
             SettingsScreenState.ShowingClearDTCButton -> {
                 clear_dtc_button.visibility = View.VISIBLE

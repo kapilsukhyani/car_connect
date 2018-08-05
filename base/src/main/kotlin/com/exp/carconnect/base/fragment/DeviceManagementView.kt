@@ -20,7 +20,6 @@ import android.support.v7.widget.DefaultItemAnimator
 import android.support.v7.widget.DividerItemDecoration
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -34,6 +33,7 @@ import com.exp.carconnect.base.state.*
 import io.reactivex.disposables.CompositeDisposable
 import kotlinx.android.synthetic.main.view_device_management.*
 import redux.api.Reducer
+import timber.log.Timber
 
 
 class DeviceManagementView : Fragment() {
@@ -90,7 +90,7 @@ class DeviceManagementView : Fragment() {
     }
 
     private fun onNewState(it: DeviceManagementScreenState) {
-        Log.d(TAG, "Received new state : $it")
+        Timber.d("$TAG Received new state : $it")
         when (it) {
             is DeviceManagementScreenState.ShowingDevices -> {
                 showDevices(it.devices)

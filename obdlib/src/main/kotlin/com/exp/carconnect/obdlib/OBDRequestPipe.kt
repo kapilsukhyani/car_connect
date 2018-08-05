@@ -55,14 +55,14 @@ internal class OBDRequestPipe(private val ioScheduler: Scheduler,
                 .observeOn(ioScheduler)
                 .subscribe(
                         { item ->
-                            Logger.log(TAG, "Submitted [${item.request.tag}] at [${Date()}]")
+                            OBDLogger.log(TAG, "Submitted [${item.request.tag}] at [${Date()}]")
                             executeRequestIfObserverAlive(item)
                         },
                         { error ->
-                            Logger.log(TAG, error)
+                            OBDLogger.log(TAG, error)
                         },
                         {
-                            Logger.log(TAG, "request pipe completed")
+                            OBDLogger.log(TAG, "request pipe completed")
                         })
 
     }
@@ -70,44 +70,44 @@ internal class OBDRequestPipe(private val ioScheduler: Scheduler,
 
     private fun executeRequestIfObserverAlive(item: Item) {
         if (item.responseEmitter.isDisposed) {
-            Logger.log(TAG, "[${item.request.tag}] disposed while waiting in queue")
+            OBDLogger.log(TAG, "[${item.request.tag}] disposed while waiting in queue")
             return
         }
         try {
-            Logger.log(TAG, "Executing [${item.request.tag}] at [${Date()}]")
+            OBDLogger.log(TAG, "Executing [${item.request.tag}] at [${Date()}]")
             val response = item.request
                     .execute(obdDevice)
                     .subscribe(
                             {
                                 when (item.responseEmitter.isDisposed) {
-                                    true -> Logger.log(TAG, "[${item.request.tag}] disposed while emitting value")
+                                    true -> OBDLogger.log(TAG, "[${item.request.tag}] disposed while emitting value")
                                     false -> item.responseEmitter.onNext(it)
                                 }
                             },
                             {
                                 when (item.responseEmitter.isDisposed) {
-                                    true -> Logger.log(TAG, "[${item.request.tag}] disposed while emitting error")
+                                    true -> OBDLogger.log(TAG, "[${item.request.tag}] disposed while emitting error")
                                     false -> item.responseEmitter.onError(it)
                                 }
                             },
                             {
                                 when (item.responseEmitter.isDisposed) {
-                                    true -> Logger.log(TAG, "[${item.request.tag}] disposed while emitting completion indicator")
+                                    true -> OBDLogger.log(TAG, "[${item.request.tag}] disposed while emitting completion indicator")
                                     false -> {
                                         item.responseEmitter.onComplete()
-                                        Logger.log(TAG, "Request Executed [${item.request.tag}]")
+                                        OBDLogger.log(TAG, "Request Executed [${item.request.tag}]")
                                     }
                                 }
                             })
 
             item.responseEmitter.setCancellable {
-                Logger.log(TAG, "[${item.request.tag}] disposed while executing")
+                OBDLogger.log(TAG, "[${item.request.tag}] disposed while executing")
                 response.dispose()
             }
 
 
         } catch (e: ExecutionException) {
-            Logger.log(TAG, "Exception while executing [${item.request.tag}]", e)
+            OBDLogger.log(TAG, "Exception while executing [${item.request.tag}]", e)
         }
     }
 

@@ -4,7 +4,6 @@ import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothSocket
 import android.content.Context
 import android.content.Intent
-import com.exp.carconnect.Logger
 import com.exp.carconnect.base.network.VehicleInfoLoader
 import com.exp.carconnect.base.state.*
 import com.exp.carconnect.obdlib.FailedOBDResponse
@@ -13,6 +12,7 @@ import com.exp.carconnect.obdlib.OBDMultiRequest
 import com.exp.carconnect.obdlib.obdmessage.*
 import io.reactivex.Observable
 import io.reactivex.Scheduler
+import timber.log.Timber
 import java.util.concurrent.TimeUnit
 
 class OBDDeviceSessionManager(private val context: Context,
@@ -36,11 +36,11 @@ class OBDDeviceSessionManager(private val context: Context,
 
         return activeSession!!
                 .start(settings)
-                .doOnDispose { Logger.log(TAG, "Active session data loading stopped") }
+                .doOnDispose { Timber.d("[$TAG] Active session data loading stopped") }
     }
 
     fun killActiveSession() {
-        Logger.log(TAG, "Killing an active session")
+        Timber.d("[$TAG] Killing an active session")
         activeSession = null
     }
 
@@ -48,7 +48,7 @@ class OBDDeviceSessionManager(private val context: Context,
                                                 settings: AppSettings): Observable<BaseAppAction> {
         return activeSession
                 ?.loadVehicleData(engine, settings)
-                ?.doOnDispose { Logger.log(TAG, "Active session data loading stopped") }
+                ?.doOnDispose { Timber.d("[$TAG] Active session data loading stopped") }
                 ?: Observable.empty()
     }
 
@@ -194,7 +194,7 @@ class OBDSession(val device: BluetoothDevice,
     private fun executeSetupCommands(engine: OBDEngine): Observable<BaseAppAction> {
         return engine.submit<OBDResponse>(resetCommand)
                 .doOnNext {
-                    Logger.log(TAG, "Got response ${it::class.java.simpleName}[${it.getFormattedResult()}]")
+                    Timber.d("[${OBDDeviceSessionManager.TAG}] Got response ${it::class.java.simpleName}[${it.getFormattedResult()}]")
                 }
                 .flatMap {
                     engine
@@ -214,7 +214,7 @@ class OBDSession(val device: BluetoothDevice,
 
     private fun loadVehicleInfo(engine: OBDEngine): Observable<BaseAppAction> {
         return engine.submit<OBDResponse>(vehicleInfoRequest)
-                .doOnNext { Logger.log(TAG, "Got response ${it::class.java.simpleName}[${it.getFormattedResult()}]") }
+                .doOnNext { Timber.d("[${OBDDeviceSessionManager.TAG}] Got response ${it::class.java.simpleName}[${it.getFormattedResult()}]") }
                 .toList()
                 .map { responses ->
                     var vin: String? = null
@@ -233,7 +233,7 @@ class OBDSession(val device: BluetoothDevice,
                                 standard = it.standard
                             }
                             is AvailablePidsResponse -> {
-                                Logger.log(TAG, "Available pids response " + it.availablePids)
+                                Timber.d("[${OBDDeviceSessionManager.TAG}] Available pids response ${it.availablePids}")
                                 availablePIDs.addAll(it.availablePids)
                             }
                         }

@@ -26,6 +26,7 @@ import com.exp.carconnect.donation.state.DonationStateLoadingEpic
 import com.exp.carconnect.donation.state.UpdateDonationEpic
 import com.exp.carconnect.donation.store.DonationStore
 import com.exp.carconnect.donation.store.DonationStoreImpl
+import com.exp.carconnect.obdlib.OBDLogger
 import com.exp.carconnect.report.pdf.ReportPDFGenerator
 import com.google.gson.Gson
 import io.fabric.sdk.android.Fabric
@@ -37,6 +38,7 @@ import redux.applyMiddleware
 import redux.combineReducers
 import redux.createStore
 import redux.observable.createEpicMiddleware
+import timber.log.Timber
 import java.util.*
 import java.util.concurrent.atomic.AtomicBoolean
 
@@ -65,11 +67,31 @@ class CarConnectApp : Application(),
 
     override fun onCreate() {
         super.onCreate()
+        Timber.plant(Timber.DebugTree())
+        OBDLogger.init(object : OBDLogger {
+            override fun log(tag: String, message: String) {
+                Timber.d("[OBD_LAYER][$tag] $message")
+            }
+
+            override fun log(tag: String, exception: Throwable) {
+                Timber.d(exception, "[OBD_LAYER][$tag]")
+            }
+
+            override fun log(tag: String, message: String, exception: Throwable) {
+                Timber.d(exception, "[OBD_LAYER][$tag] $message")
+            }
+
+        })
+
+        val initStartTime = System.currentTimeMillis()
         persistenceStore = BaseStore(this, ioScheduler)
         donationStore = DonationStoreImpl(PreferenceManager.getDefaultSharedPreferences(this), gson)
 
-        val sessionManager = OBDDeviceSessionManager(this, ioScheduler, computationScheduler,
-                mainScheduler, VehicleInfoLoaderFactoryImpl().getVehicleInfoLoader())
+        val sessionManager = OBDDeviceSessionManager(this,
+                ioScheduler,
+                computationScheduler,
+                mainScheduler,
+                VehicleInfoLoaderFactoryImpl().getVehicleInfoLoader())
 
         val reducers = combineReducers(AppStateNavigationReducer(),
                 BaseAppStateReducer(),
@@ -87,19 +109,29 @@ class CarConnectApp : Application(),
                 Pair(DonationModuleState.DONATION_STATE_KEY, LoadableState.NotLoaded)),
                 CarConnectUIState(Stack()))
 
-        val appStateLoadingMiddleware = createEpicMiddleware(BaseSateLoadingEpic(ioScheduler, mainScheduler, this))
-        val donationLoadingMiddleWare = createEpicMiddleware(DonationStateLoadingEpic(ioScheduler, mainScheduler, donationStore))
-        val obdSessionManagementMiddleware = createEpicMiddleware(OBDSessionManagementEpic(ioScheduler, mainScheduler
-                , sessionManager))
-        val clearDTCsMiddleware = createEpicMiddleware(ClearDTCsEpic(ioScheduler, mainScheduler
-                , sessionManager))
-        val fetchReportMiddleWare = createEpicMiddleware(FetchReportEpic(ioScheduler, mainScheduler
-                , sessionManager))
-        val captureReportMiddleWare = createEpicMiddleware(CaptureReportEpic(ioScheduler, mainScheduler
-                , ReportPDFGenerator((this))))
-        val updateDonationStatusEpic = createEpicMiddleware(UpdateDonationEpic(ioScheduler, mainScheduler, donationStore))
+        val appStateLoadingMiddleware = createEpicMiddleware(BaseSateLoadingEpic(ioScheduler,
+                mainScheduler,
+                this))
+        val donationLoadingMiddleWare = createEpicMiddleware(DonationStateLoadingEpic(ioScheduler,
+                mainScheduler,
+                donationStore))
+        val obdSessionManagementMiddleware = createEpicMiddleware(OBDSessionManagementEpic(ioScheduler,
+                mainScheduler,
+                sessionManager))
+        val clearDTCsMiddleware = createEpicMiddleware(ClearDTCsEpic(ioScheduler,
+                mainScheduler,
+                sessionManager))
+        val fetchReportMiddleWare = createEpicMiddleware(FetchReportEpic(ioScheduler,
+                mainScheduler,
+                sessionManager))
+        val captureReportMiddleWare = createEpicMiddleware(CaptureReportEpic(ioScheduler,
+                mainScheduler,
+                ReportPDFGenerator((this))))
+        val updateDonationStatusEpic = createEpicMiddleware(UpdateDonationEpic(ioScheduler,
+                mainScheduler,
+                donationStore))
 
-        println("debugtag: creating store")
+        Timber.d("creating store")
         store = createStore(reducers,
                 initialState,
                 applyMiddleware(appStateLoadingMiddleware,
@@ -109,7 +141,7 @@ class CarConnectApp : Application(),
                         fetchReportMiddleWare,
                         captureReportMiddleWare,
                         updateDonationStatusEpic))
-        println("debugtag: created store")
+        Timber.d("created store")
 
 
         persistenceStore.startListening(store)
@@ -119,6 +151,8 @@ class CarConnectApp : Application(),
                 Schedulers.io(),
                 AndroidSchedulers.mainThread(),
                 Schedulers.computation())
+
+        Timber.d("Initialization time ${System.currentTimeMillis() - initStartTime}")
 
     }
 

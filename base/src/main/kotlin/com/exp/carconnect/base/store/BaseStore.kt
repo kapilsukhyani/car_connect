@@ -1,5 +1,6 @@
 package com.exp.carconnect.base.store
 
+import android.annotation.SuppressLint
 import android.arch.persistence.db.SupportSQLiteDatabase
 import android.arch.persistence.room.Room
 import android.arch.persistence.room.RoomDatabase
@@ -30,7 +31,8 @@ class BaseStore(val context: Context, val ioScheduler: Scheduler) {
 
     class StateListener(val store: Store<AppState>,
                         private val ioScheduler: Scheduler,
-                        private val baseAppStateDao: BaseAppStateDao) {
+                        private val baseAppStateDao: BaseAppStateDao,
+                        private val context: Context) {
 
         private val activeSessionObservable = store.asObservable()
                 .filter { it.isBaseStateLoaded() }
@@ -54,6 +56,12 @@ class BaseStore(val context: Context, val ioScheduler: Scheduler) {
                 }
                 .observeOn(ioScheduler)
 
+        private val privacyPolicyAcceptedObservable =  store.asObservable()
+                .filter { it.isBaseStateLoaded() }
+                .map { it.getBaseAppState().baseAppPersistedState.appSettings.privacyPolicyAccepted }
+                .distinctUntilChanged()
+                .filter { it }
+
         init {
             startListening()
         }
@@ -69,6 +77,10 @@ class BaseStore(val context: Context, val ioScheduler: Scheduler) {
                         Timber.d("$TAG persisting new vehicle")
                         baseAppStateDao.insertVehicleAsRecentlyUsed(it.toEntity())
                     }
+            privacyPolicyAcceptedObservable.subscribe{
+                Timber.d("$TAG persisting privacy policy accepted")
+                baseAppStateDao.updatePrivacyPolicyToRead(context)
+            }
         }
     }
 
@@ -113,7 +125,7 @@ class BaseStore(val context: Context, val ioScheduler: Scheduler) {
     }
 
     fun startListening(store: Store<AppState>) {
-        StateListener(store, ioScheduler, baseAppStateDao)
+        StateListener(store, ioScheduler, baseAppStateDao, context)
     }
 
     internal fun loadAppState(): Single<PersistedAppState> {
@@ -129,6 +141,8 @@ class BaseStore(val context: Context, val ioScheduler: Scheduler) {
 
                     val defaultSharedPref = PreferenceManager.getDefaultSharedPreferences(context)
 
+                    val privacyPolicyAccepted = defaultSharedPref
+                            .getBoolean(context.getString(R.string.privacy_policy_flag_key), AppSettings.DEFAULT_PRIVACY_POLICY_FLAG_VALUE)
                     val backgroundConnectionEnabled = defaultSharedPref
                             .getBoolean(context.getString(R.string.background_connection_pref_key), AppSettings.DEFAULT_BACKGROUND_OPERATION_ENABLED)
                     val autoConnectEnabled = defaultSharedPref
@@ -180,7 +194,8 @@ class BaseStore(val context: Context, val ioScheduler: Scheduler) {
                                     speedNotificationSettings = speedNotificationSettings),
                             displaySettings = DisplaySettings(dashboardTheme = theme),
                             backgroundConnectionEnabled = backgroundConnectionEnabled,
-                            autoConnectToLastConnectedDongleOnLaunch = autoConnectEnabled))
+                            autoConnectToLastConnectedDongleOnLaunch = autoConnectEnabled,
+                            privacyPolicyAccepted = privacyPolicyAccepted))
 
                 }
                 .onErrorReturn {
@@ -191,4 +206,10 @@ class BaseStore(val context: Context, val ioScheduler: Scheduler) {
 
     }
 
+}
+
+@SuppressLint("ApplySharedPref")
+fun BaseAppStateDao.updatePrivacyPolicyToRead(context: Context) {
+    val defaultSharedPref = PreferenceManager.getDefaultSharedPreferences(context)
+    defaultSharedPref.edit().putBoolean(context.getString(R.string.privacy_policy_flag_key), true).commit()
 }

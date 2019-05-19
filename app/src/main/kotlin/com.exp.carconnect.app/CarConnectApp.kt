@@ -181,34 +181,38 @@ class CarConnectApp : Application(),
 
     override fun logEvent(event: AnswersEvent<*>) {
         //todo disable analytics in debug once tested
-//        if (!BuildConfig.DEBUG) {
-        if (reportingEnabled.get()) {
-            val answers = Answers.getInstance()
-            when (event) {
-                is CustomEvent -> {
-                    answers.logCustom(event)
-                }
-                is PurchaseEvent -> {
-                    answers.logPurchase(event)
-                }
-                is AddToCartEvent -> {
-                    answers.logAddToCart(event)
-                }
-                is ContentViewEvent -> {
-                    answers.logContentView(event)
-                }
-                is LevelStartEvent -> {
-                    answers.logLevelStart(event)
-                }
-                is LevelEndEvent -> {
-                    answers.logLevelEnd(event)
-                }
-                is ShareEvent -> {
-                    answers.logShare(event)
-                }
+        if (!BuildConfig.DEBUG) {
+            if (reportingEnabled.get()) {
+                val answers = Answers.getInstance()
+                when (event) {
+                    is CustomEvent -> {
+                        answers.logCustom(event)
+                    }
+                    is PurchaseEvent -> {
+                        answers.logPurchase(event)
+                    }
+                    is AddToCartEvent -> {
+                        answers.logAddToCart(event)
+                    }
+                    is ContentViewEvent -> {
+                        answers.logContentView(event)
+                    }
+                    is LevelStartEvent -> {
+                        answers.logLevelStart(event)
+                    }
+                    is LevelEndEvent -> {
+                        answers.logLevelEnd(event)
+                    }
+                    is ShareEvent -> {
+                        answers.logShare(event)
+                    }
 
+                }
             }
         }
-//        }
+    }
+
+    override fun onPrivacyPolicyAccepted() {
+        store.dispatch(BaseAppAction.UpdateAppSettings(store.state.getBaseAppState().baseAppPersistedState.appSettings.copy(privacyPolicyAccepted = true)))
     }
 }

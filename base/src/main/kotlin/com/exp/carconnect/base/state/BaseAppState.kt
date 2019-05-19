@@ -271,11 +271,13 @@ data class AppSettings(val dataSettings: DataSettings = DataSettings(),
                        val displaySettings: DisplaySettings = DisplaySettings(),
                        val backgroundConnectionEnabled: Boolean = DEFAULT_BACKGROUND_OPERATION_ENABLED,
                        val autoConnectToLastConnectedDongleOnLaunch: Boolean = DEFAULT_AUTO_CONNECTED_ENABLED,
-                       val usageReportingEnabled: Boolean = DEFAULT_USAGE_REPORTING_ENABLED) {
+                       val usageReportingEnabled: Boolean = DEFAULT_USAGE_REPORTING_ENABLED,
+                       val privacyPolicyAccepted: Boolean = DEFAULT_PRIVACY_POLICY_FLAG_VALUE) {
     companion object {
         const val DEFAULT_BACKGROUND_OPERATION_ENABLED = false
         const val DEFAULT_AUTO_CONNECTED_ENABLED = true
         const val DEFAULT_USAGE_REPORTING_ENABLED = true
+        const val DEFAULT_PRIVACY_POLICY_FLAG_VALUE = false
     }
 }
 
@@ -440,9 +442,10 @@ data class SettingsScreen(override val screenState: SettingsScreenState) : CarCo
 
 sealed class SplashScreenState : CarConnectIndividualViewState {
     // load successful can lead to either ConnectingToLastConnectedDevice or ShowingDevices
+    object ShowPrivacyPolicy: SplashScreenState()
     object LoadingAppState : SplashScreenState()
-
     object ShowLoadingError : SplashScreenState()
+    data class AppStateLoaded(val appState: BaseAppState): SplashScreenState()
 }
 
 sealed class ConnectionScreenState : CarConnectIndividualViewState {

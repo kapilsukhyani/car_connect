@@ -16,6 +16,7 @@ interface BaseAppContract {
     fun enableReporting()
     fun logEvent(event: AnswersEvent<*>)
     fun killSession()
+    fun onPrivacyPolicyAccepted()
 
     val store: Store<AppState>
     val persistenceStore: BaseStore
@@ -64,4 +65,8 @@ fun Application.logDataErrorAcknowledgedEvent(location: String) {
 fun Application.logBackPressedEvent(location: String) {
     logEvent(CustomEvent("device_back_pressed")
             .putCustomAttribute("location", location))
+}
+
+fun Application.onPrivacyPolicyAccepted() {
+    (this as BaseAppContract).onPrivacyPolicyAccepted()
 }

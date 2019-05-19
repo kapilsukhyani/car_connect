@@ -34,7 +34,7 @@ import kotlinx.android.synthetic.main.donation_view.*
 import redux.api.Reducer
 import java.util.*
 
-public class DonationView : Fragment {
+class DonationView : Fragment {
     private lateinit var viewModel: DonationVM
     private var progressDialog: ProgressDialog? = null
 
@@ -43,11 +43,6 @@ public class DonationView : Fragment {
     override fun onAttach(context: Context?) {
         super.onAttach(context)
         activity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
-    }
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-
     }
 
 
@@ -113,7 +108,7 @@ public class DonationView : Fragment {
                 .setTitle(getString(R.string.donation_error_title))
                 .setMessage(errorMessage)
                 .setCancelable(false)
-                .setPositiveButton(android.R.string.ok) { dialog, which ->
+                .setPositiveButton(android.R.string.ok) { dialog, _ ->
                     viewModel.onErrorAcknowledged(errorCode, products)
                     dialog.dismiss()
                 }
@@ -228,7 +223,7 @@ internal class DonationVM(app: Application) : AndroidViewModel(app), PurchasesUp
         skuList.addAll(DONATION_PRODUCT_IDs)
         val params = SkuDetailsParams.newBuilder()
         params.setSkusList(skuList).setType(BillingClient.SkuType.INAPP)
-        billingClient.querySkuDetailsAsync(params.build(), { responseCode, skuDetailsList ->
+        billingClient.querySkuDetailsAsync(params.build()) { responseCode, skuDetailsList ->
             if (responseCode == BillingResponse.OK && skuDetailsList != null) {
                 val products = ArrayList<Product>()
                 for (skuDetails in skuDetailsList) {
@@ -238,7 +233,7 @@ internal class DonationVM(app: Application) : AndroidViewModel(app), PurchasesUp
                 store.dispatch(DonationViewAction.ShowProducts(products))
             }
 
-        })
+        }
     }
 
     fun startDonationFlow(activity: Activity, product: Product) {

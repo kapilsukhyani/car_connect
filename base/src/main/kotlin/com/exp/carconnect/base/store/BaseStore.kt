@@ -11,6 +11,7 @@ import com.exp.carconnect.base.*
 import com.exp.carconnect.base.state.*
 import io.reactivex.Scheduler
 import io.reactivex.Single
+import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.functions.BiFunction
 import redux.api.Store
 import redux.asObservable
@@ -24,7 +25,7 @@ data class PersistedAppState(val knownDongles: Set<Dongle> = hashSetOf(),
                              val appSettings: AppSettings = AppSettings())
 
 
-class BaseStore(val context: Context, val ioScheduler: Scheduler) {
+class BaseStore(val context: Context, private val ioScheduler: Scheduler) {
     companion object {
         const val TAG = "BaseStore"
     }
@@ -56,31 +57,35 @@ class BaseStore(val context: Context, val ioScheduler: Scheduler) {
                 }
                 .observeOn(ioScheduler)
 
-        private val privacyPolicyAcceptedObservable =  store.asObservable()
+        private val privacyPolicyAcceptedObservable = store.asObservable()
                 .filter { it.isBaseStateLoaded() }
                 .map { it.getBaseAppState().baseAppPersistedState.appSettings.privacyPolicyAccepted }
                 .distinctUntilChanged()
                 .filter { it }
 
+        private val disposeBag: CompositeDisposable
+
         init {
+            disposeBag = CompositeDisposable()
             startListening()
         }
 
+
         private fun startListening() {
-            recentlyUsedDongleObservable
+            disposeBag.add(recentlyUsedDongleObservable
                     .subscribe {
                         Timber.d("$TAG persisting new dongle")
                         baseAppStateDao.insertDongleAsRecentlyUsed(it.toEntity())
-                    }
-            recentlyUsedVehicleObservable
+                    })
+            disposeBag.add(recentlyUsedVehicleObservable
                     .subscribe {
                         Timber.d("$TAG persisting new vehicle")
                         baseAppStateDao.insertVehicleAsRecentlyUsed(it.toEntity())
-                    }
-            privacyPolicyAcceptedObservable.subscribe{
+                    })
+            disposeBag.add(privacyPolicyAcceptedObservable.subscribe {
                 Timber.d("$TAG persisting privacy policy accepted")
                 baseAppStateDao.updatePrivacyPolicyToRead(context)
-            }
+            })
         }
     }
 
@@ -89,12 +94,12 @@ class BaseStore(val context: Context, val ioScheduler: Scheduler) {
             .addCallback(object : RoomDatabase.Callback() {
                 override fun onCreate(db: SupportSQLiteDatabase) {
                     super.onCreate(db)
-                    Timber.d("[${BaseStore.TAG}] DB created")
+                    Timber.d("[$TAG] DB created")
                 }
 
                 override fun onOpen(db: SupportSQLiteDatabase) {
                     super.onOpen(db)
-                    Timber.d("[${BaseStore.TAG}] DB opened")
+                    Timber.d("[$TAG] DB opened")
                 }
             })
             .build()
@@ -105,18 +110,18 @@ class BaseStore(val context: Context, val ioScheduler: Scheduler) {
     private val loadAllDongles = baseAppStateDao
             .getAllDonglesAndComplete()
             .onErrorReturn { listOf() }
-            .map {
-                Pair(it.firstOrNull { it.recentlyUsed }?.toDongle(),
-                        it.map { it.toDongle() }.toHashSet())
+            .map { dongleEntities ->
+                Pair(dongleEntities.firstOrNull { it.recentlyUsed }?.toDongle(),
+                        dongleEntities.map { it.toDongle() }.toHashSet())
             }
 
 
     private val loadAllVehicles = baseAppStateDao
             .getAllVehiclesAndComplete()
             .onErrorReturn { listOf() }
-            .map {
-                Pair(it.firstOrNull { it.recentlyUsed }?.toVehicle(),
-                        it.map { it.toVehicle() }.toHashSet())
+            .map { vehicleEntities ->
+                Pair(vehicleEntities.firstOrNull { it.recentlyUsed }?.toVehicle(),
+                        vehicleEntities.map { it.toVehicle() }.toHashSet())
             }
 
 
@@ -200,7 +205,7 @@ class BaseStore(val context: Context, val ioScheduler: Scheduler) {
                 }
                 .onErrorReturn {
                     Crashlytics.getInstance().core.logException(Exception("Unable to restore state", it))
-                    Timber.d(it, "[${BaseStore.TAG}] unexpected error while loading state")
+                    Timber.d(it, "[$TAG] unexpected error while loading state")
                     PersistedAppState()
                 }
 

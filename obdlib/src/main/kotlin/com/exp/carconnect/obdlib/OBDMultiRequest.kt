@@ -9,11 +9,7 @@ import java.util.*
 open class OBDMultiRequest(tag: String,
                            requests: List<OBDRequest>,
                            repeatable: IsRepeatable = IsRepeatable.No) : OBDRequest(tag, "", true, repeatable) {
-    val requests: List<OBDRequest>
-
-    init {
-        this.requests = Collections.unmodifiableList(requests)
-    }
+    private val requests: List<OBDRequest> = Collections.unmodifiableList(requests)
 
     override fun execute(device: IOBDDevice): Observable<OBDResponse> {
         return Observable.fromIterable(requests)

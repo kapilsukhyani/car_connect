@@ -1,7 +1,6 @@
 package com.exp.carconnect.base
 
 import android.bluetooth.BluetoothDevice
-import android.bluetooth.BluetoothSocket
 import android.content.Context
 import android.content.Intent
 import com.exp.carconnect.base.network.VehicleInfoLoader
@@ -156,10 +155,10 @@ class OBDSession(val device: BluetoothDevice,
         return Observable
                 .fromCallable {
                     try {
-                        val socket = device.connect()
-                        val engine = OBDEngine(socket.inputStream, socket.outputStream,
+                        val obdConnection = device.connect()
+                        val engine = OBDEngine(obdConnection.inputStream, obdConnection.outputStream,
                                 computationScheduler, ioScheduler)
-                        BaseAppAction.AddActiveSession(device, socket, engine)
+                        BaseAppAction.AddActiveSession(device, obdConnection, engine)
                     } catch (e: Throwable) {
                         BaseAppAction.DeviceConnectionFailed(device, e)
                     }
@@ -167,7 +166,7 @@ class OBDSession(val device: BluetoothDevice,
                 }.flatMap {
                     when (it) {
                         is BaseAppAction.AddActiveSession -> {
-                            startOBDSession(it.socket, it.device, it.engine, settings)
+                            startOBDSession(it.obdConnection, it.device, it.engine, settings)
                                     .startWith(it)
 
                         }
@@ -179,7 +178,7 @@ class OBDSession(val device: BluetoothDevice,
     }
 
 
-    private fun startOBDSession(socket: BluetoothSocket,
+    private fun startOBDSession(connection: OBDConnection,
                                 device: BluetoothDevice,
                                 engine: OBDEngine,
                                 settings: AppSettings): Observable<BaseAppAction> {

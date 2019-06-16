@@ -9,10 +9,13 @@ import io.reactivex.ObservableOnSubscribe
 import redux.StoreChangeDisposable
 import redux.api.Store
 import timber.log.Timber
+import java.io.Closeable
 import java.io.IOException
+import java.io.InputStream
+import java.io.OutputStream
 import java.util.*
 
-fun BluetoothDevice.connect(): BluetoothSocket {
+fun BluetoothDevice.connect(): OBDConnection {
     /* http://developer.android.com/reference/android/bluetooth/BluetoothDevice.html
     * #createRfcommSocketToServiceRecord(java.util.UUID)
     *
@@ -47,7 +50,7 @@ fun BluetoothDevice.connect(): BluetoothSocket {
         }
 
     }
-    return sock
+    return BluetoothOBDConnection(sock)
 }
 
 
@@ -73,6 +76,23 @@ class StoreChangeOnSubscribe<S : Any>(private val store: Store<S>) : ObservableO
                 subscription.unsubscribe()
             }
         })
+    }
+
+}
+
+interface OBDConnection : Closeable {
+    val inputStream: InputStream
+    val outputStream: OutputStream
+}
+
+private class BluetoothOBDConnection(private val socket: BluetoothSocket) : OBDConnection {
+    override val inputStream: InputStream
+        get() = socket.inputStream
+    override val outputStream: OutputStream
+        get() = socket.outputStream
+
+    override fun close() {
+        socket.close()
     }
 
 }

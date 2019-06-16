@@ -1,7 +1,6 @@
 package com.exp.carconnect.base.state
 
 import android.bluetooth.BluetoothDevice
-import android.bluetooth.BluetoothSocket
 import com.exp.carconnect.base.*
 import com.exp.carconnect.base.store.PersistedAppState
 import com.exp.carconnect.obdlib.OBDEngine
@@ -283,7 +282,7 @@ data class AppSettings(val dataSettings: DataSettings = DataSettings(),
 
 
 data class ActiveSession(val dongle: Dongle,
-                         val socket: BluetoothSocket,
+                         val obdConnection: OBDConnection,
                          val engine: OBDEngine,
                          val vehicle: LoadableState<Vehicle, Throwable> = LoadableState.NotLoaded,
                          val liveVehicleData: LoadableState<LiveVehicleData, Throwable>
@@ -442,10 +441,11 @@ data class SettingsScreen(override val screenState: SettingsScreenState) : CarCo
 
 sealed class SplashScreenState : CarConnectIndividualViewState {
     // load successful can lead to either ConnectingToLastConnectedDevice or ShowingDevices
-    object ShowPrivacyPolicy: SplashScreenState()
+    object ShowPrivacyPolicy : SplashScreenState()
+
     object LoadingAppState : SplashScreenState()
     object ShowLoadingError : SplashScreenState()
-    data class AppStateLoaded(val appState: BaseAppState): SplashScreenState()
+    data class AppStateLoaded(val appState: BaseAppState) : SplashScreenState()
 }
 
 sealed class ConnectionScreenState : CarConnectIndividualViewState {

@@ -1,7 +1,6 @@
 package com.exp.carconnect.base.state
 
 import android.bluetooth.BluetoothDevice
-import android.bluetooth.BluetoothSocket
 import com.exp.carconnect.base.*
 import com.exp.carconnect.obdlib.OBDEngine
 import com.exp.carconnect.obdlib.obdmessage.MonitorTest
@@ -24,7 +23,7 @@ sealed class BaseAppAction {
     data class VehicleInfoLoadingFailed(val device: BluetoothDevice, val error: Throwable) : BaseAppAction()
 
 
-    data class AddActiveSession(val device: BluetoothDevice, val socket: BluetoothSocket, val engine: OBDEngine) : BaseAppAction()
+    data class AddActiveSession(val device: BluetoothDevice, val obdConnection: OBDConnection, val engine: OBDEngine) : BaseAppAction()
     data class AddVehicleInfoToActiveSession(val device: BluetoothDevice, val info: Vehicle) : BaseAppAction()
     data class AddAirIntakeTemperature(val temp: Float) : BaseAppAction()
     data class AddAmbientAirTemperature(val temp: Float) : BaseAppAction()
@@ -167,14 +166,14 @@ class ActiveSessionReducer : Reducer<AppState> {
         return when (action) {
             is BaseAppAction.AddActiveSession -> {
                 state.copyAndReplaceActiveSession(ActiveSession(Dongle(action.device.address, action.device.name),
-                        action.socket, action.engine))
+                        action.obdConnection, action.engine))
             }
             is BaseAppAction.AddVehicleInfoToActiveSession -> {
                 state.copyAndReplaceActiveSession(state.getActiveSession().copy(vehicle = LoadableState.Loaded(action.info)))
             }
             is BaseAppAction.CloseSocketAndClearActiveSessionState -> {
                 if (state.isAnActiveSessionAvailable()) {
-                    state.getActiveSession().socket.close()
+                    state.getActiveSession().obdConnection.close()
                     state.clearActiveSessionState()
                 } else {
                     state

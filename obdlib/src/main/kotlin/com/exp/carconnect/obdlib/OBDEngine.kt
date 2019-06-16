@@ -12,7 +12,7 @@ class OBDEngine(sourceInputStream: InputStream,
                 ioScheduler: Scheduler,
                 computationScheduler: Scheduler) {
     companion object {
-        val TAG = "OBDEngine"
+        const val TAG = "OBDEngine"
     }
 
     private val pipe = OBDRequestPipe(ioScheduler, computationScheduler,

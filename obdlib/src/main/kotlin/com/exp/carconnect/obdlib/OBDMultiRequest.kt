@@ -15,10 +15,10 @@ open class OBDMultiRequest(tag: String,
         return Observable.fromIterable(requests)
                 .flatMap {
                     it.execute(device)
-                            .onErrorReturn { it: Throwable ->
-                                when (it) {
-                                    is ExecutionException -> getFailedOBDResponse(it)
-                                    else -> throw it
+                            .onErrorReturn { error ->
+                                when (error) {
+                                    is ExecutionException -> getFailedOBDResponse(error)
+                                    else -> throw error
                                 }
                             }
                 }

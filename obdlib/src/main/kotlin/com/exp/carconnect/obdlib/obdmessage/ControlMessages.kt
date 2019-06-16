@@ -67,7 +67,7 @@ class DTCNumberResponse(rawResponse: String) : OBDResponse("DTCNumberResponse", 
         milOn = buffer[2] and 0x80 == 128
         codeCount = buffer[2] and 0x7F
         motorType = if (buffer[3] and 0x08 == 8) {
-            tests = Array(9, { index ->
+            tests = Array(9) { index ->
                 var available = false
                 var complete = false
                 when (index) {
@@ -119,11 +119,11 @@ class DTCNumberResponse(rawResponse: String) : OBDResponse("DTCNumberResponse", 
 
                 }
 
-            })
+            }
             MotorType.COMPRESSION
 
         } else {
-            tests = Array(11, { index ->
+            tests = Array(11) { index ->
                 var available = false
                 var complete = false
                 when (index) {
@@ -186,7 +186,7 @@ class DTCNumberResponse(rawResponse: String) : OBDResponse("DTCNumberResponse", 
                     }
 
                 }
-            })
+            }
             MotorType.SPARK
         }
 

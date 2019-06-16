@@ -12,8 +12,8 @@ import java.util.*
 
 
 internal class OBDRequestPipe(private val ioScheduler: Scheduler,
-                     private val computationScheduler: Scheduler,
-                     private val obdDevice: IOBDDevice) : IOBDRequestPipe {
+                              private val computationScheduler: Scheduler,
+                              private val obdDevice: IOBDDevice) : IOBDRequestPipe {
 
     companion object {
         const val TAG = "OBDRequestPipe"
@@ -49,7 +49,7 @@ internal class OBDRequestPipe(private val ioScheduler: Scheduler,
     }
 
     private fun init() {
-        obdRequestPipe
+        val disposable = obdRequestPipe
                 .serialize()
                 .toFlowable(BackpressureStrategy.BUFFER)
                 .observeOn(ioScheduler)

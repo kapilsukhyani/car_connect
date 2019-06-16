@@ -116,12 +116,12 @@ abstract class BadResponseException(private val command: String, private val res
 
 
     companion object {
-        private val BUSINIT_ERROR_MESSAGE_PATTERN = "BUS INIT... ERROR"
-        private val MISUNDERSTOOD_COMMAND_MESSAGE_PATTERN = "?"
-        private val NO_DATE_MESSAGE_PATTERN = "NO DATA"
-        private val STOPPED_MESSAGE_PATERN = "STOPPED"
-        private val UNABLE_TO_CONNECT_MESSAGE_PATTERN = "UNABLE TO CONNECT"
-        private val ERROR_MESSAGE_PATTERN = "ERROR"
+        private const val BUSINIT_ERROR_MESSAGE_PATTERN = "BUS INIT... ERROR"
+        private const val MISUNDERSTOOD_COMMAND_MESSAGE_PATTERN = "?"
+        private const val NO_DATE_MESSAGE_PATTERN = "NO DATA"
+        private const val STOPPED_MESSAGE_PATERN = "STOPPED"
+        private const val UNABLE_TO_CONNECT_MESSAGE_PATTERN = "UNABLE TO CONNECT"
+        private const val ERROR_MESSAGE_PATTERN = "ERROR"
         private val UNSUPPORTED_COMMAND_MESSAGE_PATTERN = Pattern.compile("7F 0[0-A] 1[1-2]")
 
         private fun String.removeSpacesAndCapitalize(): String {
@@ -130,37 +130,31 @@ abstract class BadResponseException(private val command: String, private val res
 
         @Throws(BadResponseException::class)
         fun throwExceptionIfAny(command: String, response: String) {
-            if (response.removeSpacesAndCapitalize().contains(BUSINIT_ERROR_MESSAGE_PATTERN.removeSpacesAndCapitalize())) {
-                throw BusInitException(command, response)
-            } else if (response
-                            .removeSpacesAndCapitalize()
-                            .contains(MISUNDERSTOOD_COMMAND_MESSAGE_PATTERN
-                                    .removeSpacesAndCapitalize())) {
-                throw MisUnderstoodCommandException(command, response)
-            } else if (response
-                            .removeSpacesAndCapitalize()
-                            .contains(NO_DATE_MESSAGE_PATTERN
-                                    .removeSpacesAndCapitalize())) {
-                throw NoDataException(command, response)
-            } else if (response
-                            .removeSpacesAndCapitalize()
-                            .contains(STOPPED_MESSAGE_PATERN
-                                    .removeSpacesAndCapitalize())) {
-                throw StoppedException(command, response)
-            } else if (response
-                            .removeSpacesAndCapitalize()
-                            .contains(UNABLE_TO_CONNECT_MESSAGE_PATTERN
-                                    .removeSpacesAndCapitalize())) {
-                throw UnableToConnectException(command, response)
-            } else if (response
-                            .removeSpacesAndCapitalize()
-                            .contains(ERROR_MESSAGE_PATTERN
-                                    .removeSpacesAndCapitalize())) {
-                throw UnknownErrorException(command, response)
-            } else if (response
-                            .removeSpacesAndCapitalize()
-                            .matches(UNSUPPORTED_COMMAND_MESSAGE_PATTERN.toRegex())) {
-                throw UnSupportedCommandException(command, response)
+            when {
+                response.removeSpacesAndCapitalize().contains(BUSINIT_ERROR_MESSAGE_PATTERN.removeSpacesAndCapitalize()) -> throw BusInitException(command, response)
+                response
+                        .removeSpacesAndCapitalize()
+                        .contains(MISUNDERSTOOD_COMMAND_MESSAGE_PATTERN
+                                .removeSpacesAndCapitalize()) -> throw MisUnderstoodCommandException(command, response)
+                response
+                        .removeSpacesAndCapitalize()
+                        .contains(NO_DATE_MESSAGE_PATTERN
+                                .removeSpacesAndCapitalize()) -> throw NoDataException(command, response)
+                response
+                        .removeSpacesAndCapitalize()
+                        .contains(STOPPED_MESSAGE_PATERN
+                                .removeSpacesAndCapitalize()) -> throw StoppedException(command, response)
+                response
+                        .removeSpacesAndCapitalize()
+                        .contains(UNABLE_TO_CONNECT_MESSAGE_PATTERN
+                                .removeSpacesAndCapitalize()) -> throw UnableToConnectException(command, response)
+                response
+                        .removeSpacesAndCapitalize()
+                        .contains(ERROR_MESSAGE_PATTERN
+                                .removeSpacesAndCapitalize()) -> throw UnknownErrorException(command, response)
+                response
+                        .removeSpacesAndCapitalize()
+                        .matches(UNSUPPORTED_COMMAND_MESSAGE_PATTERN.toRegex()) -> throw UnSupportedCommandException(command, response)
             }
         }
     }

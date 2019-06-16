@@ -17,12 +17,12 @@ abstract class OBDRequest(val tag: String,
                           val isRepeatable: IsRepeatable = IsRepeatable.No,
                           val returnCachedResponse: Boolean = false) : Executable {
     companion object {
-        private val MAX_ATTEMPTS = 2
+        private const val MAX_ATTEMPTS = 2
     }
 
     override fun execute(device: IOBDDevice): Observable<OBDResponse> {
         return device.run(command, returnCachedResponse)
-                .retry(MAX_ATTEMPTS.toLong(), { e ->
+                .retry(MAX_ATTEMPTS.toLong()) { e ->
                     retriable && when (e) {
                         is StoppedException,
                         is UnableToConnectException,
@@ -34,7 +34,7 @@ abstract class OBDRequest(val tag: String,
                         }
                         else -> false
                     }
-                })
+                }
                 .lift<String> { downStream ->
                     object : Observer<String> {
                         override fun onError(e: Throwable) {
@@ -69,7 +69,7 @@ abstract class OBDRequest(val tag: String,
 
     }
 
-    open protected fun toResponse(rawResponse: String): OBDResponse {
+    protected open fun toResponse(rawResponse: String): OBDResponse {
         return RawResponse(rawResponse)
     }
 }

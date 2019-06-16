@@ -14,6 +14,7 @@
     <string name="setting_up">Setting Up</string>
 
     <string name="connection_error_message">Connection to %1$s failed [%2$s] </string>
+    <string name="last_device_auto_connection_bt_error">Connection to %1$s isn\'t possible, bluetooth not available</string>
     <string name="setup_error_message">%1$s Setup failed [%2$s] </string>
     <string name="vehicle_info_loading_error_message">Loading %1$s vehicle info failed [%2$s] </string>
     <string name="running_setup_message">Setting %1$s up</string>

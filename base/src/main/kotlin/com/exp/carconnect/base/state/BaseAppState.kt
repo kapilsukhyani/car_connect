@@ -1,6 +1,5 @@
 package com.exp.carconnect.base.state
 
-import android.bluetooth.BluetoothDevice
 import com.exp.carconnect.base.*
 import com.exp.carconnect.base.store.PersistedAppState
 import com.exp.carconnect.obdlib.OBDEngine
@@ -459,9 +458,9 @@ sealed class DeviceManagementScreenState : CarConnectIndividualViewState {
     //connect action will move state to connecting
     object LoadingDevices : DeviceManagementScreenState()
 
-    data class ShowingDevices(val devices: Set<BluetoothDevice>, val showUsageReportBanner: Boolean = false) : DeviceManagementScreenState()
+    data class ShowingDevices(val devices: Set<OBDDongle>, val showUsageReportBanner: Boolean = false) : DeviceManagementScreenState()
 
-    object ShowingBluetoothUnAvailableError : DeviceManagementScreenState()
+    data class ShowingError(val title: String, val message: String) : DeviceManagementScreenState()
 }
 
 

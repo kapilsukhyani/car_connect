@@ -13,18 +13,18 @@ sealed class BaseAppAction {
     data class BaseAppStateLoadError(val error: BaseAppStateLoadingError) : BaseAppAction()
 
 
-    data class StartNewSession(val device: BluetoothDevice) : BaseAppAction()
+    data class StartNewSession(val device: OBDDongle) : BaseAppAction()
 
-    data class DeviceConnectionFailed(val device: BluetoothDevice, val error: Throwable) : BaseAppAction()
-    data class RunningSetup(val device: BluetoothDevice) : BaseAppAction()
-    data class SetupCompleted(val device: BluetoothDevice) : BaseAppAction()
-    data class SetupFailed(val device: BluetoothDevice, val error: Throwable) : BaseAppAction()
-    data class LoadingVehicleInfo(val device: BluetoothDevice) : BaseAppAction()
-    data class VehicleInfoLoadingFailed(val device: BluetoothDevice, val error: Throwable) : BaseAppAction()
+    data class DeviceConnectionFailed(val device: OBDDongle, val error: Throwable) : BaseAppAction()
+    data class RunningSetup(val device: OBDDongle) : BaseAppAction()
+    data class SetupCompleted(val device: OBDDongle) : BaseAppAction()
+    data class SetupFailed(val device: OBDDongle, val error: Throwable) : BaseAppAction()
+    data class LoadingVehicleInfo(val device: OBDDongle) : BaseAppAction()
+    data class VehicleInfoLoadingFailed(val device: OBDDongle, val error: Throwable) : BaseAppAction()
 
 
-    data class AddActiveSession(val device: BluetoothDevice, val obdConnection: OBDConnection, val engine: OBDEngine) : BaseAppAction()
-    data class AddVehicleInfoToActiveSession(val device: BluetoothDevice, val info: Vehicle) : BaseAppAction()
+    data class AddActiveSession(val device: OBDDongle, val obdConnection: OBDConnection, val engine: OBDEngine) : BaseAppAction()
+    data class AddVehicleInfoToActiveSession(val device: OBDDongle, val info: Vehicle) : BaseAppAction()
     data class AddAirIntakeTemperature(val temp: Float) : BaseAppAction()
     data class AddAmbientAirTemperature(val temp: Float) : BaseAppAction()
     data class AddRPM(val rpm: Float) : BaseAppAction()
@@ -89,7 +89,7 @@ sealed class BaseAppAction {
     data class AddAbsoluteEvapSystemVaporPressureToReport(val value: Float) : BaseAppAction()
     data class AddEvapSystemVaporPressureToReport(val value: Float) : BaseAppAction()
     data class AddWarmupsSinceCodeClearedToReport(val value: Int) : BaseAppAction()
-    data class AddFailedToLoadReportErrorToState(val device: BluetoothDevice, val error: Throwable) : BaseAppAction()
+    data class AddFailedToLoadReportErrorToState(val device: OBDDongle, val error: Throwable) : BaseAppAction()
 
     object ClearDTCs : BaseAppAction()
     object FetchReport : BaseAppAction()

@@ -8,7 +8,6 @@ import android.app.AlertDialog
 import android.app.Application
 import android.arch.lifecycle.*
 import android.bluetooth.BluetoothAdapter
-import android.bluetooth.BluetoothDevice
 import android.content.Context
 import android.content.pm.ActivityInfo
 import android.os.Bundle
@@ -99,8 +98,8 @@ class DeviceManagementView : Fragment() {
                 }
             }
 
-            DeviceManagementScreenState.ShowingBluetoothUnAvailableError -> {
-                showBluetoothNotAvailableError()
+            is DeviceManagementScreenState.ShowingError -> {
+                showError(it.title, it.message)
             }
         }
 
@@ -118,7 +117,7 @@ class DeviceManagementView : Fragment() {
         usage_report_banner.postDelayed(hideBannerRunnable, 3500)
     }
 
-    private fun showBluetoothNotAvailableError() {
+    private fun showError(title: String, message: String) {
         AlertDialog
                 .Builder(activity)
                 .setTitle(getString(R.string.bluetooth_error_title))
@@ -138,11 +137,11 @@ class DeviceManagementView : Fragment() {
                 .removeCallbacks(hideBannerRunnable)
     }
 
-    private fun showDevices(devices: Set<BluetoothDevice>) {
+    private fun showDevices(devices: Set<OBDDongle>) {
         animateDeviceContainer {
         }
-        bondedDeviceList.adapter = BondedDeviceAdapter(DeviceManagementView@ this.activity, devices.toList()) {
-            deviceManagementVM.onDeviceSelected(it)
+        bondedDeviceList.adapter = DeviceListAdapter(DeviceManagementView@ this.activity, devices.toList()) {
+            onDeviceSelected(it)
         }
     }
 
@@ -199,21 +198,18 @@ class DeviceManagementView : Fragment() {
         val animatorSet = AnimatorSet()
         animatorSet.playSequentially(guidelineAnimator, appLogoAnimator)
         animatorSet.start()
-
     }
 
-    private fun onDeviceSelected(device: BluetoothDevice) {
+    private fun onDeviceSelected(device: OBDDongle) {
         deviceManagementVM.onDeviceSelected(device)
-
     }
-
 
 }
 
 
 class DeviceManagementVM(app: Application) : AndroidViewModel(app) {
 
-
+    private val dongleLoader = OBDDongleLoader()
     private val deviceManagementViewLiveData = MutableLiveData<DeviceManagementScreenState>()
     private val store = (app as BaseAppContract).store
     private val storeSubscription: CompositeDisposable = CompositeDisposable()
@@ -230,7 +226,7 @@ class DeviceManagementVM(app: Application) : AndroidViewModel(app) {
                 .distinctUntilChanged()
                 .subscribe {
                     deviceManagementViewLiveData.value = it
-                    if (it == DeviceManagementScreenState.ShowingBluetoothUnAvailableError) {
+                    if (it is DeviceManagementScreenState.ShowingError) {
                         app.logContentViewEvent("BluetoothErrorDialog")
                     }
                 })
@@ -247,41 +243,39 @@ class DeviceManagementVM(app: Application) : AndroidViewModel(app) {
                     if (it.second) {
                         store.dispatch(CommonAppAction.FinishCurrentView)
                     } else {
-                        loadDevices()
+                        loadBluetoothBondedDevices()
                     }
                 })
-
     }
 
-    private fun loadDevices() {
-        BluetoothAdapter
-                .getDefaultAdapter()?.let { bluetoothAdapter ->
-                    if (bluetoothAdapter.isEnabled) {
+    private fun loadBluetoothBondedDevices() {
+        storeSubscription.add(store.asCustomObservable()
+                .take(1)
+                .map {
+                    Pair(it.getBaseAppState().baseAppPersistedState, it.uiState.isRestoringCurrentViewFromBackStack())
+                }
+                .subscribe {
+                    val persistedState = it.first
+                    val isViewRestoredFromBackStack = it.second
+                    if (persistedState.lastConnectedDongle != null &&
+                            !isViewRestoredFromBackStack &&
+                            persistedState.appSettings.autoConnectToLastConnectedDongleOnLaunch) {
+                        val adapter = BluetoothAdapter.getDefaultAdapter()
+                        if (adapter?.isEnabled != true) {
+                            store.dispatch(DeviceManagementViewAction
+                                    .ShowError(getString(R.string.bluetooth_error_title),
+                                            getString(R.string.last_device_auto_connection_bt_error,
+                                                    persistedState.lastConnectedDongle.name)))
+                        } else {
+                            onDeviceSelected(OBDDongle(adapter.getRemoteDevice(persistedState.lastConnectedDongle.address)))
 
-                        store.asCustomObservable()
-                                .take(1)
-                                .map {
-                                    Pair(it.getBaseAppState().baseAppPersistedState, it.uiState.isRestoringCurrentViewFromBackStack())
-                                }
-                                .subscribe {
-                                    val persistedState = it.first
-                                    val isViewRestoredFromBackStack = it.second
-                                    if (persistedState.lastConnectedDongle != null && !isViewRestoredFromBackStack && persistedState.appSettings.autoConnectToLastConnectedDongleOnLaunch) {
-                                        onDeviceSelected(bluetoothAdapter.getRemoteDevice(persistedState.lastConnectedDongle.address))
-                                    } else {
-                                        store.dispatch(DeviceManagementViewAction
-                                                .ShowBondedDevicesAndUsageReportBanner(bluetoothAdapter
-                                                        .bondedDevices, persistedState.appSettings.usageReportingEnabled))
-                                    }
-                                }
-
-
+                        }
                     } else {
                         store.dispatch(DeviceManagementViewAction
-                                .ShowBluetoothError)
+                                .ShowDonglesAndUsageReportBanner(dongleLoader.loadDevices(includeSimulator = true),
+                                        persistedState.appSettings.usageReportingEnabled))
                     }
-                } ?: store.dispatch(DeviceManagementViewAction
-                .ShowBluetoothError)
+                })
     }
 
     override fun onCleared() {
@@ -292,7 +286,7 @@ class DeviceManagementVM(app: Application) : AndroidViewModel(app) {
         return deviceManagementViewLiveData
     }
 
-    fun onDeviceSelected(device: BluetoothDevice) {
+    fun onDeviceSelected(device: OBDDongle) {
         getApplication<Application>().logEvent(CustomEvent("bonded_device_selected")
                 .putCustomAttribute("Device", "[${device.name} - ${device.address}]"))
 
@@ -321,16 +315,16 @@ class DeviceManagementVM(app: Application) : AndroidViewModel(app) {
 
 
 sealed class DeviceManagementViewAction {
-    data class ShowBondedDevicesAndUsageReportBanner(val devices: Set<BluetoothDevice>, val showBanner: Boolean = false) : DeviceManagementViewAction()
-    object ShowBluetoothError : DeviceManagementViewAction()
+    data class ShowDonglesAndUsageReportBanner(val devices: Set<OBDDongle>, val showBanner: Boolean = false) : DeviceManagementViewAction()
+    data class ShowError(val title: String,
+                         val message: String) : DeviceManagementViewAction()
 }
 
 
 class DeviceManagementScreenStateReducer : Reducer<AppState> {
     override fun reduce(state: AppState, action: Any): AppState {
         return when (action) {
-            is DeviceManagementViewAction.ShowBondedDevicesAndUsageReportBanner -> {
-
+            is DeviceManagementViewAction.ShowDonglesAndUsageReportBanner -> {
                 state.copy(uiState = state
                         .uiState
                         .copy(backStack = state
@@ -340,15 +334,14 @@ class DeviceManagementScreenStateReducer : Reducer<AppState> {
                                 DeviceManagementScreen(DeviceManagementScreenState.ShowingDevices(action.devices, action.showBanner))))
             }
 
-            is DeviceManagementViewAction.ShowBluetoothError -> {
-
+            is DeviceManagementViewAction.ShowError -> {
                 state.copy(uiState = state
                         .uiState
                         .copy(backStack = state
                                 .uiState
                                 .backStack
                                 .subList(0, state.uiState.backStack.size - 1) +
-                                DeviceManagementScreen(DeviceManagementScreenState.ShowingBluetoothUnAvailableError)))
+                                DeviceManagementScreen(DeviceManagementScreenState.ShowingError(action.title, action.message))))
             }
             else -> {
                 state
@@ -359,28 +352,32 @@ class DeviceManagementScreenStateReducer : Reducer<AppState> {
 }
 
 
-private class BondedDeviceAdapter(val context: Context, val bondedDevices: List<BluetoothDevice>, val itemClickListener: (BluetoothDevice) -> Unit) : RecyclerView.Adapter<BondedDeviceRowViewHolder>() {
+private class DeviceListAdapter(val context: Context, val dongles: List<OBDDongle>, val itemClickListener: (OBDDongle) -> Unit) : RecyclerView.Adapter<BondedDeviceRowViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup?, viewType: Int): BondedDeviceRowViewHolder {
         return BondedDeviceRowViewHolder(LayoutInflater.from(context).inflate(R.layout.view_available_devices_row, null) as TextView, itemClickListener)
     }
 
     override fun getItemCount(): Int {
-        return bondedDevices.size
+        return dongles.size
     }
 
     override fun onBindViewHolder(holder: BondedDeviceRowViewHolder, position: Int) {
-        holder.textView.text = bondedDevices[position].name
-        holder.textView.tag = bondedDevices[position]
+        if (!dongles[position].connectable()) {
+            holder.textView.isEnabled = false
+        }
+        holder.textView.text = dongles[position].name
+        holder.textView.tag = dongles[position]
     }
 
 }
 
-private class BondedDeviceRowViewHolder(val textView: TextView, itemClickListener: (BluetoothDevice) -> Unit) : RecyclerView.ViewHolder(textView) {
+private class BondedDeviceRowViewHolder(val textView: TextView,
+                                        itemClickListener: (OBDDongle) -> Unit) : RecyclerView.ViewHolder(textView) {
     init {
         textView.layoutParams = ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
         textView.setOnClickListener {
-            itemClickListener.invoke(textView.tag as BluetoothDevice)
+            itemClickListener.invoke(textView.tag as OBDDongle)
         }
     }
 }

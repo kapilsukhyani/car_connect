@@ -25,7 +25,7 @@ class OBDDeviceSessionManager(private val context: Context,
 
     private var activeSession: OBDSession? = null
 
-    fun startNewSession(device: BluetoothDevice,
+    fun startNewSession(device: OBDDongle,
                         settings: AppSettings): Observable<BaseAppAction> {
         activeSession = OBDSession(device,
                 ioScheduler,
@@ -74,7 +74,7 @@ class OBDDeviceSessionManager(private val context: Context,
 }
 
 //todo handle FailedOBDResponse for all the multi request
-class OBDSession(val device: BluetoothDevice,
+class OBDSession(val device: OBDDongle,
                  private val ioScheduler: Scheduler,
                  private val computationScheduler: Scheduler,
                  private val mainScheduler: Scheduler,
@@ -147,8 +147,6 @@ class OBDSession(val device: BluetoothDevice,
                 AbsoluteEvapSystemPressureRequest(),
                 EvapSystemPressureRequest(),
                 WarmupsSinceCodeClearedRequest())
-
-
     }
 
     fun start(settings: AppSettings): Observable<BaseAppAction> {
@@ -179,7 +177,7 @@ class OBDSession(val device: BluetoothDevice,
 
 
     private fun startOBDSession(connection: OBDConnection,
-                                device: BluetoothDevice,
+                                device: OBDDongle,
                                 engine: OBDEngine,
                                 settings: AppSettings): Observable<BaseAppAction> {
 

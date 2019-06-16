@@ -1,8 +1,13 @@
 package com.exp.carconnect.base
 
+import android.app.Application
+import android.arch.lifecycle.AndroidViewModel
+import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothSocket
+import android.support.annotation.StringRes
 import com.crashlytics.android.Crashlytics
+import com.exp.carconnect.obdlib.SimulatedStreams
 import io.reactivex.Observable
 import io.reactivex.ObservableEmitter
 import io.reactivex.ObservableOnSubscribe
@@ -15,7 +20,15 @@ import java.io.InputStream
 import java.io.OutputStream
 import java.util.*
 
-fun BluetoothDevice.connect(): OBDConnection {
+
+fun AndroidViewModel.getString(@StringRes id: Int,
+                               vararg formatArgs: Any = emptyArray()): String = if (formatArgs.isEmpty()) {
+    getApplication<Application>().getString(id)
+} else {
+    getApplication<Application>().getString(id, formatArgs)
+}
+
+private fun BluetoothDevice.connect(): OBDConnection {
     /* http://developer.android.com/reference/android/bluetooth/BluetoothDevice.html
     * #createRfcommSocketToServiceRecord(java.util.UUID)
     *
@@ -85,6 +98,30 @@ interface OBDConnection : Closeable {
     val outputStream: OutputStream
 }
 
+sealed class OBDDongle(val name: String,
+                       val address: String) {
+    abstract fun connect(): OBDConnection
+    abstract fun connectable(): Boolean
+}
+
+
+interface OBDDongleLoader {
+    fun loadDevices(includeSimulator: Boolean = true): Set<OBDDongle> = loadDevices().let { loadedDevices ->
+        val set = mutableSetOf<OBDDongle>()
+        if (includeSimulator) {
+            set.add(SimulatedOBDDongle())
+        }
+        set.addAll(loadedDevices)
+        set
+    }
+
+    fun loadDevices(): Set<OBDDongle>
+}
+
+
+fun OBDDongle(device: BluetoothDevice): OBDDongle = BluetoothOBDDongle(device)
+fun OBDDongleLoader(): OBDDongleLoader = BluetoothOBDDongleLoader()
+
 private class BluetoothOBDConnection(private val socket: BluetoothSocket) : OBDConnection {
     override val inputStream: InputStream
         get() = socket.inputStream
@@ -94,5 +131,35 @@ private class BluetoothOBDConnection(private val socket: BluetoothSocket) : OBDC
     override fun close() {
         socket.close()
     }
+}
 
+class BluetoothOBDDongle(private val device: BluetoothDevice) : OBDDongle(device.name, device.address) {
+    override fun connect(): OBDConnection = device.connect()
+    override fun connectable(): Boolean = BluetoothAdapter.getDefaultAdapter()?.isEnabled ?: false
+}
+
+class SimulatedOBDDongle : OBDDongle("Simulator", "Dummy") {
+    private val simulatedStreams = SimulatedStreams()
+    override fun connect(): OBDConnection = object : OBDConnection {
+        override val inputStream: InputStream
+            get() = simulatedStreams.inputStream
+        override val outputStream: OutputStream
+            get() = simulatedStreams.outputStream
+
+        override fun close() {
+            //no op
+        }
+
+    }
+
+    override fun connectable(): Boolean = true
+
+}
+
+private class BluetoothOBDDongleLoader : OBDDongleLoader {
+    override fun loadDevices(): Set<OBDDongle> = BluetoothAdapter.getDefaultAdapter()
+            ?.bondedDevices
+            ?.map { bondedBTDevice -> OBDDongle(bondedBTDevice) }
+            ?.toSet()
+            ?: emptySet()
 }

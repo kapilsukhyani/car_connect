@@ -1,7 +1,7 @@
 package com.exp.carconnect.obdlib.obdmessage
 
 
-class TemperatureRequest(private val temperatureType: TemperatureType,
+class TemperatureRequest(val temperatureType: TemperatureType,
                          retriable: Boolean = true,
                          repeatable: IsRepeatable = IsRepeatable.No) :
         OBDRequest("TemperatureRequest", temperatureType.command, retriable, repeatable) {
@@ -10,14 +10,18 @@ class TemperatureRequest(private val temperatureType: TemperatureType,
     }
 }
 
-class TemperatureResponse(rawResponse: String, val type: TemperatureType) : OBDResponse("TemperatureResponse", rawResponse) {
-    val temperature: Int
+class TemperatureResponse(val temperature: Int,
+                          val type: TemperatureType,
+                          rawResponse: String = "") : OBDResponse("TemperatureResponse", rawResponse) {
 
-    init {
+    constructor(rawResponse: String, type: TemperatureType) : this({
         val buffer = rawResponse.toIntList()
         // // ignore first two bytes [hh hh] of the response
-        temperature = buffer[2] - 40
-    }
+        val temperature = buffer[2] - 40
+        temperature
+    }(),
+            type,
+            rawResponse)
 
     override fun getFormattedResult(): String {
         return "$temperature C"
@@ -32,7 +36,7 @@ enum class TemperatureType(val command: String) {
 }
 
 
-class CatalystTemperatureRequest(private val temperatureType: CatalystTemperatureType,
+class CatalystTemperatureRequest(val temperatureType: CatalystTemperatureType,
                                  retriable: Boolean = true,
                                  repeatable: IsRepeatable = IsRepeatable.No) :
         MultiModeOBDRequest(OBDRequestMode.CURRENT, "CatalystTemperatureRequest", temperatureType.command, retriable, repeatable) {
@@ -41,14 +45,18 @@ class CatalystTemperatureRequest(private val temperatureType: CatalystTemperatur
     }
 }
 
-class CatalystTemperatureResponse(rawResponse: String, val type: CatalystTemperatureType) : OBDResponse("CatalystTemperatureResponse", rawResponse) {
-    val temperature: Float
+class CatalystTemperatureResponse(val temperature: Float,
+                                  val type: CatalystTemperatureType,
+                                  rawResponse: String = "") : OBDResponse("CatalystTemperatureResponse", rawResponse) {
 
-    init {
+    constructor(rawResponse: String, type: CatalystTemperatureType) : this({
         val buffer = rawResponse.toIntList()
         // // ignore first two bytes [hh hh] of the response
-        temperature = (256.0f * buffer[2] + buffer[3]) / 10.0f - 40
-    }
+        val temperature = (256.0f * buffer[2] + buffer[3]) / 10.0f - 40
+        temperature
+    }(),
+            type,
+            rawResponse)
 
     override fun getFormattedResult(): String {
         return "$temperature C"

@@ -15,17 +15,27 @@ class OBDEngine(sourceInputStream: InputStream,
         const val TAG = "OBDEngine"
     }
 
+    private val simulationEnabled = sourceInputStream.isSimulationEnabled()
+    private val simulationResponseSource: SimulationResponseSource by lazy {
+        sourceInputStream.getSource()
+    }
+    private val simulatorOBDDevice = SimulatorOBDDevice()
+
     private val pipe: IOBDRequestPipe by lazy {
-        if (sourceInputStream.isSimulationEnabled()) {
-            OBDRequestPipe(ioScheduler, computationScheduler,
-                    OBDDevice(sourceInputStream, sourceOutputStream))
-        } else {
-            SimulatorRequestPipe()
-        }
+        OBDRequestPipe(ioScheduler,
+                computationScheduler,
+                OBDDevice(sourceInputStream, sourceOutputStream))
     }
 
     fun <T : OBDResponse> submit(request: OBDRequest): Observable<T> {
-        return pipe.submitRequest(request)
+        val req = if (simulationEnabled) {
+            SimulatedRequest(request,
+                    simulationResponseSource,
+                    simulatorOBDDevice)
+        } else {
+            request
+        }
+        return pipe.submitRequest(req)
     }
 
 }

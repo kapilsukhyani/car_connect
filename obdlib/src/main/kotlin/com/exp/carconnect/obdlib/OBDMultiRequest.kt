@@ -11,10 +11,11 @@ open class OBDMultiRequest(tag: String,
                            repeatable: IsRepeatable = IsRepeatable.No) : OBDRequest(tag, "", true, repeatable) {
     private val requests: List<OBDRequest> = Collections.unmodifiableList(requests)
 
-    override fun execute(device: IOBDDevice): Observable<OBDResponse> {
+    override fun execute(device: IOBDDevice,
+                         responseHandler: (OBDRequest, String) -> OBDResponse): Observable<OBDResponse> {
         return Observable.fromIterable(requests)
                 .flatMap {
-                    it.execute(device)
+                    it.execute(device, responseHandler)
                             .onErrorReturn { error ->
                                 when (error) {
                                     is ExecutionException -> getFailedOBDResponse(error)

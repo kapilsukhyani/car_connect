@@ -10,14 +10,15 @@ class BarometricPressureRequest(mode: OBDRequestMode = OBDRequestMode.CURRENT,
     }
 }
 
-class BarometricPressureResponse(rawResponse: String) : OBDResponse("BarometricPressureResponse", rawResponse) {
-    val barometricPressure: Int
-
-    init {
+class BarometricPressureResponse(val barometricPressure: Int,
+                                 rawResponse: String = "") : OBDResponse("BarometricPressureResponse", rawResponse) {
+    constructor(rawResponse: String) : this({
         val buffer = rawResponse.toIntList()
         // // ignore first two bytes [hh hh] of the response
-        barometricPressure = buffer[2]
-    }
+        val barometricPressure = buffer[2]
+        barometricPressure
+    }(),
+            rawResponse)
 
     override fun getFormattedResult(): String {
         return "$barometricPressure kPa"
@@ -34,14 +35,15 @@ class FuelPressureRequest(mode: OBDRequestMode = OBDRequestMode.CURRENT,
     }
 }
 
-class FuelPressureResponse(rawResponse: String) : OBDResponse("FuelPressureResponse", rawResponse) {
-    val fuelPressure: Int
-
-    init {
+class FuelPressureResponse(val fuelPressure: Int,
+                           rawResponse: String = "") : OBDResponse("FuelPressureResponse", rawResponse) {
+    constructor(rawResponse: String) : this({
         val buffer = rawResponse.toIntList()
         // // ignore first two bytes [hh hh] of the response
-        fuelPressure = buffer[2] * 3
-    }
+        val fuelPressure = buffer[2] * 3
+        fuelPressure
+    }(),
+            rawResponse)
 
     override fun getFormattedResult(): String {
         return "$fuelPressure kPa"
@@ -58,14 +60,15 @@ class FuelRailPressureRequest(mode: OBDRequestMode = OBDRequestMode.CURRENT,
     }
 }
 
-class FuelRailPressureResponse(rawResponse: String) : OBDResponse("FuelRailPressureResponse", rawResponse) {
-    val fuelRailPressure: Int
-
-    init {
+class FuelRailPressureResponse(val fuelRailPressure: Int,
+                               rawResponse: String = "") : OBDResponse("FuelRailPressureResponse", rawResponse) {
+    constructor(rawResponse: String) : this({
         val buffer = rawResponse.toIntList()
         // // ignore first two bytes [hh hh] of the response
-        fuelRailPressure = ((buffer[2] * 256) + buffer[3]) * 10
-    }
+        val fuelRailPressure = ((buffer[2] * 256) + buffer[3]) * 10
+        fuelRailPressure
+    }(),
+            rawResponse)
 
     override fun getFormattedResult(): String {
         return "$fuelRailPressure kPa"
@@ -81,14 +84,16 @@ class RelativeFuelRailPressureRequest(mode: OBDRequestMode = OBDRequestMode.CURR
     }
 }
 
-class RelativeFuelRailPressureResponse(rawResponse: String) : OBDResponse("RelativeFuelRailPressureResponse", rawResponse) {
-    val relativeFuelRailPressure: Float
+class RelativeFuelRailPressureResponse(val relativeFuelRailPressure: Float,
+                                       rawResponse: String = "") : OBDResponse("RelativeFuelRailPressureResponse", rawResponse) {
 
-    init {
+    constructor(rawResponse: String) : this({
         val buffer = rawResponse.toIntList()
         // // ignore first two bytes [hh hh] of the response
-        relativeFuelRailPressure = ((buffer[2] * 256) + buffer[3]) * .079f
-    }
+        val relativeFuelRailPressure = ((buffer[2] * 256) + buffer[3]) * .079f
+        relativeFuelRailPressure
+    }(), rawResponse)
+
 
     override fun getFormattedResult(): String {
         return "$relativeFuelRailPressure kPa"
@@ -105,14 +110,16 @@ class AbsoluteFuelRailPressureRequest(mode: OBDRequestMode = OBDRequestMode.CURR
     }
 }
 
-class AbsoluteFuelRailPressureResponse(rawResponse: String) : OBDResponse("AbsoluteFuelRailPressureResponse", rawResponse) {
-    val pressure: Float
+class AbsoluteFuelRailPressureResponse(val pressure: Float,
+                                       rawResponse: String = "") : OBDResponse("AbsoluteFuelRailPressureResponse", rawResponse) {
 
-    init {
+    constructor(rawResponse: String) : this({
         val buffer = rawResponse.toIntList()
         // // ignore first two bytes [hh hh] of the response
-        pressure = ((buffer[2] * 256) + buffer[3]) * 10.0f
-    }
+        val pressure = ((buffer[2] * 256) + buffer[3]) * 10.0f
+        pressure
+    }(),
+            rawResponse)
 
     override fun getFormattedResult(): String {
         return "$pressure kPa"
@@ -129,14 +136,16 @@ class IntakeManifoldPressureRequest(mode: OBDRequestMode = OBDRequestMode.CURREN
     }
 }
 
-class IntakeManifoldPressureResponse(rawResponse: String) : OBDResponse("IntakeManifoldPressureResponse", rawResponse) {
-    val intakeManifoldPressure: Int
+class IntakeManifoldPressureResponse(val intakeManifoldPressure: Int,
+                                     rawResponse: String = "") : OBDResponse("IntakeManifoldPressureResponse", rawResponse) {
 
-    init {
+    constructor(rawResponse: String) : this({
         val buffer = rawResponse.toIntList()
         // // ignore first two bytes [hh hh] of the response
-        intakeManifoldPressure = buffer[2]
-    }
+        val intakeManifoldPressure = buffer[2]
+        intakeManifoldPressure
+    }(),
+            rawResponse)
 
     override fun getFormattedResult(): String {
         return "$intakeManifoldPressure kPa"
@@ -152,14 +161,16 @@ class AbsoluteEvapSystemPressureRequest(mode: OBDRequestMode = OBDRequestMode.CU
     }
 }
 
-class AbsoluteEvapSystemPressureResponse(rawResponse: String) : OBDResponse("AbsoluteEvapSystempPressureResponse", rawResponse) {
-    val pressure: Float
+class AbsoluteEvapSystemPressureResponse(val pressure: Float,
+                                         rawResponse: String = "") : OBDResponse("AbsoluteEvapSystempPressureResponse", rawResponse) {
 
-    init {
+    constructor(rawResponse: String) : this({
         val buffer = rawResponse.toIntList()
         // // ignore first two bytes [hh hh] of the response
-        pressure = (buffer[2] * 256.0f + buffer[3]) / 200.0f
-    }
+        val pressure = (buffer[2] * 256.0f + buffer[3]) / 200.0f
+        pressure
+    }(),
+            rawResponse)
 
     override fun getFormattedResult(): String {
         return "$pressure kPa"
@@ -176,14 +187,16 @@ class EvapSystemPressureRequest(mode: OBDRequestMode = OBDRequestMode.CURRENT,
     }
 }
 
-class EvapSystemPressureResponse(rawResponse: String) : OBDResponse("EvapSystemPressureResponse", rawResponse) {
-    val pressure: Float
+class EvapSystemPressureResponse(val pressure: Float,
+                                 rawResponse: String = "") : OBDResponse("EvapSystemPressureResponse", rawResponse) {
 
-    init {
+    constructor(rawResponse: String) : this({
         val buffer = rawResponse.toIntList()
         // // ignore first two bytes [hh hh] of the response
-        pressure = ((buffer[2] * 256.0f + buffer[3])) - 32767
-    }
+        val pressure = ((buffer[2] * 256.0f + buffer[3])) - 32767
+        pressure
+    }(),
+            rawResponse)
 
     override fun getFormattedResult(): String {
         return "$pressure Pa"

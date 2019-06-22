@@ -10,13 +10,14 @@ class RPMRequest(mode: OBDRequestMode = OBDRequestMode.CURRENT,
     }
 }
 
-class RPMResponse(rawResponse: String) : OBDResponse("RPMResponse", rawResponse) {
-    val rpm: Int
-
-    init {
+class RPMResponse(val rpm: Int,
+                  rawResponse: String = "") : OBDResponse("RPMResponse", rawResponse) {
+    constructor(rawResponse: String) : this({
         val buffer = rawResponse.toIntList()
-        rpm = (buffer[2] * 256 + buffer[3]) / 4
-    }
+        val rpm = (buffer[2] * 256 + buffer[3]) / 4
+        rpm
+    }(),
+            rawResponse)
 
     override fun getFormattedResult(): String {
         return "$rpm RPM"
@@ -33,17 +34,16 @@ class AbsoluteLoadRequest(mode: OBDRequestMode = OBDRequestMode.CURRENT,
 }
 
 
-class AbsoluteLoadResponse(rawResponse: String) :
+class AbsoluteLoadResponse(val ratio: Float, rawResponse: String = "") :
         OBDResponse("AbsoluteLoadResponse", rawResponse) {
-
-    val ratio: Float
-
-    init {
+    constructor(rawResponse: String) : this({
         val buffer = rawResponse.toIntList()
         val a = buffer[2]
         val b = buffer[3]
-        ratio = (a * 256 + b) * 100.0f / 255.0f
-    }
+        val ratio = (a * 256 + b) * 100.0f / 255.0f
+        ratio
+    }(),
+            rawResponse)
 
     override fun getFormattedResult(): String {
         return "$ratio %"
@@ -61,16 +61,15 @@ class CommandedEGRRequest(mode: OBDRequestMode = OBDRequestMode.CURRENT,
 }
 
 
-class CommandedEGRResponse(rawResponse: String) :
+class CommandedEGRResponse(val ratio: Float, rawResponse: String = "") :
         OBDResponse("CommandedEGRResponse", rawResponse) {
-
-    val ratio: Float
-
-    init {
+    constructor(rawResponse: String) : this({
         val buffer = rawResponse.toIntList()
         val a = buffer[2]
-        ratio = (a) * 100.0f / 255.0f
-    }
+        val ratio = (a) * 100.0f / 255.0f
+        ratio
+    }(),
+            rawResponse)
 
     override fun getFormattedResult(): String {
         return "$ratio %"
@@ -88,16 +87,15 @@ class CommandedEGRErrorRequest(mode: OBDRequestMode = OBDRequestMode.CURRENT,
 }
 
 
-class CommandedEGRErrorResponse(rawResponse: String) :
+class CommandedEGRErrorResponse(val error: Float, rawResponse: String = "") :
         OBDResponse("CommandedEGRErrorResponse", rawResponse) {
-
-    val error: Float
-
-    init {
+    constructor(rawResponse: String) : this({
         val buffer = rawResponse.toIntList()
         val a = buffer[2]
-        error = ((a) * 100.0f / 128.0f) - 100
-    }
+        val error = ((a) * 100.0f / 128.0f) - 100
+        error
+    }(),
+            rawResponse)
 
     override fun getFormattedResult(): String {
         return "$error %"
@@ -115,16 +113,15 @@ class CommandedEvaporativePurgeRequest(mode: OBDRequestMode = OBDRequestMode.CUR
 }
 
 
-class CommandedEvaporativePurgeResponse(rawResponse: String) :
+class CommandedEvaporativePurgeResponse(val ratio: Float, rawResponse: String = "") :
         OBDResponse("CommandedEvaporativePurgeResponse", rawResponse) {
-
-    val ratio: Float
-
-    init {
+    constructor(rawResponse: String) : this({
         val buffer = rawResponse.toIntList()
         val a = buffer[2]
-        ratio = (a) * 100.0f / 255.0f
-    }
+        val ratio = (a) * 100.0f / 255.0f
+        ratio
+    }(),
+            rawResponse)
 
     override fun getFormattedResult(): String {
         return "$ratio %"
@@ -142,16 +139,15 @@ class WarmupsSinceCodeClearedRequest(mode: OBDRequestMode = OBDRequestMode.CURRE
 }
 
 
-class WarmupsSinceCodeClearedResponse(rawResponse: String) :
+class WarmupsSinceCodeClearedResponse(val warmUps: Int, rawResponse: String = "") :
         OBDResponse("WramupsSinceCodeClearedResponse", rawResponse) {
-
-    val warmUps: Int
-
-    init {
+    constructor(rawResponse: String) : this({
         val buffer = rawResponse.toIntList()
         val a = buffer[2]
-        warmUps = (a)
-    }
+        val warmUps = (a)
+        warmUps
+    }(),
+            rawResponse)
 
     override fun getFormattedResult(): String {
         return "$warmUps"
@@ -168,10 +164,9 @@ class LoadRequest(mode: OBDRequestMode = OBDRequestMode.CURRENT,
     }
 }
 
-class LoadResponse(rawResponse: String) :
+class LoadResponse(val load: Float, rawResponse: String = "") :
         OBDResponse("LoadResponse", rawResponse) {
-
-    val load = (rawResponse.toIntList()[2] * 100.0f) / 255.0f
+    constructor(rawResponse: String) : this((rawResponse.toIntList()[2] * 100.0f) / 255.0f, rawResponse)
 
     override fun getFormattedResult(): String {
         return "$load %"
@@ -188,15 +183,14 @@ class MassAirFlowRequest(mode: OBDRequestMode = OBDRequestMode.CURRENT,
     }
 }
 
-class MassAirFlowResponse(rawResponse: String) :
+class MassAirFlowResponse(val maf: Float, rawResponse: String = "") :
         OBDResponse("MassAirFlowResponse", rawResponse) {
-
-    val maf: Float
-
-    init {
+    constructor(rawResponse: String) : this({
         val buffer = rawResponse.toIntList()
-        maf = (buffer[2] * 256 + buffer[3]) / 100.0f
-    }
+        val maf = (buffer[2] * 256 + buffer[3]) / 100.0f
+        maf
+    }(),
+            rawResponse)
 
     override fun getFormattedResult(): String {
         return "$maf g/s"
@@ -213,10 +207,9 @@ class OilTempRequest(mode: OBDRequestMode = OBDRequestMode.CURRENT,
     }
 }
 
-class OilTempResponse(rawResponse: String) :
+class OilTempResponse(val temperature: Int, rawResponse: String = "") :
         OBDResponse("OilTempResponse", rawResponse) {
-
-    val temperature = rawResponse.toIntList()[2] - 40
+    constructor(rawResponse: String) : this(rawResponse.toIntList()[2] - 40, rawResponse)
 
     override fun getFormattedResult(): String {
         return "$temperature C"
@@ -233,16 +226,17 @@ class RuntimeRequest(val type: RuntimeType, mode: OBDRequestMode = OBDRequestMod
     }
 }
 
-class RuntimeResponse(rawResponse: String
-                      , val type: RuntimeType) :
+class RuntimeResponse(val value: Int,
+                      val type: RuntimeType,
+                      rawResponse: String = "") :
         OBDResponse("RuntimeResponse", rawResponse) {
-
-    val value: Int
-
-    init {
+    constructor(rawResponse: String, type: RuntimeType) : this({
         val buffer = rawResponse.toIntList()
-        value = buffer[2] * 256 + buffer[3]
-    }
+        val value = buffer[2] * 256 + buffer[3]
+        value
+    }(),
+            type,
+            rawResponse)
 
     override fun getFormattedResult(): String {
         val hh = String.format("%02d", value / 3600)
@@ -268,10 +262,9 @@ class ThrottlePositionRequest(mode: OBDRequestMode = OBDRequestMode.CURRENT,
     }
 }
 
-class ThrottlePositionResponse(rawResponse: String) :
+class ThrottlePositionResponse(val throttle: Float, rawResponse: String = "") :
         OBDResponse("ThrottlePositionResponse", rawResponse) {
-
-    val throttle = (rawResponse.toIntList()[2] * 100.0f) / 255.0f
+    constructor(rawResponse: String) : this((rawResponse.toIntList()[2] * 100.0f) / 255.0f, rawResponse)
 
     override fun getFormattedResult(): String {
         return "$throttle %"
@@ -289,10 +282,9 @@ class ThrottleRequest(mode: OBDRequestMode = OBDRequestMode.CURRENT,
     }
 }
 
-class ThrottleResponse(rawResponse: String, val type: ThrottleRequestType) :
+class ThrottleResponse(val response: Float, val type: ThrottleRequestType, rawResponse: String = "") :
         OBDResponse("ThrottleResponse", rawResponse) {
-
-    val response = (rawResponse.toIntList()[2] * 100.0f) / 255.0f
+    constructor(rawResponse: String, type: ThrottleRequestType) : this((rawResponse.toIntList()[2] * 100.0f) / 255.0f, type, rawResponse)
 
     override fun getFormattedResult(): String {
         return "$response %"
@@ -321,9 +313,9 @@ class SpeedRequest(mode: OBDRequestMode = OBDRequestMode.CURRENT,
     }
 }
 
-class SpeedResponse(rawResponse: String) : OBDResponse("SpeedResponse", rawResponse) {
-
-    val metricSpeed = rawResponse.toIntList()[2]
+class SpeedResponse(val metricSpeed: Int,
+                    rawResponse: String = "") : OBDResponse("SpeedResponse", rawResponse) {
+    constructor(rawResponse: String) : this(rawResponse.toIntList()[2], rawResponse)
 
     override fun getFormattedResult(): String {
         return "$metricSpeed km/h"

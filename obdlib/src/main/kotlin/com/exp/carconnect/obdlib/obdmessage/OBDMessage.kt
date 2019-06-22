@@ -20,8 +20,9 @@ abstract class OBDRequest(val tag: String,
         private const val MAX_ATTEMPTS = 2
     }
 
-    override fun execute(device: IOBDDevice): Observable<OBDResponse> {
-        return device.run(command, returnCachedResponse)
+    override fun execute(device: IOBDDevice,
+                         responseHandler: (OBDRequest, String) -> OBDResponse): Observable<OBDResponse> {
+        return device.run(this)
                 .retry(MAX_ATTEMPTS.toLong()) { e ->
                     retriable && when (e) {
                         is StoppedException,
@@ -61,12 +62,16 @@ abstract class OBDRequest(val tag: String,
                 .map { rawResponse ->
                     OBDLogger.log("[$tag]", "raw response [$rawResponse]")
                     try {
-                        toResponse(rawResponse)
+                        responseHandler(this, rawResponse)
                     } catch (e: NonAlphaNumericException) {
                         throw ExecutionException(this@OBDRequest, object : BadResponseException(command, e.response) {})
                     }
                 }
 
+    }
+
+    override fun toResponse(request: OBDRequest, rawResponse: String): OBDResponse {
+        return toResponse(rawResponse)
     }
 
     protected open fun toResponse(rawResponse: String): OBDResponse {

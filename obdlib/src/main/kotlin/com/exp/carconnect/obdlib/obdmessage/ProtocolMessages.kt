@@ -37,10 +37,21 @@ class AvailablePidsCommand(val pidCommand: PidCommand,
     }
 }
 
-class AvailablePidsResponse(command: PidCommand, rawResponse: String) : OBDResponse("AvailablePidsResponse", rawResponse) {
-    val availablePids: Set<String>
+class AvailablePidsResponse(val availablePids: Set<String>,
+                            command: PidCommand,
+                            rawResponse: String = "") : OBDResponse("AvailablePidsResponse", rawResponse) {
+    companion object {
+        private fun Int.getHexString(): String {
+            val hexString = this.toString(16)
+            return if (hexString.length == 1) {
+                "0$hexString"
+            } else {
+                hexString
+            }
+        }
+    }
 
-    init {
+    constructor(command: PidCommand, rawResponse: String) : this({
         val availablePidsMutable = mutableSetOf<String>()
         val buffer = rawResponse.toIntList().subList(2, 6)
         var pidNumber = command.getStartingPid()
@@ -55,21 +66,14 @@ class AvailablePidsResponse(command: PidCommand, rawResponse: String) : OBDRespo
                 pidNumber++
             }
         }
-        availablePids = availablePidsMutable
+        availablePidsMutable
+    }(),
+            command,
+            rawResponse)
 
-    }
-
-    private fun Int.getHexString(): String {
-        val hexString = this.toString(16)
-        return if (hexString.length == 1) {
-            "0$hexString"
-        } else {
-            hexString
-        }
-    }
 
     override fun getFormattedResult(): String {
-        return rawResponse.substring(4)
+        return availablePids.toString()
     }
 }
 
@@ -105,13 +109,14 @@ class OBDStandardRequest(retriable: Boolean = true,
     }
 }
 
-class OBDStandardResponse(rawResponse: String) : OBDResponse("OBDStandardResponse", rawResponse) {
-    val standard: OBDStandard
+class OBDStandardResponse(val standard: OBDStandard,
+                          rawResponse: String = "") : OBDResponse("OBDStandardResponse", rawResponse) {
 
-    init {
+    constructor(rawResponse: String) : this({
         val standardType = rawResponse.toIntList()[2]
-        standard = OBDStandard.fromValue(standardType)
-    }
+        OBDStandard.fromValue(standardType)
+    }(),
+            rawResponse)
 }
 
 

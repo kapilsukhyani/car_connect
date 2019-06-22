@@ -11,14 +11,15 @@ class AirFuelRatioRequest(mode: OBDRequestMode = OBDRequestMode.CURRENT,
     }
 }
 
-class AirFuelRatioResponse(rawResponse: String) : OBDResponse("AirFuelRatioResponse", rawResponse) {
-    val afr: Float
-
-    init {
+class AirFuelRatioResponse(val afr: Float,
+                           rawResponse: String = "") : OBDResponse("AirFuelRatioResponse", rawResponse) {
+    constructor(rawResponse: String) : this({
         val buffer = rawResponse.toIntList()
         // ignore first two bytes [01 44] of the response
-        afr = (buffer[2] * 256 + buffer[3]) / 32768 * 14.7f//((A*256)+B)/32768
-    }
+        val afr = (buffer[2] * 256 + buffer[3]) / 32768 * 14.7f//((A*256)+B)/32768
+        afr
+    }(),
+            rawResponse)
 
     override fun getFormattedResult(): String {
         return "$afr:1 AFR"
@@ -35,14 +36,15 @@ class ConsumptionRateRequest(mode: OBDRequestMode = OBDRequestMode.CURRENT,
     }
 }
 
-class ConsumptionRateResponse(rawResponse: String) : OBDResponse("ConsumptionRateResponse", rawResponse) {
-    val fuelRate: Float
-
-    init {
+class ConsumptionRateResponse(val fuelRate: Float,
+                              rawResponse: String = "") : OBDResponse("ConsumptionRateResponse", rawResponse) {
+    constructor(rawResponse: String) : this({
         val buffer = rawResponse.toIntList()
         // // ignore first two bytes [hh hh] of the response
-        fuelRate = (buffer[2] * 256 + buffer[3]) * 0.05f
-    }
+        val fuelRate = (buffer[2] * 256 + buffer[3]) * 0.05f
+        fuelRate
+    }(),
+            rawResponse)
 
     override fun getFormattedResult(): String {
         return "$fuelRate L/h"
@@ -57,14 +59,15 @@ class FuelTypeRequest(retriable: Boolean = true) :
     }
 }
 
-class FuelTypeResponse(rawResponse: String) : OBDResponse("FuelTypeResponse", rawResponse) {
-    val fuelType: Int
-
-    init {
+class FuelTypeResponse(val fuelType: Int,
+                       rawResponse: String = "") : OBDResponse("FuelTypeResponse", rawResponse) {
+    constructor(rawResponse: String) : this({
         val buffer = rawResponse.toIntList()
         // // ignore first two bytes [hh hh] of the response
-        fuelType = buffer[2]
-    }
+        val fuelType = buffer[2]
+        fuelType
+    }(),
+            rawResponse)
 
     override fun getFormattedResult(): String {
         return try {
@@ -128,21 +131,23 @@ class FuelLevelRequest(mode: OBDRequestMode = OBDRequestMode.CURRENT,
     }
 }
 
-class FuelLevelResponse(rawResponse: String) : OBDResponse("FuelLevelResponse", rawResponse) {
-    val fuelLevel: Float
-
-    init {
+class FuelLevelResponse(val fuelLevel: Float,
+                        rawResponse: String = "") : OBDResponse("FuelLevelResponse", rawResponse) {
+    constructor(rawResponse: String) : this({
         val buffer = rawResponse.toIntList()
         // // ignore first two bytes [hh hh] of the response
-        fuelLevel = 100.0f * buffer[2] / 255.0f
-    }
+        val fuelLevel = 100.0f * buffer[2] / 255.0f
+        fuelLevel
+    }(),
+            rawResponse)
 
     override fun getFormattedResult(): String {
         return "$fuelLevel %"
     }
 }
 
-class FuelTrimRequest(val fuelTrim: FuelTrim, retriable: Boolean = true,
+class FuelTrimRequest(val fuelTrim: FuelTrim,
+                      retriable: Boolean = true,
                       repeatable: IsRepeatable = IsRepeatable.No) :
         OBDRequest("FuelTrimRequest[${fuelTrim.bank}]", fuelTrim.buildObdCommand(), retriable, repeatable) {
     override fun toResponse(rawResponse: String): OBDResponse {
@@ -150,14 +155,17 @@ class FuelTrimRequest(val fuelTrim: FuelTrim, retriable: Boolean = true,
     }
 }
 
-class FuelTrimResponse(rawResponse: String, val type: FuelTrim) : OBDResponse("FuelTrimResponse", rawResponse) {
-    val fuelTrim: Float
-
-    init {
+class FuelTrimResponse(val fuelTrim: Float,
+                       val type: FuelTrim,
+                       rawResponse: String = "") : OBDResponse("FuelTrimResponse", rawResponse) {
+    constructor(rawResponse: String, type: FuelTrim) : this({
         val buffer = rawResponse.toIntList()
         // // ignore first two bytes [hh hh] of the response
-        fuelTrim = (buffer[2] - 128) * (100.0f / 128)
-    }
+        val fuelTrim = (buffer[2] - 128) * (100.0f / 128)
+        fuelTrim
+    }(),
+            type,
+            rawResponse)
 
     override fun getFormattedResult(): String {
         return "$fuelTrim %"
@@ -201,14 +209,15 @@ class WidebandAirFuelRatioRequest(mode: OBDRequestMode = OBDRequestMode.CURRENT,
     }
 }
 
-class WidebandAirFuelRatioResponse(rawResponse: String) : OBDResponse("WidebandAirFuelRatioResponse", rawResponse) {
-    val wafr: Float
-
-    init {
+class WidebandAirFuelRatioResponse(val wafr: Float,
+                                   rawResponse: String = "") : OBDResponse("WidebandAirFuelRatioResponse", rawResponse) {
+    constructor(rawResponse: String) : this({
         val buffer = rawResponse.toIntList()
         // // ignore first two bytes [hh hh] of the response
-        wafr = (((buffer[2] * 256) + buffer[3]) / 32768) * 14.7f//((A*256)+B)/32768
-    }
+        val wafr = (((buffer[2] * 256) + buffer[3]) / 32768) * 14.7f//((A*256)+B)/32768
+        wafr
+    }(),
+            rawResponse)
 
     override fun getFormattedResult(): String {
         return "$wafr:1 AFR"
@@ -225,14 +234,15 @@ class EthanolFuelPercentRequest(mode: OBDRequestMode = OBDRequestMode.CURRENT,
     }
 }
 
-class EthanolFuelPercentResponse(rawResponse: String) : OBDResponse("EthanolFuelPercentResponse", rawResponse) {
-    val percent: Float
-
-    init {
+class EthanolFuelPercentResponse(val percent: Float,
+                                 rawResponse: String = "") : OBDResponse("EthanolFuelPercentResponse", rawResponse) {
+    constructor(rawResponse: String) : this({
         val buffer = rawResponse.toIntList()
         // // ignore first two bytes [hh hh] of the response
-        percent = buffer[2] * 100.0f / 255.0f
-    }
+        val percent = buffer[2] * 100.0f / 255.0f
+        percent
+    }(),
+            rawResponse)
 
     override fun getFormattedResult(): String {
         return "$percent %"
@@ -248,14 +258,15 @@ class FuelInjectionTimingRequest(mode: OBDRequestMode = OBDRequestMode.CURRENT,
     }
 }
 
-class FuelInjectionTimingResponse(rawResponse: String) : OBDResponse("FuelInjectionTimingResponse", rawResponse) {
-    val response: Float
-
-    init {
+class FuelInjectionTimingResponse(val response: Float,
+                                  rawResponse: String = "") : OBDResponse("FuelInjectionTimingResponse", rawResponse) {
+    constructor(rawResponse: String) : this({
         val buffer = rawResponse.toIntList()
         // // ignore first two bytes [hh hh] of the response
-        response = ((buffer[2] * 256.0f + buffer[3]) / 128.0f) - 210
-    }
+        val response = ((buffer[2] * 256.0f + buffer[3]) / 128.0f) - 210
+        response
+    }(),
+            rawResponse)
 
     override fun getFormattedResult(): String {
         return "$response"

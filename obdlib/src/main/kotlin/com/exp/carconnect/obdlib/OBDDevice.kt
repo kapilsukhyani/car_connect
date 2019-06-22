@@ -1,15 +1,16 @@
 package com.exp.carconnect.obdlib
 
+import com.exp.carconnect.obdlib.obdmessage.OBDRequest
 import io.reactivex.Observable
 import java.io.InputStream
 import java.io.OutputStream
 import java.util.regex.Pattern
 
-
-internal class OBDDevice(private val inputStream: InputStream, private val outputStream: OutputStream) : IOBDDevice {
+internal class OBDDevice(private val inputStream: InputStream,
+                         private val outputStream: OutputStream) : IOBDDevice {
 
     companion object {
-        private val TAG: String = "OBDDevice"
+        private const val TAG: String = "OBDDevice"
         private val WHITESPACE_PATTERN = Pattern.compile("\\s")
         private val BUSINIT_PATTERN = Pattern.compile("(BUS INIT)|(BUSINIT)|(\\.)")
         private val SEARCHING_PATTERN = Pattern.compile("SEARCHING")
@@ -20,7 +21,11 @@ internal class OBDDevice(private val inputStream: InputStream, private val outpu
 
     private val latestRequestResponseSnapShot = mutableMapOf<String, String>()
 
-    override fun run(command: String, returnCachedResponse: Boolean): Observable<String> {
+    override fun run(request: OBDRequest): Observable<String> {
+        return run(request.command, request.returnCachedResponse)
+    }
+
+    private fun run(command: String, returnCachedResponse: Boolean): Observable<String> {
         return Observable.defer {
             try {
                 if (returnCachedResponse &&
@@ -33,7 +38,7 @@ internal class OBDDevice(private val inputStream: InputStream, private val outpu
                 val response = readResponse(command)
                 val endTime = System.currentTimeMillis()
                 OBDLogger.log(TAG, "[ $command  ] executed in [  ${endTime - startTime}  ]ms")
-                latestRequestResponseSnapShot.put(command, response)
+                latestRequestResponseSnapShot[command] = response
                 Observable.just(response)
             } catch (e: Exception) {
                 Observable.error<String>(e)
@@ -165,7 +170,7 @@ abstract class BadResponseException(private val command: String, private val res
 }
 
 interface IOBDDevice {
-    fun run(command: String, returnCachedResponse: Boolean = false): Observable<String>
+    fun run(request: OBDRequest): Observable<String>
     fun getLatestResponse(command: String): Observable<String?>
     fun purgeCachedResponseFor(command: String)
     fun purgeAllCachedResponses()

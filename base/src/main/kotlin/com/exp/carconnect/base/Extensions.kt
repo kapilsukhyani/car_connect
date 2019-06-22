@@ -9,6 +9,8 @@ import android.support.annotation.StringRes
 import com.crashlytics.android.Crashlytics
 import com.exp.carconnect.obdlib.SimulatedStreams
 import com.exp.carconnect.obdlib.SimulationResponseSource
+import com.exp.carconnect.obdlib.obdmessage.FuelLevelResponse
+import com.exp.carconnect.obdlib.obdmessage.RPMResponse
 import com.exp.carconnect.obdlib.obdmessage.SpeedResponse
 import io.reactivex.Observable
 import io.reactivex.ObservableEmitter
@@ -141,11 +143,12 @@ class BluetoothOBDDongle(private val device: BluetoothDevice) : OBDDongle(device
 }
 
 class SimulatedOBDDongle : OBDDongle("Simulator", "Dummy") {
-    private class LinearValueInterpolator {
+    private class LinearValueInterpolator(private val changeRate: Float = linearChangeRate,
+                                          initialDirection: Direction = Companion.Direction.Increasing) {
         companion object {
             private const val min = 0.0f
             private const val max = 1.0f
-            private const val linearChangeRate = .05f
+            private const val linearChangeRate = .01f
 
             enum class Direction {
                 Increasing,
@@ -153,19 +156,25 @@ class SimulatedOBDDongle : OBDDongle("Simulator", "Dummy") {
             }
         }
 
-        private var direction = Direction.Increasing
-        var currentFactor: Float = min
+        init {
+            if (changeRate < min || changeRate > max) {
+                throw IllegalArgumentException("Invalid changeRate, it needs to be between [$min, $max]")
+            }
+        }
+
+        private var direction = initialDirection
+        var currentFactor: Float = { if (initialDirection == Companion.Direction.Increasing) min else max }()
             @Synchronized
             get() {
                 val f = field
                 if (field < max && direction == Companion.Direction.Increasing) {
-                    field += field + linearChangeRate
+                    field += changeRate
                     if (field >= max) {
                         field = max
                         direction = Companion.Direction.Decreasing
                     }
                 } else {
-                    field -= linearChangeRate
+                    field -= changeRate
                     if (field <= min) {
                         field = min
                         direction = Companion.Direction.Increasing
@@ -177,12 +186,24 @@ class SimulatedOBDDongle : OBDDongle("Simulator", "Dummy") {
     }
 
     private val speedInterpolator = LinearValueInterpolator()
+    private val rpmInterpolator = LinearValueInterpolator(.02f)
+    private val fuelLevelInterpolator = LinearValueInterpolator(.05f,
+            LinearValueInterpolator.Companion.Direction.Decreasing)
 
-    private val source = SimulationResponseSource(speedResponseProducer = {
-        val speed = 320f * speedInterpolator.currentFactor
-//        println("speed $speed")
-        SpeedResponse(speed.toInt())
-    })
+    private val source = SimulationResponseSource(
+            speedResponseProducer = {
+                val speed = 320f * speedInterpolator.currentFactor
+                SpeedResponse(speed.toInt())
+            },
+            rpmResponseProducer = {
+                val rpm = 7000f * rpmInterpolator.currentFactor
+                RPMResponse(rpm.toInt())
+            },
+            fuelLevelResponseProducer = {
+                val level = 100f * fuelLevelInterpolator.currentFactor
+                FuelLevelResponse(level)
+            }
+    )
     private val simulatedStreams = SimulatedStreams(source)
     override fun connect(): OBDConnection = object : OBDConnection {
         override val inputStream: InputStream

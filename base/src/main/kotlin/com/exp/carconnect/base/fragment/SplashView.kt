@@ -32,17 +32,21 @@ class SplashView : Fragment() {
     private val constraintSet = ConstraintSet()
     private lateinit var containerLayout: ConstraintLayout
     private lateinit var splashVM: SplashVM
+    private var ignoreCreate = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        splashVM = ViewModelProviders
-                .of(this)
-                .get(SplashVM::class.java)
+        if (activity.requestedOrientation == ActivityInfo.SCREEN_ORIENTATION_PORTRAIT && !ignoreCreate) {
+            splashVM = ViewModelProviders
+                    .of(this)
+                    .get(SplashVM::class.java)
+            splashVM.getAppLoadingStateLiveData()
+                    .observe(this, Observer {
+                        showStatus(it!!)
+                    })
 
-        splashVM.getAppLoadingStateLiveData()
-                .observe(this, Observer {
-                    showStatus(it!!)
-                })
+        }
+
     }
 
     private fun showStatus(it: SplashScreenState) {
@@ -59,7 +63,10 @@ class SplashView : Fragment() {
 
     override fun onAttach(context: Context?) {
         super.onAttach(context)
-        activity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+        if (activity.requestedOrientation != ActivityInfo.SCREEN_ORIENTATION_PORTRAIT) {
+            activity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+            ignoreCreate = true
+        }
     }
 
     override fun onCreateView(inflater: LayoutInflater?, container: ViewGroup?, savedInstanceState: Bundle?): View? {

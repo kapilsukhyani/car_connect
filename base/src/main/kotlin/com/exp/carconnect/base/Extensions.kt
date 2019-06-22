@@ -8,6 +8,8 @@ import android.bluetooth.BluetoothSocket
 import android.support.annotation.StringRes
 import com.crashlytics.android.Crashlytics
 import com.exp.carconnect.obdlib.SimulatedStreams
+import com.exp.carconnect.obdlib.SimulationResponseSource
+import com.exp.carconnect.obdlib.obdmessage.SpeedResponse
 import io.reactivex.Observable
 import io.reactivex.ObservableEmitter
 import io.reactivex.ObservableOnSubscribe
@@ -139,7 +141,49 @@ class BluetoothOBDDongle(private val device: BluetoothDevice) : OBDDongle(device
 }
 
 class SimulatedOBDDongle : OBDDongle("Simulator", "Dummy") {
-    private val simulatedStreams = SimulatedStreams()
+    private class LinearValueInterpolator {
+        companion object {
+            private const val min = 0.0f
+            private const val max = 1.0f
+            private const val linearChangeRate = .05f
+
+            enum class Direction {
+                Increasing,
+                Decreasing
+            }
+        }
+
+        private var direction = Direction.Increasing
+        var currentFactor: Float = min
+            @Synchronized
+            get() {
+                val f = field
+                if (field < max && direction == Companion.Direction.Increasing) {
+                    field += field + linearChangeRate
+                    if (field >= max) {
+                        field = max
+                        direction = Companion.Direction.Decreasing
+                    }
+                } else {
+                    field -= linearChangeRate
+                    if (field <= min) {
+                        field = min
+                        direction = Companion.Direction.Increasing
+                    }
+                }
+                return f
+            }
+            private set(_) {}
+    }
+
+    private val speedInterpolator = LinearValueInterpolator()
+
+    private val source = SimulationResponseSource(speedResponseProducer = {
+        val speed = 320f * speedInterpolator.currentFactor
+//        println("speed $speed")
+        SpeedResponse(speed.toInt())
+    })
+    private val simulatedStreams = SimulatedStreams(source)
     override fun connect(): OBDConnection = object : OBDConnection {
         override val inputStream: InputStream
             get() = simulatedStreams.inputStream

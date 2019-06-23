@@ -172,11 +172,16 @@ class CarConnectApp : Application(),
 
     override fun onDataLoadingStartedFor(info: Vehicle) {
         //replace connection view with dashboard
-        store.dispatch(CommonAppAction.ReplaceViewOnBackStackTop(DashboardScreen(DashboardScreenState.ShowNewSnapshot(info, LiveVehicleData(), DashboardTheme.Dark))))
+        store.dispatch(CommonAppAction
+                .ReplaceViewOnBackStackTop(DashboardScreen(DashboardScreenState
+                        .ShowNewSnapshot(info,
+                                LiveVehicleData(),
+                                DashboardTheme.Dark))))
     }
 
     override fun onReportRequested() {
-        store.dispatch(CommonAppAction.PushViewToBackStack(ReportScreen(ReportScreenState.ShowNewSnapshot(ReportData()))))
+        store.dispatch(CommonAppAction.
+                PushViewToBackStack(ReportScreen(ReportScreenState.ShowNewSnapshot(ReportData()))))
     }
 
     override fun killSession() {
@@ -184,13 +189,14 @@ class CarConnectApp : Application(),
     }
 
     override fun enableReporting() {
-        Fabric.with(this, Crashlytics())
-        Fabric.with(this, Answers())
-        reportingEnabled.set(true)
+        if (!BuildConfig.DEBUG) {
+            Fabric.with(this, Crashlytics())
+            Fabric.with(this, Answers())
+            reportingEnabled.set(true)
+        }
     }
 
     override fun logEvent(event: AnswersEvent<*>) {
-        //todo disable analytics in debug once tested
         if (!BuildConfig.DEBUG) {
             if (reportingEnabled.get()) {
                 val answers = Answers.getInstance()
@@ -223,6 +229,12 @@ class CarConnectApp : Application(),
     }
 
     override fun onPrivacyPolicyAccepted() {
-        store.dispatch(BaseAppAction.UpdateAppSettings(store.state.getBaseAppState().baseAppPersistedState.appSettings.copy(privacyPolicyAccepted = true)))
+        store.dispatch(BaseAppAction
+                .UpdateAppSettings(store
+                        .state
+                        .getBaseAppState()
+                        .baseAppPersistedState
+                        .appSettings
+                        .copy(privacyPolicyAccepted = true)))
     }
 }

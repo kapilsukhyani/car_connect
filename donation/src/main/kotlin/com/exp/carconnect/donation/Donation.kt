@@ -22,10 +22,10 @@ import redux.api.Store
 fun showDonationBottomSheet(activity: Activity,
                             store: Store<AppState>,
                             app: Application) {
-    InstallationTimeBasedShowDonationCriteria(app, store)
+    val ob = InstallationTimeBasedShowDonationCriteria(app, store)
             .isFulfilled()
             .subscribe(Consumer {
-                if(it) {
+                if (it) {
                     val bottomSheetDialog = BottomSheetDialog(activity)
                     bottomSheetDialog.setCancelable(true)
                     val donateSheet = activity.layoutInflater.inflate(R.layout.donation_bottom_sheet, null)

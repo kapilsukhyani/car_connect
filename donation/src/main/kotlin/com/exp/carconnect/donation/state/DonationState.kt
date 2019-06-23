@@ -6,7 +6,7 @@ import com.exp.carconnect.donation.state.DonationModuleState.Companion.DONATION_
 
 
 fun AppState.copyAndReplaceDonationState(state: LoadableState<DonationModuleState, Throwable>): AppState {
-    return this.copy(moduleStateMap = moduleStateMap + Pair(DonationModuleState.DONATION_STATE_KEY, state))
+    return this.copy(moduleStateMap = moduleStateMap + Pair(DONATION_STATE_KEY, state))
 }
 
 fun AppState.isDonationStateLoaded(): Boolean {

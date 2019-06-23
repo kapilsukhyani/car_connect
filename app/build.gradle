@@ -43,4 +43,5 @@ dependencies {
     implementation project(':dashboard')
     implementation project(':donation')
     implementation project(':report')
+    implementation 'io.github.kobakei:ratethisapp:1.2.0'
 }

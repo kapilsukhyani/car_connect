@@ -25,6 +25,7 @@ import com.exp.carconnect.dashboard.fragment.DashboardView
 import com.exp.carconnect.dashboard.state.DashboardScreen
 import com.exp.carconnect.donation.fragment.DonationView
 import com.exp.carconnect.donation.state.DonationScreen
+import com.kobakei.ratethisapp.RateThisApp
 import io.reactivex.disposables.Disposable
 import redux.api.Store
 
@@ -49,8 +50,13 @@ class CarConnectWindow : AppCompatActivity() {
                 .observe(this, Observer {
                     showView(it)
                 })
+        trySeekingRating()
     }
 
+    private fun trySeekingRating() {
+        RateThisApp.onCreate(this)
+        RateThisApp.showRateDialogIfNeeded(this)
+    }
 
     private fun showView(it: CarConnectView?) {
         when (it) {

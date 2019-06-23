@@ -5,6 +5,7 @@ import android.app.Application
 import android.arch.lifecycle.*
 import android.content.Context
 import android.content.pm.ActivityInfo
+import android.content.res.Configuration
 import android.os.Bundle
 import android.support.constraint.ConstraintLayout
 import android.support.constraint.ConstraintSet
@@ -36,7 +37,8 @@ class SplashView : Fragment() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        if (activity.requestedOrientation == ActivityInfo.SCREEN_ORIENTATION_PORTRAIT && !ignoreCreate) {
+        if (activity.resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT
+                && !ignoreCreate) {
             splashVM = ViewModelProviders
                     .of(this)
                     .get(SplashVM::class.java)
@@ -46,7 +48,6 @@ class SplashView : Fragment() {
                     })
 
         }
-
     }
 
     private fun showStatus(it: SplashScreenState) {
@@ -63,7 +64,7 @@ class SplashView : Fragment() {
 
     override fun onAttach(context: Context?) {
         super.onAttach(context)
-        if (activity.requestedOrientation != ActivityInfo.SCREEN_ORIENTATION_PORTRAIT) {
+        if (activity.resources.configuration.orientation != Configuration.ORIENTATION_PORTRAIT) {
             activity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
             ignoreCreate = true
         }

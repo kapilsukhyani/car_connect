@@ -6,6 +6,7 @@ import android.app.Application
 import android.arch.lifecycle.*
 import android.content.Context
 import android.content.pm.ActivityInfo
+import android.content.res.Configuration
 import android.os.Bundle
 import android.support.v4.app.Fragment
 import android.view.LayoutInflater
@@ -27,11 +28,15 @@ class DeviceConnectionView : Fragment(), BackInterceptor {
 
     private lateinit var deviceConnectionVM: DeviceConnectionVM
     private lateinit var trackAnimator: ObjectAnimator
+    private var ignoreCreate = false
 
 
     override fun onAttach(context: Context?) {
         super.onAttach(context)
-        activity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+        if (activity.resources.configuration.orientation != Configuration.ORIENTATION_PORTRAIT) {
+            activity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+            ignoreCreate = true
+        }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -40,18 +45,20 @@ class DeviceConnectionView : Fragment(), BackInterceptor {
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        val rootView = inflater.inflate(R.layout.view_device_connection, null)
-        return rootView
+        return inflater.inflate(R.layout.view_device_connection, null)
     }
 
     override fun onViewCreated(view: View?, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        deviceConnectionVM = ViewModelProviders.of(this).get(DeviceConnectionVM::class.java)
-        deviceConnectionVM
-                .getScreenStateLiveData()
-                .observe(this, Observer {
-                    onNewState(it!!)
-                })
+        if (activity.resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT
+                && !ignoreCreate) {
+            deviceConnectionVM = ViewModelProviders.of(this).get(DeviceConnectionVM::class.java)
+            deviceConnectionVM
+                    .getScreenStateLiveData()
+                    .observe(this, Observer {
+                        onNewState(it!!)
+                    })
+        }
     }
 
     override fun onStart() {
@@ -133,7 +140,7 @@ class DeviceConnectionVM(app: Application) : AndroidViewModel(app) {
                 .distinctUntilChanged()
                 .subscribe {
                     deviceConnectionViewLiveData.value = it
-                    if(it is ConnectionScreenState.ShowSetupError){
+                    if (it is ConnectionScreenState.ShowSetupError) {
                         app.logContentViewEvent("SetupErrorDialog")
                     }
                 })
@@ -180,7 +187,7 @@ class DeviceConnectionScreenStateReducer(val context: Context) : Reducer<AppStat
                         .ShowSetupError(context.getString(R.string.setup_error_message, action.device.name, action.error.localizedMessage)))
             }
 
-        //todo update baseapp state to reflect vehicle info loading failed and then update the Connectionview state
+            //todo update baseapp state to reflect vehicle info loading failed and then update the Connectionview state
             is BaseAppAction.VehicleInfoLoadingFailed -> {
                 updateState(state, ConnectionScreenState
                         .ShowSetupError(context.getString(R.string.vehicle_info_loading_error_message, action.device.name, action.error.localizedMessage)))

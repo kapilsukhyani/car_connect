@@ -1,9 +1,13 @@
-package com.exp.carconnect.app.fragment
+package com.exp.carconnect.report.fragment
 
 import android.app.AlertDialog
 import android.app.Application
 import android.app.ProgressDialog
-import android.arch.lifecycle.*
+import android.arch.lifecycle.AndroidViewModel
+import android.arch.lifecycle.LiveData
+import android.arch.lifecycle.MutableLiveData
+import android.arch.lifecycle.Observer
+import android.arch.lifecycle.ViewModelProviders
 import android.content.Context
 import android.content.Intent
 import android.content.pm.ActivityInfo
@@ -26,6 +30,7 @@ import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.subjects.BehaviorSubject
 import kotlinx.android.synthetic.main.report_view.*
 import redux.api.Reducer
+import java.util.*
 import java.util.concurrent.TimeUnit
 
 
@@ -118,6 +123,7 @@ class ReportView : Fragment() {
                 .show()
     }
 
+    @Suppress("DEPRECATION") //TODO visit this again
     private fun onNewSpanShot(reportViewModel: ReportData) {
         vehicle_info.text = getString(R.string.vehicle_info_value, reportViewModel.name, reportViewModel.model + " " + reportViewModel.year, reportViewModel.vin, reportViewModel.obdStandard)
         mil.text = fromHtml(getString(R.string.mil_value, reportViewModel.milStatus, reportViewModel.pendingDTCs))
@@ -179,7 +185,10 @@ class ReportView : Fragment() {
     }
 
     private fun addNewRowMonitorStatusGrid(it: MonitorStatusTest, rowNumber: Int) {
-        addNewRowMonitorStatusGrid(it.testName.toLowerCase(), it.available.toString(), it.complete.toString(), rowNumber)
+        addNewRowMonitorStatusGrid(it.testName.toLowerCase(Locale.US),
+                it.available.toString(),
+                it.complete.toString(),
+                rowNumber)
     }
 
 
@@ -255,10 +264,10 @@ internal class ReportViewModel(app: Application) : AndroidViewModel(app) {
                     var model = "N/A"
                     var year = "N/A"
                     val tests = if (liveVehicleData.monitorStatus is UnAvailableAvailableData.Available) {
-                        val monitoStatus = (liveVehicleData.monitorStatus as UnAvailableAvailableData.Available).data
-                        Array(monitoStatus.size, { index ->
-                            MonitorStatusTest(monitoStatus[index].testType.name, monitoStatus[index].available, monitoStatus[index].complete)
-                        })
+                        val monitorStatus = (liveVehicleData.monitorStatus as UnAvailableAvailableData.Available).data
+                        Array(monitorStatus.size) { index ->
+                            MonitorStatusTest(monitorStatus[index].testType.name, monitorStatus[index].available, monitorStatus[index].complete)
+                        }
                     } else {
                         emptyArray()
                     }

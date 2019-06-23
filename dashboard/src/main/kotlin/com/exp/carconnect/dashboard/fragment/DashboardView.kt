@@ -5,6 +5,7 @@ import android.app.Application
 import android.arch.lifecycle.*
 import android.content.Context
 import android.content.pm.ActivityInfo
+import android.content.res.Configuration
 import android.os.Bundle
 import android.support.v4.app.Fragment
 import android.view.LayoutInflater
@@ -27,10 +28,14 @@ class DashboardView : Fragment(), BackInterceptor {
     lateinit var dashboard: Dashboard
     lateinit var dashboardVM: DashboardVM
     var setVehicleInfo = false
+    private var ignoreCreate = false
 
     override fun onAttach(context: Context?) {
         super.onAttach(context)
-        activity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
+        if (activity.resources.configuration.orientation != Configuration.ORIENTATION_LANDSCAPE) {
+            activity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
+            ignoreCreate = true
+        }
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
@@ -40,18 +45,21 @@ class DashboardView : Fragment(), BackInterceptor {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        initView(view)
-        dashboardVM = ViewModelProviders.of(this).get(DashboardVM::class.java)
-        dashboardVM.getScreenStateLiveData()
-                .observe(this, Observer {
-                    onNewState(it!!)
-                })
-        settings_icon.setOnClickListener {
-            dashboardVM.onSettingsIconClicked()
-        }
+        if (activity.resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
+                && !ignoreCreate) {
+            initView(view)
+            dashboardVM = ViewModelProviders.of(this).get(DashboardVM::class.java)
+            dashboardVM.getScreenStateLiveData()
+                    .observe(this, Observer {
+                        onNewState(it!!)
+                    })
+            settings_icon.setOnClickListener {
+                dashboardVM.onSettingsIconClicked()
+            }
 
-        report_icon.setOnClickListener {
-            dashboardVM.onReportIconClicked()
+            report_icon.setOnClickListener {
+                dashboardVM.onReportIconClicked()
+            }
         }
     }
 

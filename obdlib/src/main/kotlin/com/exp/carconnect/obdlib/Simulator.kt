@@ -264,7 +264,8 @@ class SimulationResponseSource(freezeDTCResponseProducer: (FreezeDTCRequest) -> 
 
 
         val defaultAvailablePidsResponseProducer: (AvailablePidsCommand) -> AvailablePidsResponse = {
-            AvailablePidsResponse(setOf("dc0012, p0102"), it.pidCommand)
+            //TODO increase the number of available PIDs here
+            AvailablePidsResponse(setOf("04","01"), it.pidCommand)
         }
         val defaultOBDStandardResponseProducer: (OBDStandardRequest) -> OBDStandardResponse = {
             OBDStandardResponse(OBDStandard.CARB_OBD2)

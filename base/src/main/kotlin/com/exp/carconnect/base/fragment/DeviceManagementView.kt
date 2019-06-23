@@ -10,6 +10,7 @@ import android.arch.lifecycle.*
 import android.bluetooth.BluetoothAdapter
 import android.content.Context
 import android.content.pm.ActivityInfo
+import android.content.res.Configuration
 import android.os.Bundle
 import android.support.constraint.ConstraintLayout
 import android.support.constraint.ConstraintSet
@@ -48,6 +49,8 @@ class DeviceManagementView : Fragment() {
     private lateinit var containerLayout: ConstraintLayout
     private lateinit var settingsIcon: View
     private val constraintSet = ConstraintSet()
+    private var ignoreCreate = false
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -57,7 +60,10 @@ class DeviceManagementView : Fragment() {
 
     override fun onAttach(context: Context?) {
         super.onAttach(context)
-        activity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+        if (activity.resources.configuration.orientation != Configuration.ORIENTATION_PORTRAIT) {
+            activity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+            ignoreCreate = true
+        }
     }
 
 
@@ -77,14 +83,17 @@ class DeviceManagementView : Fragment() {
 
     override fun onViewCreated(view: View?, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        deviceManagementVM = ViewModelProviders.of(this)
-                .get(DeviceManagementVM::class.java)
-        deviceManagementVM.getScreenStateLiveData()
-                .observe(this, Observer {
-                    onNewState(it!!)
-                })
-        settingsIcon.setOnClickListener {
-            deviceManagementVM.onSettingsIconClicked()
+        if (activity.resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT
+                && !ignoreCreate) {
+            deviceManagementVM = ViewModelProviders.of(this)
+                    .get(DeviceManagementVM::class.java)
+            deviceManagementVM.getScreenStateLiveData()
+                    .observe(this, Observer {
+                        onNewState(it!!)
+                    })
+            settingsIcon.setOnClickListener {
+                deviceManagementVM.onSettingsIconClicked()
+            }
         }
     }
 
@@ -257,7 +266,9 @@ class DeviceManagementVM(app: Application) : AndroidViewModel(app) {
                 .subscribe {
                     val persistedState = it.first
                     val isViewRestoredFromBackStack = it.second
+
                     if (persistedState.lastConnectedDongle != null &&
+                            !persistedState.lastConnectedDongle.isSumulated() && // we do not want to connect to simulator automatically
                             !isViewRestoredFromBackStack &&
                             persistedState.appSettings.autoConnectToLastConnectedDongleOnLaunch) {
                         val adapter = BluetoothAdapter.getDefaultAdapter()

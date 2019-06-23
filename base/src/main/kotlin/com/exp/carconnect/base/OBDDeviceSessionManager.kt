@@ -12,6 +12,7 @@ import com.exp.carconnect.obdlib.obdmessage.*
 import io.reactivex.Observable
 import io.reactivex.Scheduler
 import timber.log.Timber
+import java.util.*
 import java.util.concurrent.TimeUnit
 
 class OBDDeviceSessionManager(private val context: Context,
@@ -370,7 +371,7 @@ class OBDSession(val device: OBDDongle,
     internal fun fetchReport(engine: OBDEngine, availablePIDs: Set<String>): Observable<BaseAppAction> {
 
         val filteredRequests = reportRequests.filter {
-            availablePIDs.contains(it.command.removePrefix("01 ").trim().toLowerCase())
+            availablePIDs.contains(it.command.removePrefix("01 ").trim().toLowerCase(Locale.US))
         }
 
         return engine.submit<OBDResponse>(OBDMultiRequest("Report", filteredRequests))
@@ -513,8 +514,6 @@ class OBDSession(val device: OBDDongle,
                             BaseAppAction.AddOilTemperatureToReport((response as OilTempResponse).temperature)
                         }
                     }
-
-
                 }
                 .onErrorReturn { BaseAppAction.AddFailedToLoadReportErrorToState(device, it) }
     }

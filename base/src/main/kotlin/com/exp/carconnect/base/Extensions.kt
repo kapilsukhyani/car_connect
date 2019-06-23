@@ -7,6 +7,7 @@ import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothSocket
 import android.support.annotation.StringRes
 import com.crashlytics.android.Crashlytics
+import com.exp.carconnect.base.state.Dongle
 import com.exp.carconnect.obdlib.SimulatedStreams
 import com.exp.carconnect.obdlib.SimulationResponseSource
 import com.exp.carconnect.obdlib.obdmessage.FuelLevelResponse
@@ -142,7 +143,14 @@ class BluetoothOBDDongle(private val device: BluetoothDevice) : OBDDongle(device
     override fun connectable(): Boolean = BluetoothAdapter.getDefaultAdapter()?.isEnabled ?: false
 }
 
-class SimulatedOBDDongle : OBDDongle("Simulator", "Dummy") {
+fun Dongle.isSumulated(): Boolean = name == SimulatedOBDDongle.NAME && address == SimulatedOBDDongle.ADDRESS
+
+class SimulatedOBDDongle : OBDDongle(NAME, ADDRESS) {
+    companion object {
+        const val NAME = "Simulator"
+        const val ADDRESS = "Dummy"
+    }
+
     private class LinearValueInterpolator(private val changeRate: Float = linearChangeRate,
                                           initialDirection: Direction = Companion.Direction.Increasing) {
         companion object {

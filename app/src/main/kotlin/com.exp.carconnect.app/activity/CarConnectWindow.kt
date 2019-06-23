@@ -13,7 +13,7 @@ import android.transition.TransitionSet
 import android.view.View
 import com.exp.carconnect.app.CarConnectApp
 import com.exp.carconnect.app.R
-import com.exp.carconnect.app.fragment.ReportView
+import com.exp.carconnect.report.fragment.ReportView
 import com.exp.carconnect.app.state.ReportScreen
 import com.exp.carconnect.base.*
 import com.exp.carconnect.base.fragment.DeviceConnectionView
@@ -40,6 +40,7 @@ class CarConnectWindow : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.window)
+        clearAndroidManagedViewState()
         windowContainer = findViewById(R.id.window_container)
         windowVM = ViewModelProviders.of(this)
                 .get(WindowVM::class.java)
@@ -114,6 +115,12 @@ class CarConnectWindow : AppCompatActivity() {
                 .addShareElementTransitionIfNotEmpty(sharedElement, sharedElementTransitionName)
                 .replace(R.id.window_container, fragment, CURRENT_FRAGMENT_TAG)
                 .commitNow()
+    }
+
+    private fun clearAndroidManagedViewState() {
+        getCurrentFragment()?.let {
+            supportFragmentManager.beginTransaction().remove(it).commitNow()
+        }
     }
 
 

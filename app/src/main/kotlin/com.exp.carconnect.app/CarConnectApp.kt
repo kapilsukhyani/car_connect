@@ -4,7 +4,7 @@ import android.app.Application
 import android.preference.PreferenceManager
 import com.crashlytics.android.Crashlytics
 import com.crashlytics.android.answers.*
-import com.exp.carconnect.app.fragment.ReportScreenStateReducer
+import com.exp.carconnect.report.fragment.ReportScreenStateReducer
 import com.exp.carconnect.app.state.*
 import com.exp.carconnect.base.*
 import com.exp.carconnect.base.fragment.DeviceConnectionScreenStateReducer

@@ -108,7 +108,7 @@ class OBDSession(val device: OBDDongle,
                 listOf(SpeedRequest(mode = OBDRequestMode.FREEZE_FRAME),
                         RPMRequest(mode = OBDRequestMode.FREEZE_FRAME)))
 
-        private val reportRequests = listOf<OBDRequest>(LoadRequest(),
+        private val reportRequests = listOf(LoadRequest(),
                 FuelPressureRequest(),
                 IntakeManifoldPressureRequest(),
                 TimingAdvanceRequest(),

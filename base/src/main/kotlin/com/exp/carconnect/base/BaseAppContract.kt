@@ -17,6 +17,7 @@ interface BaseAppContract {
     fun logEvent(event: AnswersEvent<*>)
     fun killSession()
     fun onPrivacyPolicyAccepted()
+    fun logNonFatal(error: Throwable)
 
     val store: Store<AppState>
     val persistenceStore: BaseStore
@@ -69,4 +70,8 @@ fun Application.logBackPressedEvent(location: String) {
 
 fun Application.onPrivacyPolicyAccepted() {
     (this as BaseAppContract).onPrivacyPolicyAccepted()
+}
+
+fun Application.logNonFatal(e: Throwable) {
+    (this as BaseAppContract).logNonFatal(e)
 }

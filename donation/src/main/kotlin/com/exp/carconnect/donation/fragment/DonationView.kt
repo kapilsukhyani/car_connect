@@ -11,6 +11,7 @@ import android.arch.lifecycle.Observer
 import android.arch.lifecycle.ViewModelProviders
 import android.content.Context
 import android.content.pm.ActivityInfo
+import android.content.res.Configuration
 import android.os.Bundle
 import android.support.constraint.ConstraintLayout
 import android.support.constraint.ConstraintSet
@@ -21,7 +22,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
 import com.android.billingclient.api.*
-import com.android.billingclient.api.BillingClient.BillingResponse
 import com.crashlytics.android.answers.AddToCartEvent
 import com.crashlytics.android.answers.CustomEvent
 import com.crashlytics.android.answers.PurchaseEvent
@@ -34,17 +34,18 @@ import kotlinx.android.synthetic.main.donation_view.*
 import redux.api.Reducer
 import java.util.*
 
-class DonationView : Fragment {
+class DonationView : Fragment() {
     private lateinit var viewModel: DonationVM
     private var progressDialog: ProgressDialog? = null
-
-    constructor() : super()
+    private var ignoreCreate = false
 
     override fun onAttach(context: Context?) {
         super.onAttach(context)
-        activity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+        if (activity.resources.configuration.orientation != Configuration.ORIENTATION_PORTRAIT) {
+            activity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+            ignoreCreate = true
+        }
     }
-
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         super.onCreateView(inflater, container, savedInstanceState)
@@ -53,14 +54,18 @@ class DonationView : Fragment {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        viewModel = ViewModelProviders.of(this).get(DonationVM::class.java)
-        donate_button.setOnClickListener {
-            viewModel.startDonationFlow(activity, product_list.selectedItem as Product)
+        if (activity.resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT
+                && !ignoreCreate) {
+            viewModel = ViewModelProviders.of(this).get(DonationVM::class.java)
+            donate_button.setOnClickListener {
+                viewModel.startDonationFlow(activity, product_list.selectedItem as Product)
 
+            }
+            viewModel.getScreenStateLiveData()
+                    .observe(this, Observer {
+                        onNewState(it!!)
+                    })
         }
-        viewModel.getScreenStateLiveData().observe(this, Observer {
-            onNewState(it!!)
-        })
     }
 
     private fun onNewState(it: DonationScreenState) {
@@ -87,7 +92,11 @@ class DonationView : Fragment {
     }
 
     private fun startDonatedAnimation() {
-        val postTransitionConstraintLayout = activity.layoutInflater.inflate(R.layout.donation_view_post_transition, null) as ConstraintLayout
+        val postTransitionConstraintLayout = activity
+                .layoutInflater
+                .inflate(R.layout.donation_view_post_transition, null)
+                as ConstraintLayout
+
         val constraintSet = ConstraintSet()
         constraintSet.clone(postTransitionConstraintLayout)
         TransitionManager.beginDelayedTransition(constraint_container)
@@ -141,7 +150,8 @@ internal class DonationVM(app: Application) : AndroidViewModel(app), PurchasesUp
 
     companion object {
         private val DONATION_PRODUCT_IDs = arrayOf("carconnectdonationproduct",
-                "carconnectdonationproduct2", "carconnectdonationproduct3")
+                "carconnectdonationproduct2",
+                "carconnectdonationproduct3")
     }
 
     init {
@@ -156,7 +166,6 @@ internal class DonationVM(app: Application) : AndroidViewModel(app), PurchasesUp
                         store.dispatch(CommonAppAction.FinishCurrentView)
                     } else {
                         donationViewScreenStateLiveData.value = it
-
                     }
                 })
 
@@ -164,27 +173,36 @@ internal class DonationVM(app: Application) : AndroidViewModel(app), PurchasesUp
     }
 
     private fun setupBilling() {
-        billingClient = BillingClient.newBuilder(getApplication()).setListener(this).build()
+        billingClient = BillingClient
+                .newBuilder(getApplication())
+                .enablePendingPurchases()
+                .setListener(this)
+                .build()
         billingClient.startConnection(object : BillingClientStateListener {
-            override fun onBillingSetupFinished(@BillingClient.BillingResponse billingResponseCode: Int) {
-                if (billingResponseCode == BillingClient.BillingResponse.OK) {
+            override fun onBillingSetupFinished(billingResult: BillingResult?) {
+                if (billingResult?.responseCode == BillingClient.BillingResponseCode.OK) {
                     // The billing client is ready. You can query purchases here.
                     queryProducts()
+                } else {
+                    getApplication<Application>().logNonFatal(IllegalStateException("Billing Setup Failed [${billingResult?.responseCode}]"))
+                    handleUnSuccessfulResponse(billingResult?.responseCode
+                            ?: BillingClient.BillingResponseCode.ERROR)
                 }
             }
+
 
             override fun onBillingServiceDisconnected() {
                 // Try to restart the connection on the next request to
                 // Google Play by calling the startConnection() method.
                 handlePurchaseTerminated(getApplication<Application>()
                         .getString(R.string.donation_service_disconnected_message),
-                        BillingResponse.SERVICE_DISCONNECTED)
+                        BillingClient.BillingResponseCode.SERVICE_DISCONNECTED)
             }
         })
     }
 
-    override fun onPurchasesUpdated(responseCode: Int, purchases: MutableList<Purchase>?) {
-        if (responseCode === BillingResponse.OK && purchases != null) {
+    override fun onPurchasesUpdated(result: BillingResult?, purchases: MutableList<Purchase>?) {
+        if (result?.responseCode == BillingClient.BillingResponseCode.OK && purchases != null) {
             for (purchase in purchases) {
                 handlePurchase(purchase)
             }
@@ -192,14 +210,15 @@ internal class DonationVM(app: Application) : AndroidViewModel(app), PurchasesUp
             if (purchases != null) {
                 for (purchase in purchases) {
                     getApplication<Application>().logEvent(CustomEvent("purchase_failed")
-                            .putCustomAttribute("response_code", responseCode))
+                            .putCustomAttribute("response_code", result?.responseCode))
                 }
             } else {
                 getApplication<Application>().logEvent(CustomEvent("purchase_failed")
-                        .putCustomAttribute("response_code", responseCode))
+                        .putCustomAttribute("response_code", result?.responseCode))
             }
             // Handle any other error codes.
-            handleUnSuccessfulResponse(responseCode)
+            handleUnSuccessfulResponse(result?.responseCode
+                    ?: BillingClient.BillingResponseCode.ERROR)
         }
     }
 
@@ -223,16 +242,22 @@ internal class DonationVM(app: Application) : AndroidViewModel(app), PurchasesUp
         skuList.addAll(DONATION_PRODUCT_IDs)
         val params = SkuDetailsParams.newBuilder()
         params.setSkusList(skuList).setType(BillingClient.SkuType.INAPP)
-        billingClient.querySkuDetailsAsync(params.build()) { responseCode, skuDetailsList ->
-            if (responseCode == BillingResponse.OK && skuDetailsList != null) {
+        billingClient.querySkuDetailsAsync(params.build()) { result, skuDetailsList ->
+            if (result.responseCode == BillingClient.BillingResponseCode.OK && skuDetailsList != null) {
                 val products = ArrayList<Product>()
                 for (skuDetails in skuDetailsList) {
-                    products.add(Product(skuDetails.price, skuDetails.priceCurrencyCode, skuDetails.title, skuDetails.sku))
+                    products.add(Product(skuDetails.price,
+                            skuDetails.priceCurrencyCode,
+                            skuDetails.title,
+                            skuDetails.sku,
+                            skuDetails))
                 }
 
                 store.dispatch(DonationViewAction.ShowProducts(products))
+            } else {
+                getApplication<Application>().logNonFatal(IllegalStateException("Querying products failed [$result]"))
+                handleUnSuccessfulResponse(result.responseCode)
             }
-
         }
     }
 
@@ -242,52 +267,52 @@ internal class DonationVM(app: Application) : AndroidViewModel(app), PurchasesUp
                 .putCurrency(Currency.getInstance(product.currencyCode)))
         store.dispatch(DonationViewAction.StartPaymentFlow(product))
         val flowParams = BillingFlowParams.newBuilder()
-                .setSku(product.id)
+                .setSkuDetails(product.derivedFrom)
 //                .setSku("android.test.purchased") // test product id. https://developer.android.com/google/play/billing/billing_testing
 //                .setSku("android.test.canceled") // test product id. https://developer.android.com/google/play/billing/billing_testing
 //                .setSku("android.test.item_unavailable") // test product id. https://developer.android.com/google/play/billing/billing_testing
-                .setType(BillingClient.SkuType.INAPP) // SkuType.SUB for subscription
+//                .setType(BillingClient.SkuType.INAPP) // SkuType.SUB for subscription
                 .build()
-        val responseCode = billingClient.launchBillingFlow(activity, flowParams)
-        if (responseCode != BillingResponse.OK) {
-            handleUnSuccessfulResponse(responseCode)
+        val result = billingClient.launchBillingFlow(activity, flowParams)
+        if (result.responseCode != BillingClient.BillingResponseCode.OK) {
+            handleUnSuccessfulResponse(result.responseCode)
         }
     }
 
     //message uses unicode defined here http://wrttn.me/30dbfd/
     private fun handleUnSuccessfulResponse(responseCode: Int) {
         when (responseCode) {
-            BillingResponse.BILLING_UNAVAILABLE -> {
+            BillingClient.BillingResponseCode.BILLING_UNAVAILABLE -> {
                 handlePurchaseTerminated(getApplication<Application>().getString(R.string.donation_feature_not_available_message), responseCode)
             }
-            BillingResponse.DEVELOPER_ERROR -> {
+            BillingClient.BillingResponseCode.DEVELOPER_ERROR -> {
                 handlePurchaseTerminated(getApplication<Application>().getString(R.string.donation_feature_not_available_message), responseCode)
             }
-            BillingResponse.ITEM_ALREADY_OWNED -> {
+            BillingClient.BillingResponseCode.ITEM_ALREADY_OWNED -> {
                 handlePurchaseTerminated(getApplication<Application>().getString(R.string.donation_item_already_owned_message), responseCode)
             }
-            BillingResponse.ITEM_NOT_OWNED -> {
+            BillingClient.BillingResponseCode.ITEM_NOT_OWNED -> {
                 handlePurchaseTerminated(getApplication<Application>().getString(R.string.donation_item_not_owned_message), responseCode)
             }
 
-            BillingResponse.ITEM_UNAVAILABLE -> {
+            BillingClient.BillingResponseCode.ITEM_UNAVAILABLE -> {
                 handlePurchaseTerminated(getApplication<Application>().getString(R.string.donation_item_unavailable_message), responseCode)
             }
 
-            BillingResponse.FEATURE_NOT_SUPPORTED -> {
+            BillingClient.BillingResponseCode.FEATURE_NOT_SUPPORTED -> {
                 handlePurchaseTerminated(getApplication<Application>().getString(R.string.donation_feature_not_available_message), responseCode)
             }
 
-            BillingResponse.SERVICE_DISCONNECTED -> {
+            BillingClient.BillingResponseCode.SERVICE_DISCONNECTED -> {
                 handlePurchaseTerminated(getApplication<Application>().getString(R.string.donation_service_disconnected_message), responseCode)
             }
-            BillingResponse.SERVICE_UNAVAILABLE -> {
+            BillingClient.BillingResponseCode.SERVICE_UNAVAILABLE -> {
                 handlePurchaseTerminated(getApplication<Application>().getString(R.string.donation_network_error_message), responseCode)
             }
-            BillingResponse.USER_CANCELED -> {
+            BillingClient.BillingResponseCode.USER_CANCELED -> {
                 handlePurchaseTerminated(getApplication<Application>().getString(R.string.donation_user_canceled_message), responseCode)
             }
-            BillingResponse.ERROR -> {
+            BillingClient.BillingResponseCode.ERROR -> {
                 handlePurchaseTerminated(getApplication<Application>().getString(R.string.donation_something_went_wrong_message), responseCode)
             }
         }
@@ -302,7 +327,8 @@ internal class DonationVM(app: Application) : AndroidViewModel(app), PurchasesUp
         disposables.clear()
     }
 
-    fun onErrorAcknowledged(errorCode: Int, products: List<Product>?) {
+    fun onErrorAcknowledged(errorCode: Int,
+                            products: List<Product>?) {
         getApplication<Application>().logEvent(CustomEvent("donation_error_acknowledged"))
         store.dispatch(DonationViewAction.ErrorAcknowledged(errorCode))
     }

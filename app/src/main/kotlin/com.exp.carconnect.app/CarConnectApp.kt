@@ -4,7 +4,6 @@ import android.app.Application
 import android.preference.PreferenceManager
 import com.crashlytics.android.Crashlytics
 import com.crashlytics.android.answers.*
-import com.exp.carconnect.report.fragment.ReportScreenStateReducer
 import com.exp.carconnect.app.state.*
 import com.exp.carconnect.base.*
 import com.exp.carconnect.base.fragment.DeviceConnectionScreenStateReducer
@@ -27,8 +26,10 @@ import com.exp.carconnect.donation.state.UpdateDonationEpic
 import com.exp.carconnect.donation.store.DonationStore
 import com.exp.carconnect.donation.store.DonationStoreImpl
 import com.exp.carconnect.obdlib.OBDLogger
+import com.exp.carconnect.report.fragment.ReportScreenStateReducer
 import com.exp.carconnect.report.pdf.ReportPDFGenerator
 import com.google.gson.Gson
+import com.kobakei.ratethisapp.RateThisApp
 import io.fabric.sdk.android.Fabric
 import io.reactivex.Scheduler
 import io.reactivex.android.schedulers.AndroidSchedulers
@@ -41,7 +42,6 @@ import redux.observable.createEpicMiddleware
 import timber.log.Timber
 import java.util.*
 import java.util.concurrent.atomic.AtomicBoolean
-import com.kobakei.ratethisapp.RateThisApp
 
 
 //https://romannurik.github.io/AndroidAssetStudio/icons-launcher.html#foreground.type=image&foreground.space.trim=1&foreground.space.pad=-0.05&foreColor=rgba(96%2C%20125%2C%20139%2C%200)&backColor=rgb(255%2C%20255%2C%20255)&crop=0&backgroundShape=circle&effects=score&name=ic_launcher
@@ -180,8 +180,7 @@ class CarConnectApp : Application(),
     }
 
     override fun onReportRequested() {
-        store.dispatch(CommonAppAction.
-                PushViewToBackStack(ReportScreen(ReportScreenState.ShowNewSnapshot(ReportData()))))
+        store.dispatch(CommonAppAction.PushViewToBackStack(ReportScreen(ReportScreenState.ShowNewSnapshot(ReportData()))))
     }
 
     override fun killSession() {
@@ -224,6 +223,14 @@ class CarConnectApp : Application(),
                     }
 
                 }
+            }
+        }
+    }
+
+    override fun logNonFatal(error: Throwable) {
+        if (!BuildConfig.DEBUG) {
+            if (reportingEnabled.get()) {
+                Crashlytics.logException(error)
             }
         }
     }

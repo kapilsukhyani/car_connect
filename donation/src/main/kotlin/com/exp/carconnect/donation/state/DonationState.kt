@@ -1,6 +1,7 @@
 package com.exp.carconnect.donation.state
 
 import com.android.billingclient.api.BillingClient
+import com.android.billingclient.api.SkuDetails
 import com.exp.carconnect.base.*
 import com.exp.carconnect.donation.state.DonationModuleState.Companion.DONATION_STATE_KEY
 
@@ -39,7 +40,11 @@ sealed class DonationState {
                        val purchaseToken: String) : DonationState()
 }
 
-data class Product(val price: String, val currencyCode: String, val name: String, val id: String) {
+data class Product(val price: String,
+                   val currencyCode: String,
+                   val name: String,
+                   val id: String,
+                   val derivedFrom: SkuDetails) {
     override fun toString(): String {
         return price
     }
@@ -100,12 +105,12 @@ sealed class DonationScreenState : CarConnectIndividualViewState {
             return when (action) {
                 is DonationViewAction.ErrorAcknowledged -> {
                     when (action.errorCode) {
-                        BillingClient.BillingResponse.BILLING_UNAVAILABLE,
-                        BillingClient.BillingResponse.DEVELOPER_ERROR,
-                        BillingClient.BillingResponse.ITEM_ALREADY_OWNED,
-                        BillingClient.BillingResponse.ITEM_NOT_OWNED,
-                        BillingClient.BillingResponse.FEATURE_NOT_SUPPORTED,
-                        BillingClient.BillingResponse.SERVICE_DISCONNECTED -> {
+                        BillingClient.BillingResponseCode.BILLING_UNAVAILABLE,
+                        BillingClient.BillingResponseCode.DEVELOPER_ERROR,
+                        BillingClient.BillingResponseCode.ITEM_ALREADY_OWNED,
+                        BillingClient.BillingResponseCode.ITEM_NOT_OWNED,
+                        BillingClient.BillingResponseCode.FEATURE_NOT_SUPPORTED,
+                        BillingClient.BillingResponseCode.SERVICE_DISCONNECTED -> {
                             FinishDonationView
                         }
                         else -> {

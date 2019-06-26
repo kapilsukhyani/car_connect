@@ -277,7 +277,9 @@ class Dashboard @JvmOverloads constructor(context: Context,
         gaugeBackgroundDrawable.isCircular = true
         background = context.getDrawable(R.drawable.dashboard_bg)
 
-        gaugeBGPaint.shader = BitmapShader((context.getDrawable(R.drawable.gauge_bg) as BitmapDrawable).bitmap, Shader.TileMode.REPEAT, Shader.TileMode.REPEAT)
+        gaugeBGPaint.shader = BitmapShader((context.getDrawable(R.drawable.gauge_bg) as BitmapDrawable).bitmap,
+                Shader.TileMode.REPEAT,
+                Shader.TileMode.REPEAT)
         gaugeBGPaint.style = Paint.Style.FILL
 
         vinPaint.textLocale = Locale.US
@@ -304,7 +306,7 @@ class Dashboard @JvmOverloads constructor(context: Context,
             }
         })
 
-        addOnLayoutChangeListener(object : View.OnLayoutChangeListener {
+        addOnLayoutChangeListener(object : OnLayoutChangeListener {
             override fun onLayoutChange(v: View?, left: Int, top: Int, right: Int, bottom: Int, oldLeft: Int, oldTop: Int, oldRight: Int, oldBottom: Int) {
                 layedOut = true
                 removeOnLayoutChangeListener(this)
@@ -366,7 +368,9 @@ class Dashboard @JvmOverloads constructor(context: Context,
         rpmGauge.onBoundChanged(leftGaugeBounds)
 
         val sideAndMiddleGaugeIntersectionLength = Math.abs(rightGaugeBoundsToBeShownCompletely.left - middleGaugeBounds.right)
-        fuelAndTemperatureGauge.onBoundChanged(rightGaugeBounds, middleGaugeRadius, sideAndMiddleGaugeIntersectionLength)
+        fuelAndTemperatureGauge.onBoundChanged(rightGaugeBounds,
+                middleGaugeRadius,
+                sideAndMiddleGaugeIntersectionLength)
 
     }
 
@@ -396,26 +400,35 @@ class Dashboard @JvmOverloads constructor(context: Context,
 
     private fun drawSpeedometerGauge(canvas: Canvas, middleGaugeBounds: RectF) {
         //drawing middle gauge bg at end, otherwise left and right gauge bgs overwrite the middle gauge bg a little bit
-        gaugeBackgroundDrawable.setBounds(middleGaugeBounds.left.toInt(), middleGaugeBounds.top.toInt(), middleGaugeBounds.right.toInt(), middleGaugeBounds.bottom.toInt())
+        gaugeBackgroundDrawable.setBounds(middleGaugeBounds.left.toInt(),
+                middleGaugeBounds.top.toInt(),
+                middleGaugeBounds.right.toInt(),
+                middleGaugeBounds.bottom.toInt())
         gaugeBackgroundDrawable.draw(canvas)
         speedometerGauge.drawGauge(canvas, middleGaugeBounds)
     }
 
     private fun drawRPMGauge(canvas: Canvas, leftSideGaugeBounds: RectF) {
-        gaugeBackgroundDrawable.setBounds(leftSideGaugeBounds.left.toInt(), leftSideGaugeBounds.top.toInt(), leftSideGaugeBounds.right.toInt(), leftSideGaugeBounds.bottom.toInt())
+        gaugeBackgroundDrawable.setBounds(leftSideGaugeBounds.left.toInt(),
+                leftSideGaugeBounds.top.toInt(),
+                leftSideGaugeBounds.right.toInt(),
+                leftSideGaugeBounds.bottom.toInt())
         gaugeBackgroundDrawable.draw(canvas)
         rpmGauge.drawGauge(canvas, leftSideGaugeBounds)
     }
 
     private fun drawFuelGauge(canvas: Canvas, rightSideGaugeBounds: RectF) {
-        gaugeBackgroundDrawable.setBounds(rightSideGaugeBounds.left.toInt(), rightSideGaugeBounds.top.toInt(), rightSideGaugeBounds.right.toInt(), rightSideGaugeBounds.bottom.toInt())
+        gaugeBackgroundDrawable.setBounds(rightSideGaugeBounds.left.toInt(),
+                rightSideGaugeBounds.top.toInt(),
+                rightSideGaugeBounds.right.toInt(),
+                rightSideGaugeBounds.bottom.toInt())
         gaugeBackgroundDrawable.draw(canvas)
         fuelAndTemperatureGauge.drawGauge(canvas, rightSideGaugeBounds)
     }
 
 
     private fun drawVin(canvas: Canvas, middleGaugeBounds: RectF) {
-        if (!vin.isEmpty()) {
+        if (vin.isNotEmpty()) {
             vinPaint.textSize = vinCharSize
             var totalRotationSoFar = VIN_START_ANGLE
             canvas.save()
@@ -475,13 +488,13 @@ class Dashboard @JvmOverloads constructor(context: Context,
     private fun startSideGaugeAnimation(animateFrom: Float, animateTo: Float, offsetBoundsBy: (Float) -> Unit) {
         val animator = ValueAnimator
                 .ofFloat(animateFrom, animateTo)
-        animator.addUpdateListener({
+        animator.addUpdateListener {
             val animatedBy = Math.abs((it.animatedValue as Float) - rightGaugeBounds.left)
             offsetBoundsBy(animatedBy)
             rpmGauge.onBoundChanged(leftGaugeBounds)
             fuelAndTemperatureGauge.onBoundChanged(rightGaugeBounds)
             invalidate()
-        })
+        }
         animator.addListener(object : AnimatorListenerAdapter() {
             override fun onAnimationStart(animation: Animator?) {
                 animatingSideGauges = true

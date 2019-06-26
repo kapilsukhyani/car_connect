@@ -8,7 +8,7 @@ internal abstract class Gauge(val dashboard: Dashboard,
                               var onlineColor: Int,
                               val offlineColor: Int) {
     companion object {
-        val GAUGE_STROKE_WIDTH = 20f
+        const val GAUGE_STROKE_WIDTH = 20f
     }
 
     protected val gaugePaint: Paint = Paint(Paint.ANTI_ALIAS_FLAG)
@@ -20,6 +20,7 @@ internal abstract class Gauge(val dashboard: Dashboard,
             } else {
                 onDisconnected()
             }
+            field = value
         }
 
     init {

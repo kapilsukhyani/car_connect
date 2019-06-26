@@ -23,29 +23,29 @@ internal class SpeedometerGauge(dashboard: Dashboard,
                                 offlineColor: Int) : MiddleGauge(dashboard, onlineColor, offlineColor) {
 
     companion object {
-        internal val MAX_SPEED = 320
-        internal val MIN_SPEED = 0
+        internal const val MAX_SPEED = 320
+        internal const val MIN_SPEED = 0
 
-        private val BIG_TICK_LENGTH_PERCENTAGE = .08f
-        private val BIG_TICK_WIDTH_PERCENTAGE = .009f
-        private val SMALL_TICK_LENGTH_PERCENTAGE = .06f
-        private val SMALL_TICK_WIDTH_PERCENTAGE = .007f
-        private val TICK_MARKER_TEXT_SIZE_PERCENTAGE = .05f
-        private val TICK_MARKER_MARGIN_PERCENTAGE = .025f
-        private val INNER_CIRCLE_WIDTH_PERCENTAGE = .45f
-        private val INDICATOR_DIMEN_PERCENTAGE = .1f
-        private val CHECK_ENGINE_LIGHT_DIMEN_PERCENTAGE = .08f
-        private val IGNITION_DIMEN_PERCENTAGE = .08f
+        private const val BIG_TICK_LENGTH_PERCENTAGE = .08f
+        private const val BIG_TICK_WIDTH_PERCENTAGE = .009f
+        private const val SMALL_TICK_LENGTH_PERCENTAGE = .06f
+        private const val SMALL_TICK_WIDTH_PERCENTAGE = .007f
+        private const val TICK_MARKER_TEXT_SIZE_PERCENTAGE = .05f
+        private const val TICK_MARKER_MARGIN_PERCENTAGE = .025f
+        private const val INNER_CIRCLE_WIDTH_PERCENTAGE = .45f
+        private const val INDICATOR_DIMEN_PERCENTAGE = .1f
+        private const val CHECK_ENGINE_LIGHT_DIMEN_PERCENTAGE = .08f
+        private const val IGNITION_DIMEN_PERCENTAGE = .08f
 
-        private val INNER_CIRCLE_STROKE_WIDTH = 10
-        private val TOTAL_NO_OF_TICKS = 33
-        private val BIG_TICK_MULTIPLE = 2
-        private val TICK_MARKER_START = 0
-        private val TICK_MARKER_DIFF = 20
-        private val CURRENT_SPEED_TEXT_SIZE_PERCENTAGE = .05f
-        private val DEFAULT_SPEED_UNIT = "km/h"
+        private const val INNER_CIRCLE_STROKE_WIDTH = 10
+        private const val TOTAL_NO_OF_TICKS = 33
+        private const val BIG_TICK_MULTIPLE = 2
+        private const val TICK_MARKER_START = 0
+        private const val TICK_MARKER_DIFF = 20
+        private const val CURRENT_SPEED_TEXT_SIZE_PERCENTAGE = .05f
+        private const val DEFAULT_SPEED_UNIT = "km/h"
 
-        private val DRIBBLE_RANGE = 5.0f
+        private const val DRIBBLE_RANGE = 5.0f
         private val DRIBBLE_RANDOM = Random()
     }
 

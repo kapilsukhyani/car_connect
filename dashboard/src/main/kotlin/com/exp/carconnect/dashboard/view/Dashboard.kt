@@ -334,17 +334,24 @@ class Dashboard @JvmOverloads constructor(context: Context,
         middleGaugeRadius = remainingWidthAfterPadding * MIDDLE_GAUGE_WIDTH_PERCENTAGE / 2
         sideGaugeRadius = remainingWidthAfterPadding * LEFT_GAUGE_WIDTH_PERCENTAGE / 2
 
-        middleGaugeBounds = RectF(viewCenter.x - middleGaugeRadius, viewCenter.y - middleGaugeRadius,
-                viewCenter.x + middleGaugeRadius, viewCenter.y + middleGaugeRadius)
+        middleGaugeBounds = RectF(viewCenter.x - middleGaugeRadius,
+                viewCenter.y - middleGaugeRadius,
+                viewCenter.x + middleGaugeRadius,
+                viewCenter.y + middleGaugeRadius)
 
         val leftGaugeStartPoint = Math.ceil(middleGaugeBounds.left - sideGaugeRadius * Math.sqrt(2.0)).toInt()
-        leftGaugeBounds = RectF(leftGaugeStartPoint.toFloat(), viewCenter.y - sideGaugeRadius,
-                leftGaugeStartPoint + 2 * sideGaugeRadius, viewCenter.y + sideGaugeRadius)
+        leftGaugeBounds = RectF(leftGaugeStartPoint.toFloat(),
+                viewCenter.y - sideGaugeRadius,
+                leftGaugeStartPoint + 2 * sideGaugeRadius,
+                viewCenter.y + sideGaugeRadius)
+
         leftGaugeBoundsToBeShownCompletely = RectF(leftGaugeBounds)
 
         val rightGaugeEndpoint = Math.ceil(middleGaugeBounds.right + sideGaugeRadius * Math.sqrt(2.0)).toInt()
-        rightGaugeBounds = RectF(rightGaugeEndpoint - 2 * sideGaugeRadius, viewCenter.y - sideGaugeRadius,
-                rightGaugeEndpoint.toFloat(), viewCenter.y + sideGaugeRadius)
+        rightGaugeBounds = RectF(rightGaugeEndpoint - 2 * sideGaugeRadius,
+                viewCenter.y - sideGaugeRadius,
+                rightGaugeEndpoint.toFloat(),
+                viewCenter.y + sideGaugeRadius)
         rightGaugeBoundsToBeShownCompletely = RectF(rightGaugeBounds)
 
         if (!showSideGauges) {
@@ -355,8 +362,10 @@ class Dashboard @JvmOverloads constructor(context: Context,
 
         val availableHeight = (remainingHeihtAfterPadding - (2 * sideGaugeRadius)) / 2
         val margin = availableHeight * DASHBOARD_LABEL_MARGIN_PERCENTAGE_OF_AVAILABLE_HEIGHT
-        labelBoundsOnCanvas = RectF(margin, viewCenter.y + sideGaugeRadius + margin,
-                labelBound.width().toFloat(), viewCenter.y + sideGaugeRadius + availableHeight - margin)
+        labelBoundsOnCanvas = RectF(margin,
+                viewCenter.y + sideGaugeRadius + margin,
+                labelBound.width().toFloat(),
+                viewCenter.y + sideGaugeRadius + availableHeight - margin)
 
 
         val middleGaugeCircumference: Float = (Math.PI * middleGaugeBounds.width()).toFloat()

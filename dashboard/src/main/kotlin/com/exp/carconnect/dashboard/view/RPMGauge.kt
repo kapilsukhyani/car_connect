@@ -20,33 +20,33 @@ internal class RPMGauge(dashboard: Dashboard,
 
     companion object {
 
-        internal val MIN_RPM = 0
-        internal val MAX_RPM = 8
+        internal const val MIN_RPM = 0
+        internal const val MAX_RPM = 8
 
-        internal val TOTAL_NO_OF_DATA_POINTS = MAX_RPM
+        internal const val TOTAL_NO_OF_DATA_POINTS = MAX_RPM
 
-        private val RPM_TEXT = "RPM x 1000"
-        private val TOTAL_NO_OF_TICKS = 25
-        private val BIG_TICK_MULTIPLE = 3
-        private val TICK_MARKER_START = 0
-        private val TICK_MARKER_DIFF = 1
-        private val BIG_TICK_LENGTH_PERCENTAGE = .08f
-        private val BIG_TICK_WIDTH_PERCENTAGE = .009f
-        private val SMALL_TICK_LENGTH_PERCENTAGE = .06f
-        private val SMALL_TICK_WIDTH_PERCENTAGE = .007f
-        private val TICK_MARKER_TEXT_SIZE_PERCENTAGE = .06f
-        private val TICK_MARKER_MARGIN_PERCENTAGE = .03f
-        private val INDICATOR_CENTER_PERCENTAGE = .15f
-        private val INDICATOR_LENGTH_PERCENTAGE = .5f
-        private val RPM_TEXT_SIZE_PERCENTAGE = .06f
-        private val RPM_TEXT_MARGIN = .04f
+        private const val RPM_TEXT = "RPM x 1000"
+        private const val TOTAL_NO_OF_TICKS = 25
+        private const val BIG_TICK_MULTIPLE = 3
+        private const val TICK_MARKER_START = 0
+        private const val TICK_MARKER_DIFF = 1
+        private const val BIG_TICK_LENGTH_PERCENTAGE = .08f
+        private const val BIG_TICK_WIDTH_PERCENTAGE = .009f
+        private const val SMALL_TICK_LENGTH_PERCENTAGE = .06f
+        private const val SMALL_TICK_WIDTH_PERCENTAGE = .007f
+        private const val TICK_MARKER_TEXT_SIZE_PERCENTAGE = .06f
+        private const val TICK_MARKER_MARGIN_PERCENTAGE = .03f
+        private const val INDICATOR_CENTER_PERCENTAGE = .15f
+        private const val INDICATOR_LENGTH_PERCENTAGE = .5f
+        private const val RPM_TEXT_SIZE_PERCENTAGE = .06f
+        private const val RPM_TEXT_MARGIN = .04f
 
-        private val CRITICAL_ANGLE_SWEEP = 45f
+        private const val CRITICAL_ANGLE_SWEEP = 45f
 
-        private val INDICATOR_CIRCLE_STROKE_WIDTH = 10
-        private val INDICATOR_STROKE_WIDTH = 25
+        private const val INDICATOR_CIRCLE_STROKE_WIDTH = 10
+        private const val INDICATOR_STROKE_WIDTH = 25
 
-        private val DRIBBLE_RANGE = .1f
+        private const val DRIBBLE_RANGE = .1f
         private val DRIBBLE_RANDOM = Random()
     }
 
@@ -107,7 +107,10 @@ internal class RPMGauge(dashboard: Dashboard,
         tickMarkerPaint.typeface = Typeface.create(Typeface.DEFAULT, Typeface.BOLD)
         tickMarkerPaint.textAlign = Paint.Align.CENTER
 
-        tickPaint.maskFilter = EmbossMaskFilter(floatArrayOf(1f, 5f, 1f), 0.8f, 6.0f, 20.0f)
+        tickPaint.maskFilter = EmbossMaskFilter(floatArrayOf(1f, 5f, 1f),
+                0.8f,
+                6.0f,
+                20.0f)
 
         rpmTextPaint.textLocale = Locale.US
         rpmTextPaint.typeface = Typeface.create(Typeface.DEFAULT, Typeface.BOLD)
@@ -123,7 +126,13 @@ internal class RPMGauge(dashboard: Dashboard,
         indicatorThinLinePaint.style = Paint.Style.STROKE
         indicatorThinLinePaint.strokeWidth = INDICATOR_STROKE_WIDTH.toFloat() * .2f
         indicatorThinLinePaint.color = criticalZoneColor
-        indicatorThinLinePaint.shader = LinearGradient(0f, 0f, 100f, 100f, criticalZoneColor, getDarkerColor(criticalZoneColor), Shader.TileMode.MIRROR)
+        indicatorThinLinePaint.shader = LinearGradient(0f,
+                0f,
+                100f,
+                100f,
+                criticalZoneColor,
+                getDarkerColor(criticalZoneColor),
+                Shader.TileMode.MIRROR)
     }
 
     override fun onConnected() {
@@ -134,10 +143,22 @@ internal class RPMGauge(dashboard: Dashboard,
         rpmTextPaint.color = onlineColor
 
         indicatorCenterPaint.color = onlineColor
-        indicatorCenterPaint.setShadowLayer(20f, 0f, 0f, onlineColor)
+        indicatorCenterPaint.setShadowLayer(20f,
+                0f,
+                0f,
+                onlineColor)
         indicatorPaint.color = onlineColor
-        indicatorPaint.shader = LinearGradient(0f, 0f, 100f, 100f, onlineColor, onlineGradientColor, Shader.TileMode.MIRROR)
-        indicatorPaint.setShadowLayer(20f, 0f, 0f, onlineColor)
+        indicatorPaint.shader = LinearGradient(0f,
+                0f,
+                100f,
+                100f,
+                onlineColor,
+                onlineGradientColor,
+                Shader.TileMode.MIRROR)
+        indicatorPaint.setShadowLayer(20f,
+                0f,
+                0f,
+                onlineColor)
         dribble()
     }
 
@@ -150,10 +171,22 @@ internal class RPMGauge(dashboard: Dashboard,
         rpmTextPaint.color = offlineColor
 
         indicatorCenterPaint.color = offlineColor
-        indicatorCenterPaint.setShadowLayer(20f, 0f, 0f, offlineColor)
+        indicatorCenterPaint.setShadowLayer(20f,
+                0f,
+                0f,
+                offlineColor)
         indicatorPaint.color = offlineColor
-        indicatorPaint.shader = LinearGradient(0f, 0f, 100f, 100f, offlineColor, offlineGradientColor, Shader.TileMode.MIRROR)
-        indicatorPaint.setShadowLayer(20f, 0f, 0f, offlineColor)
+        indicatorPaint.shader = LinearGradient(0f,
+                0f,
+                100f,
+                100f,
+                offlineColor,
+                offlineGradientColor,
+                Shader.TileMode.MIRROR)
+        indicatorPaint.setShadowLayer(20f,
+                0f,
+                0f,
+                offlineColor)
         cancelDribble()
     }
 
@@ -175,22 +208,47 @@ internal class RPMGauge(dashboard: Dashboard,
 
 
     override fun drawGauge(canvas: Canvas, bounds: RectF) {
-        canvas.drawArc(bounds, startAngle, sweep, false, gaugePaint)
+        canvas.drawArc(bounds,
+                startAngle,
+                sweep,
+                false,
+                gaugePaint)
 
-        canvas.drawArc(bounds, normalZoneStartAngle, normalZoneSweep, false, gaugePaint)
+        canvas.drawArc(bounds,
+                normalZoneStartAngle,
+                normalZoneSweep,
+                false,
+                gaugePaint)
+
         val color = gaugePaint.color
         gaugePaint.color = criticalZoneColor
-        canvas.drawArc(bounds, criticalZoneStartAngle, CRITICAL_ANGLE_SWEEP, false, gaugePaint)
+        canvas.drawArc(bounds,
+                criticalZoneStartAngle,
+                CRITICAL_ANGLE_SWEEP,
+                false,
+                gaugePaint)
+
         gaugePaint.color = color
 
-
-        drawTicks(canvas, bounds, startAngle,
+        drawTicks(canvas,
+                bounds,
+                startAngle,
                 sweep / (TOTAL_NO_OF_TICKS - 1),
-                TOTAL_NO_OF_TICKS, BIG_TICK_MULTIPLE,
-                bigTickLength, bigTickWidth, smallTickLength, smallTickWidth,
-                TICK_MARKER_START, TICK_MARKER_DIFF,
-                textSize, textMargin, tickMarkerPaint, tickPaint,
-                true, CRITICAL_ANGLE_SWEEP, criticalZoneColor)
+                TOTAL_NO_OF_TICKS,
+                BIG_TICK_MULTIPLE,
+                bigTickLength,
+                bigTickWidth,
+                smallTickLength,
+                smallTickWidth,
+                TICK_MARKER_START,
+                TICK_MARKER_DIFF,
+                textSize,
+                textMargin,
+                tickMarkerPaint,
+                tickPaint,
+                true,
+                CRITICAL_ANGLE_SWEEP,
+                criticalZoneColor)
 
 
         drawIndicator(canvas, bounds)
@@ -202,17 +260,28 @@ internal class RPMGauge(dashboard: Dashboard,
         indicatorCenterPaint.color = ColorUtils.blendARGB(gaugePaint.color, Color.RED, currentSpeedOverMaxSpeedRatio)
 
         val indicatorCenterRadius = parentBounds.width() * INDICATOR_CENTER_PERCENTAGE / 2
-        canvas.drawCircle(parentBounds.centerX(), parentBounds.centerY(), indicatorCenterRadius, indicatorCenterPaint)
+        canvas.drawCircle(parentBounds.centerX(),
+                parentBounds.centerY(),
+                indicatorCenterRadius,
+                indicatorCenterPaint)
 
         val rpmTextSize = parentBounds.width() * RPM_TEXT_SIZE_PERCENTAGE
         val rpmTextTopMargin = parentBounds.width() * RPM_TEXT_MARGIN
         rpmTextPaint.textSize = rpmTextSize
         val textSize = Rect()
-        rpmTextPaint.getTextBounds(RPM_TEXT, 0, RPM_TEXT.length, textSize)
-        canvas.drawText(RPM_TEXT, parentBounds.centerX(), parentBounds.centerY() + indicatorCenterRadius + textSize.height() + rpmTextTopMargin, rpmTextPaint)
+        rpmTextPaint.getTextBounds(RPM_TEXT,
+                0,
+                RPM_TEXT.length,
+                textSize)
+        canvas.drawText(RPM_TEXT,
+                parentBounds.centerX(),
+                parentBounds.centerY() + indicatorCenterRadius + textSize.height() + rpmTextTopMargin,
+                rpmTextPaint)
 
         canvas.save()
-        canvas.rotate(getDegreesForCurrentRPM(), parentBounds.centerX(), parentBounds.centerY())
+        canvas.rotate(getDegreesForCurrentRPM(),
+                parentBounds.centerX(),
+                parentBounds.centerY())
 
         val indicatorLength = parentBounds.width() * INDICATOR_LENGTH_PERCENTAGE
         val x1 = (parentBounds.centerX() - indicatorLength * .35).toFloat()
@@ -230,8 +299,12 @@ internal class RPMGauge(dashboard: Dashboard,
     private fun dribble() {
         if (rpmDribbleEnabled && dashboard.currentRPM > MIN_RPM && dashboard.online) {
             val dribbleBy = DRIBBLE_RANDOM.nextFloat() * (DRIBBLE_RANGE - 0.0f) + 0.0f
-            dribbleRPMAnimator = ObjectAnimator.ofFloat(this, "currentRPM", currentRPM, dashboard.currentRPM + dribbleBy,
-                    dashboard.currentRPM, dashboard.currentRPM - dribbleBy, currentRPM)
+            dribbleRPMAnimator = ObjectAnimator.ofFloat(this,
+                    "currentRPM", currentRPM,
+                    dashboard.currentRPM + dribbleBy,
+                    dashboard.currentRPM,
+                    dashboard.currentRPM - dribbleBy,
+                    currentRPM)
             dribbleRPMAnimator?.repeatMode = ObjectAnimator.RESTART
             dribbleRPMAnimator?.repeatCount = ObjectAnimator.INFINITE
             dribbleRPMAnimator?.start()
@@ -247,7 +320,10 @@ internal class RPMGauge(dashboard: Dashboard,
     internal fun updateRPM(rpm: Float) {
         rpmDribbleEnabled = false
         currentRPMAnimator?.cancel()
-        currentRPMAnimator = ObjectAnimator.ofFloat(this, "currentRPM", currentRPM, rpm)
+        currentRPMAnimator = ObjectAnimator.ofFloat(this,
+                "currentRPM",
+                currentRPM,
+                rpm)
         currentRPMAnimator?.addListener(object : Animator.AnimatorListener {
             override fun onAnimationRepeat(animation: Animator?) {
             }

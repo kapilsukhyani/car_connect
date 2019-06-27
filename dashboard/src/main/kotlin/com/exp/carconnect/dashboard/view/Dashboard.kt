@@ -238,12 +238,30 @@ class Dashboard @JvmOverloads constructor(context: Context,
             (getContext().getDrawable(R.drawable.gauge_bg) as BitmapDrawable).bitmap)
 
 
-    private val speedometerGauge = SpeedometerGauge(this, MIDDLE_GAUGE_START_ANGLE.toFloat(), MIDDLE_GAUGE_SWEEP_ANGLE.toFloat(),
-            currentSpeed, showIgnitionIcon, showCheckEngineLight, speedDribbleEnabled, onlineColor, offlineColor)
-    private val rpmGauge = RPMGauge(this, LEFT_GAUGE_START_ANGLE.toFloat(), LEFT_GAUGE_SWEEP_ANGLE.toFloat(),
-            rpmDribbleEnabled, currentRPM, onlineColor, offlineColor)
-    private val fuelAndTemperatureGauge = FuelAndTemperatureGauge(this, RIGHT_GAUGE_START_ANGLE.toFloat(), RIGHT_GAUGE_SWEEP_ANGLE.toFloat(),
-            .01f, currentAirIntakeTemp, currentAmbientTemp, onlineColor, offlineColor)
+    private val speedometerGauge = SpeedometerGauge(this,
+            MIDDLE_GAUGE_START_ANGLE.toFloat(),
+            MIDDLE_GAUGE_SWEEP_ANGLE.toFloat(),
+            currentSpeed,
+            showIgnitionIcon,
+            showCheckEngineLight,
+            speedDribbleEnabled,
+            onlineColor,
+            offlineColor)
+    private val rpmGauge = RPMGauge(this,
+            LEFT_GAUGE_START_ANGLE.toFloat(),
+            LEFT_GAUGE_SWEEP_ANGLE.toFloat(),
+            rpmDribbleEnabled,
+            currentRPM,
+            onlineColor,
+            offlineColor)
+    private val fuelAndTemperatureGauge = FuelAndTemperatureGauge(this,
+            RIGHT_GAUGE_START_ANGLE.toFloat(),
+            RIGHT_GAUGE_SWEEP_ANGLE.toFloat(),
+            .01f,
+            currentAirIntakeTemp,
+            currentAmbientTemp,
+            onlineColor,
+            offlineColor)
 
     private val gestureListener = object : GestureDetector.SimpleOnGestureListener() {
         override fun onSingleTapUp(e: MotionEvent): Boolean {
@@ -441,7 +459,9 @@ class Dashboard @JvmOverloads constructor(context: Context,
             vinPaint.textSize = vinCharSize
             var totalRotationSoFar = VIN_START_ANGLE
             canvas.save()
-            canvas.rotate(VIN_START_ANGLE, middleGaugeBounds.centerX(), middleGaugeBounds.centerY())
+            canvas.rotate(VIN_START_ANGLE,
+                    middleGaugeBounds.centerX(),
+                    middleGaugeBounds.centerY())
             val x: Float = middleGaugeBounds.centerX() + (middleGaugeBounds.width() / 2)
             val y: Float = middleGaugeBounds.centerY()
             for (i in 0 until 17) {
@@ -450,7 +470,9 @@ class Dashboard @JvmOverloads constructor(context: Context,
                 canvas.drawText(vin.substring(i, i + 1), x, y, vinPaint)
                 canvas.restore()
 
-                canvas.rotate(-vinCharGapInDegrees, middleGaugeBounds.centerX(), middleGaugeBounds.centerY())
+                canvas.rotate(-vinCharGapInDegrees,
+                        middleGaugeBounds.centerX(),
+                        middleGaugeBounds.centerY())
                 totalRotationSoFar -= vinCharGapInDegrees
             }
 
@@ -494,7 +516,9 @@ class Dashboard @JvmOverloads constructor(context: Context,
     }
 
 
-    private fun startSideGaugeAnimation(animateFrom: Float, animateTo: Float, offsetBoundsBy: (Float) -> Unit) {
+    private fun startSideGaugeAnimation(animateFrom: Float,
+                                        animateTo: Float,
+                                        offsetBoundsBy: (Float) -> Unit) {
         val animator = ValueAnimator
                 .ofFloat(animateFrom, animateTo)
         animator.addUpdateListener {

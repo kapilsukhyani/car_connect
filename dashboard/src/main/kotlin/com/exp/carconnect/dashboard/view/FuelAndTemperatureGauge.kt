@@ -46,7 +46,9 @@ internal class FuelAndTemperatureGauge(dashboard: Dashboard,
     private val temperatureTextPaint = TextPaint(Paint.ANTI_ALIAS_FLAG)
 
 
-    private val fuelIcon = VectorDrawableCompat.create(dashboard.context.resources, R.drawable.ic_local_gas_station_black_24dp, null)!!
+    private val fuelIcon = VectorDrawableCompat.create(dashboard.context.resources,
+            R.drawable.ic_local_gas_station_black_24dp,
+            null)!!
 
 
     internal var fuelPercentageChangedListener: ((Float) -> Unit)? = null
@@ -142,7 +144,6 @@ internal class FuelAndTemperatureGauge(dashboard: Dashboard,
 
         temperatureTextPaint.color = offlineColor
         temperatureDottInActivePaint.color = offlineColor
-
     }
 
 
@@ -178,26 +179,42 @@ internal class FuelAndTemperatureGauge(dashboard: Dashboard,
         val temperatureTextBoundLeftEdge = (temperatureGaugeCircleRadius + temperatureGaugeCircleCenter.x + 2 * smallestTemperatureDottRadius * MAX_NO_OF_TEMPERATURE_DOTTS)
 
         //todo improve text bound calculation, touch is not getting registered properly as of now
-        temperatureTextPaint.getTextBounds(AIR_INTAKE_TEXT, 0, AIR_INTAKE_TEXT.length, textBound)
+        temperatureTextPaint.getTextBounds(AIR_INTAKE_TEXT,
+                0,
+                AIR_INTAKE_TEXT.length,
+                textBound)
         val currentAirIntakeTempString = String.format("%.1f", currentAirIntakeTemperature) + " " + CELSIUS
-        temperatureTextPaint.getTextBounds(currentAirIntakeTempString, 0, currentAirIntakeTempString.length, currentTempTextBound)
+        temperatureTextPaint.getTextBounds(currentAirIntakeTempString,
+                0,
+                currentAirIntakeTempString.length,
+                currentTempTextBound)
         textBound.offsetTo(temperatureTextBoundLeftEdge.toInt(), temperatureGaugeCircleCenter.y.toInt())
 
         airIntakeLabelBounds = RectF(textBound)
         currentAirIntakeTextStartingPoint = PointF(textBound.left.toFloat(), textBound.top - currentTempTextBound.height().toFloat())
-        airIntakeTouchBounds = RectF(currentAirIntakeTextStartingPoint.x, currentAirIntakeTextStartingPoint.y - currentTempTextBound.height().toFloat(),
-                airIntakeLabelBounds.right, airIntakeLabelBounds.bottom)
+        airIntakeTouchBounds = RectF(currentAirIntakeTextStartingPoint.x,
+                currentAirIntakeTextStartingPoint.y - currentTempTextBound.height().toFloat(),
+                airIntakeLabelBounds.right,
+                airIntakeLabelBounds.bottom)
 
-        temperatureTextPaint.getTextBounds(AMBIENT_TEXT, 0, AMBIENT_TEXT.length, textBound)
+        temperatureTextPaint.getTextBounds(AMBIENT_TEXT,
+                0,
+                AMBIENT_TEXT.length,
+                textBound)
         val currentAmbientTempString = String.format("%.1f", currentAmbientTemperature) + " " + CELSIUS
-        temperatureTextPaint.getTextBounds(currentAmbientTempString, 0, currentAmbientTempString.length, currentTempTextBound)
+        temperatureTextPaint.getTextBounds(currentAmbientTempString,
+                0,
+                currentAmbientTempString.length,
+                currentTempTextBound)
         textBound.offsetTo(temperatureTextBoundLeftEdge.toInt(), temperatureGaugeCircleCenter.y.toInt())
 
         ambientLabelBounds = RectF(textBound)
         currentAmbientTextStartingPoint = PointF(textBound.left.toFloat(),
                 textBound.bottom + currentTempTextBound.height().toFloat())
-        ambientTouchBounds = RectF(ambientLabelBounds.left, ambientLabelBounds.top,
-                ambientLabelBounds.right, ambientLabelBounds.bottom + currentAmbientTextStartingPoint.y)
+        ambientTouchBounds = RectF(ambientLabelBounds.left,
+                ambientLabelBounds.top,
+                ambientLabelBounds.right,
+                ambientLabelBounds.bottom + currentAmbientTextStartingPoint.y)
 
         temperatureDottCenter = PointF(temperatureGaugeCircleRadius + temperatureGaugeCircleCenter.x, temperatureGaugeCircleCenter.y)
 
@@ -217,18 +234,25 @@ internal class FuelAndTemperatureGauge(dashboard: Dashboard,
         canvas.drawArc(bounds, startAngle, sweep, false, gaugePaint)
         drawFuelGauge(canvas, boundsAfterStrokeWidth)
         drawTemperatureGauges(canvas)
-
     }
 
 
     private fun drawFuelGauge(canvas: Canvas, bounds: RectF) {
-
-        canvas.drawArc(fuelGaugeInnerBound, FUEL_GAUGE_START_ANGLE.toFloat(), FUEL_GAUGE_SWEEP_ANGLE.toFloat(), false, fuelGaugeBoundary)
+        canvas.drawArc(fuelGaugeInnerBound,
+                FUEL_GAUGE_START_ANGLE.toFloat(),
+                FUEL_GAUGE_SWEEP_ANGLE.toFloat(),
+                false, fuelGaugeBoundary)
 
         val sweepAngle = Math.abs(FUEL_GAUGE_SWEEP_ANGLE) * currentFuelPercentage
-        canvas.drawArc(fuelGaugeOuterBound, FUEL_GAUGE_START_ANGLE.toFloat(), -sweepAngle, false, fuelGaugePaint)
+        canvas.drawArc(fuelGaugeOuterBound,
+                FUEL_GAUGE_START_ANGLE.toFloat(),
+                -sweepAngle,
+                false,
+                fuelGaugePaint)
 
-        fuelIcon.setTint(ColorUtils.blendARGB(gaugePaint.color, Color.RED, 1 - currentFuelPercentage))
+        fuelIcon.setTint(ColorUtils.blendARGB(gaugePaint.color,
+                Color.RED,
+                1 - currentFuelPercentage))
         fuelIcon.bounds = fuelIconBounds
         fuelIcon.draw(canvas)
 
@@ -248,40 +272,59 @@ internal class FuelAndTemperatureGauge(dashboard: Dashboard,
         canvas.save()
         //draw air-intake temperature dotts
         for (dottNumber in MAX_NO_OF_TEMPERATURE_DOTTS downTo 1) {
-            canvas.rotate(-termperatureDottsRotationDegrees, temperatureGaugeCircleCenter.x, temperatureGaugeCircleCenter.y)
+            canvas.rotate(-termperatureDottsRotationDegrees,
+                    temperatureGaugeCircleCenter.x,
+                    temperatureGaugeCircleCenter.y)
             totalPercentageSoFar = (MAX_NO_OF_TEMPERATURE_DOTTS - dottNumber + 1) * TEMPERATURE_PERCENTAGE_COVERED_PER_DOTT
             dottRadius = smallestTemperatureDottRadius * dottNumber
 
             when {
-                currentAirIntakeTempOverMax == 0.0f || (currentAirIntakeTempOverMax < totalPercentageSoFar - TEMPERATURE_PERCENTAGE_COVERED_PER_DOTT) -> {
-                    canvas.drawCircle(temperatureDottCenter.x, temperatureDottCenter.y,
-                            dottRadius, temperatureDottInActivePaint)
+                currentAirIntakeTempOverMax == 0.0f ||
+                        (currentAirIntakeTempOverMax < totalPercentageSoFar - TEMPERATURE_PERCENTAGE_COVERED_PER_DOTT) -> {
+                    canvas.drawCircle(temperatureDottCenter.x,
+                            temperatureDottCenter.y,
+                            dottRadius,
+                            temperatureDottInActivePaint)
                 }
                 currentAirIntakeTempOverMax >= totalPercentageSoFar -> {
                     temperatureDottActivePaint.color = airIntakeActiveDottColor
-                    canvas.drawCircle(temperatureDottCenter.x, temperatureDottCenter.y,
-                            dottRadius, temperatureDottActivePaint)
+                    canvas.drawCircle(temperatureDottCenter.x,
+                            temperatureDottCenter.y,
+                            dottRadius,
+                            temperatureDottActivePaint)
                 }
                 else -> {
                     val curveAngleToDraw = 1440f * ((currentAirIntakeTempOverMax - (totalPercentageSoFar - TEMPERATURE_PERCENTAGE_COVERED_PER_DOTT)))
                     temperatureDottActivePaint.color = airIntakeActiveDottColor
-                    canvas.drawCircle(temperatureDottCenter.x, temperatureDottCenter.y,
-                            dottRadius, temperatureDottInActivePaint)
-                    canvas.drawArc(temperatureDottCenter.x - dottRadius, temperatureDottCenter.y - dottRadius,
-                            temperatureDottCenter.x + dottRadius, temperatureDottCenter.y + dottRadius,
-                            90f - (curveAngleToDraw / 2f), curveAngleToDraw, true, temperatureDottActivePaint)
+                    canvas.drawCircle(temperatureDottCenter.x,
+                            temperatureDottCenter.y,
+                            dottRadius,
+                            temperatureDottInActivePaint)
+                    canvas.drawArc(temperatureDottCenter.x - dottRadius,
+                            temperatureDottCenter.y - dottRadius,
+                            temperatureDottCenter.x + dottRadius,
+                            temperatureDottCenter.y + dottRadius,
+                            90f - (curveAngleToDraw / 2f), curveAngleToDraw,
+                            true,
+                            temperatureDottActivePaint)
                 }
             }
-
 
 
             if (dottNumber == MAX_NO_OF_TEMPERATURE_DOTTS) {
                 val currentAirIntakeTempString = String.format("%.1f", currentAirIntakeTemperature) + " " + CELSIUS
                 canvas.save()
-                canvas.rotate(termperatureDottsRotationDegrees, airIntakeLabelBounds.centerX(), airIntakeLabelBounds.centerY())
-                canvas.drawText(AIR_INTAKE_TEXT, airIntakeLabelBounds.left, airIntakeLabelBounds.bottom, temperatureTextPaint)
-                canvas.drawText(currentAirIntakeTempString, currentAirIntakeTextStartingPoint.x,
-                        currentAirIntakeTextStartingPoint.y, temperatureTextPaint)
+                canvas.rotate(termperatureDottsRotationDegrees,
+                        airIntakeLabelBounds.centerX(),
+                        airIntakeLabelBounds.centerY())
+                canvas.drawText(AIR_INTAKE_TEXT,
+                        airIntakeLabelBounds.left,
+                        airIntakeLabelBounds.bottom,
+                        temperatureTextPaint)
+                canvas.drawText(currentAirIntakeTempString,
+                        currentAirIntakeTextStartingPoint.x,
+                        currentAirIntakeTextStartingPoint.y,
+                        temperatureTextPaint)
                 canvas.restore()
             }
         }
@@ -290,29 +333,42 @@ internal class FuelAndTemperatureGauge(dashboard: Dashboard,
         canvas.save()
         //draw ambient temperature dotts
         for (dottNumber in MAX_NO_OF_TEMPERATURE_DOTTS downTo 1) {
-            canvas.rotate(termperatureDottsRotationDegrees, temperatureGaugeCircleCenter.x, temperatureGaugeCircleCenter.y)
+            canvas.rotate(termperatureDottsRotationDegrees,
+                    temperatureGaugeCircleCenter.x,
+                    temperatureGaugeCircleCenter.y)
 
             totalPercentageSoFar = (MAX_NO_OF_TEMPERATURE_DOTTS - dottNumber + 1) * TEMPERATURE_PERCENTAGE_COVERED_PER_DOTT
             dottRadius = smallestTemperatureDottRadius * dottNumber
 
             when {
                 currentAmbientTempOverMax == 0.0f || currentAmbientTempOverMax < (totalPercentageSoFar - TEMPERATURE_PERCENTAGE_COVERED_PER_DOTT) -> {
-                    canvas.drawCircle(temperatureDottCenter.x, temperatureDottCenter.y,
-                            dottRadius, temperatureDottInActivePaint)
+                    canvas.drawCircle(temperatureDottCenter.x,
+                            temperatureDottCenter.y,
+                            dottRadius,
+                            temperatureDottInActivePaint)
                 }
                 currentAmbientTempOverMax >= totalPercentageSoFar -> {
                     temperatureDottActivePaint.color = ambientActiveDottColor
-                    canvas.drawCircle(temperatureDottCenter.x, temperatureDottCenter.y,
-                            dottRadius, temperatureDottActivePaint)
+                    canvas.drawCircle(temperatureDottCenter.x,
+                            temperatureDottCenter.y,
+                            dottRadius,
+                            temperatureDottActivePaint)
                 }
                 else -> {
                     val curveAngleToDraw = 1440f * ((currentAmbientTempOverMax - (totalPercentageSoFar - TEMPERATURE_PERCENTAGE_COVERED_PER_DOTT)))
                     temperatureDottActivePaint.color = ambientActiveDottColor
-                    canvas.drawCircle(temperatureDottCenter.x, temperatureDottCenter.y,
-                            dottRadius, temperatureDottInActivePaint)
-                    canvas.drawArc(temperatureDottCenter.x - dottRadius, temperatureDottCenter.y - dottRadius,
-                            temperatureDottCenter.x + dottRadius, temperatureDottCenter.y + dottRadius,
-                            -(90f + (curveAngleToDraw / 2f)), curveAngleToDraw, true, temperatureDottActivePaint)
+                    canvas.drawCircle(temperatureDottCenter.x,
+                            temperatureDottCenter.y,
+                            dottRadius,
+                            temperatureDottInActivePaint)
+                    canvas.drawArc(temperatureDottCenter.x - dottRadius,
+                            temperatureDottCenter.y - dottRadius,
+                            temperatureDottCenter.x + dottRadius,
+                            temperatureDottCenter.y + dottRadius,
+                            -(90f + (curveAngleToDraw / 2f)),
+                            curveAngleToDraw,
+                            true,
+                            temperatureDottActivePaint)
                 }
             }
 
@@ -320,17 +376,23 @@ internal class FuelAndTemperatureGauge(dashboard: Dashboard,
             if (dottNumber == MAX_NO_OF_TEMPERATURE_DOTTS) {
                 val currentAmbientTempString = String.format("%.1f", currentAmbientTemperature) + " " + CELSIUS
                 canvas.save()
-                canvas.rotate(-termperatureDottsRotationDegrees, ambientLabelBounds.centerX(), ambientLabelBounds.centerY())
-                canvas.drawText(AMBIENT_TEXT, ambientLabelBounds.left, ambientLabelBounds.top, temperatureTextPaint)
-                canvas.drawText(currentAmbientTempString, currentAmbientTextStartingPoint.x,
-                        currentAmbientTextStartingPoint.y, temperatureTextPaint)
+                canvas.rotate(-termperatureDottsRotationDegrees,
+                        ambientLabelBounds.centerX(),
+                        ambientLabelBounds.centerY())
+                canvas.drawText(AMBIENT_TEXT,
+                        ambientLabelBounds.left,
+                        ambientLabelBounds.top,
+                        temperatureTextPaint)
+                canvas.drawText(currentAmbientTempString,
+                        currentAmbientTextStartingPoint.x,
+                        currentAmbientTextStartingPoint.y,
+                        temperatureTextPaint)
                 canvas.restore()
             }
         }
         canvas.restore()
 
     }
-
 
     @SuppressLint("ObjectAnimatorBinding")
     internal fun updateFuel(fuel: Float) {
@@ -339,7 +401,10 @@ internal class FuelAndTemperatureGauge(dashboard: Dashboard,
         if (fuelVar <= 0f) {
             fuelVar = .01f
         }
-        currentFuelAnimator = ObjectAnimator.ofFloat(this, "currentFuelPercentage", currentFuelPercentage, fuelVar)
+        currentFuelAnimator = ObjectAnimator.ofFloat(this,
+                "currentFuelPercentage",
+                currentFuelPercentage,
+                fuelVar)
         currentFuelAnimator?.start()
     }
 

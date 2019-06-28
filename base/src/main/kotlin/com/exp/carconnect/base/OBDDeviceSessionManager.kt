@@ -162,7 +162,8 @@ class OBDSession(val device: OBDDongle,
                         BaseAppAction.DeviceConnectionFailed(device, e)
                     }
 
-                }.flatMap {
+                }
+                .flatMap {
                     when (it) {
                         is BaseAppAction.AddActiveSession -> {
                             startOBDSession(it.obdConnection, it.device, it.engine, settings)
@@ -301,7 +302,7 @@ class OBDSession(val device: OBDDongle,
                                 is RPMResponse -> BaseAppAction.AddRPM(response.rpm / RPM_FACTOR)
                                 is ThrottlePositionResponse -> BaseAppAction.AddThrottlePosition(response.throttle)
                                 is ConsumptionRateResponse -> BaseAppAction.AddFuelConsumptionRate(response.fuelRate)
-                            //could be received if one the request in multi request failed
+                                //could be received if one the request in multi request failed
                                 is FailedOBDResponse -> BaseAppAction.AddFailedOBDResponseError(response.exception)
                                 else -> BaseAppAction.AddIgnition((response as IgnitionMonitorResponse).ignitionOn)
                             }

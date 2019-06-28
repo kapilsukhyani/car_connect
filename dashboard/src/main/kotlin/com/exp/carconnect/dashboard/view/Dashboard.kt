@@ -419,7 +419,10 @@ class Dashboard @JvmOverloads constructor(context: Context,
         canvas.drawText(LABEL_TEXT, labelBoundsOnCanvas.left, labelBoundsOnCanvas.bottom, labelPaint)
     }
 
-    private fun drawGauges(canvas: Canvas, middleGaugeBounds: RectF, leftSideGaugeBounds: RectF, rightSideGaugeBounds: RectF) {
+    private fun drawGauges(canvas: Canvas,
+                           middleGaugeBounds: RectF,
+                           leftSideGaugeBounds: RectF,
+                           rightSideGaugeBounds: RectF) {
         drawRPMGauge(canvas, leftSideGaugeBounds)
         drawFuelGauge(canvas, rightSideGaugeBounds)
         drawSpeedometerGauge(canvas, middleGaugeBounds)
@@ -493,7 +496,6 @@ class Dashboard @JvmOverloads constructor(context: Context,
             speedometerGauge.onDisconnected()
             rpmGauge.onDisconnected()
             fuelAndTemperatureGauge.onDisconnected()
-
         }
     }
 

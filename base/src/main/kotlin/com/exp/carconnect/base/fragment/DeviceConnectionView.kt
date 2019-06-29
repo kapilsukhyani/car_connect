@@ -33,8 +33,8 @@ class DeviceConnectionView : Fragment(), BackInterceptor {
 
     override fun onAttach(context: Context?) {
         super.onAttach(context)
-        if (activity.resources.configuration.orientation != Configuration.ORIENTATION_PORTRAIT) {
-            activity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+        if (activity!!.resources.configuration.orientation != Configuration.ORIENTATION_PORTRAIT) {
+            activity!!.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
             ignoreCreate = true
         }
     }
@@ -48,9 +48,9 @@ class DeviceConnectionView : Fragment(), BackInterceptor {
         return inflater.inflate(R.layout.view_device_connection, null)
     }
 
-    override fun onViewCreated(view: View?, savedInstanceState: Bundle?) {
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        if (activity.resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT
+        if (view.resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT
                 && !ignoreCreate) {
             deviceConnectionVM = ViewModelProviders.of(this).get(DeviceConnectionVM::class.java)
             deviceConnectionVM

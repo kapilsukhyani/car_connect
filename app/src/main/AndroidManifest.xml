@@ -5,7 +5,8 @@
     <application
         android:name=".CarConnectApp"
         android:label="CarConnect"
-        tools:replace="android:name,android:label">
+        tools:replace="android:name,android:label"
+        tools:ignore="GoogleAppIndexingWarning">
         <activity
             android:name=".activity.CarConnectWindow"
             android:theme="@style/AppTheme">
@@ -29,7 +30,7 @@
             android:authorities="com.exp.carconnect.dashboard.test.crashlyticsinitprovider"
             android:exported="false"
             android:initOrder="100"
-            tools:replace="android:authorities" />
+            tools:replace="android:authorities,android:initOrder" />
 
     </application>
 </manifest>

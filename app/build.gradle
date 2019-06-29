@@ -9,14 +9,14 @@ repositories {
     maven { url 'https://maven.fabric.io/public' }
 }
 android {
-    compileSdkVersion 26
-    buildToolsVersion '26.0.2'
+    compileSdkVersion 28
+    buildToolsVersion '26.0.3'
 
 
     defaultConfig {
         applicationId "com.exp.carconnect"
         minSdkVersion 23
-        targetSdkVersion 26
+        targetSdkVersion 28
         versionCode 4
         versionName "2.0"
 
@@ -36,8 +36,8 @@ android {
 }
 
 dependencies {
-    api 'com.google.dagger:dagger:2.13'
-    kapt 'com.google.dagger:dagger-compiler:2.13'
+    api 'com.google.dagger:dagger:2.23.2'
+    kapt 'com.google.dagger:dagger-compiler:2.23.2'
 
     implementation project(':base')
     implementation project(':dashboard')

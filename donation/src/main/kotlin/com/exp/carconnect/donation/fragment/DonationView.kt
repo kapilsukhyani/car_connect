@@ -41,8 +41,8 @@ class DonationView : Fragment() {
 
     override fun onAttach(context: Context?) {
         super.onAttach(context)
-        if (activity.resources.configuration.orientation != Configuration.ORIENTATION_PORTRAIT) {
-            activity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+        if (activity!!.resources.configuration.orientation != Configuration.ORIENTATION_PORTRAIT) {
+            activity!!.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
             ignoreCreate = true
         }
     }
@@ -54,11 +54,11 @@ class DonationView : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        if (activity.resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT
+        if (view.resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT
                 && !ignoreCreate) {
             viewModel = ViewModelProviders.of(this).get(DonationVM::class.java)
             donate_button.setOnClickListener {
-                viewModel.startDonationFlow(activity, product_list.selectedItem as Product)
+                viewModel.startDonationFlow(activity!!, product_list.selectedItem as Product)
 
             }
             viewModel.getScreenStateLiveData()
@@ -92,7 +92,7 @@ class DonationView : Fragment() {
     }
 
     private fun startDonatedAnimation() {
-        val postTransitionConstraintLayout = activity
+        val postTransitionConstraintLayout = activity!!
                 .layoutInflater
                 .inflate(R.layout.donation_view_post_transition, null)
                 as ConstraintLayout
@@ -130,7 +130,9 @@ class DonationView : Fragment() {
     }
 
     private fun showLoading() {
-        progressDialog = ProgressDialog.show(activity, activity.getString(R.string.loading), activity.getString(com.exp.carconnect.base.R.string.please_wait))
+        progressDialog = ProgressDialog.show(activity,
+                activity!!.getString(R.string.loading),
+                activity!!.getString(com.exp.carconnect.base.R.string.please_wait))
     }
 
     private fun hideLoading() {

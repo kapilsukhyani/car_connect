@@ -60,8 +60,8 @@ class DeviceManagementView : Fragment() {
 
     override fun onAttach(context: Context?) {
         super.onAttach(context)
-        if (activity.resources.configuration.orientation != Configuration.ORIENTATION_PORTRAIT) {
-            activity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+        if (activity!!.resources.configuration.orientation != Configuration.ORIENTATION_PORTRAIT) {
+            activity!!.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
             ignoreCreate = true
         }
     }
@@ -81,9 +81,9 @@ class DeviceManagementView : Fragment() {
         return rootView
     }
 
-    override fun onViewCreated(view: View?, savedInstanceState: Bundle?) {
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        if (activity.resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT
+        if (view.resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT
                 && !ignoreCreate) {
             deviceManagementVM = ViewModelProviders.of(this)
                     .get(DeviceManagementVM::class.java)
@@ -149,7 +149,7 @@ class DeviceManagementView : Fragment() {
     private fun showDevices(devices: Set<OBDDongle>) {
         animateDeviceContainer {
         }
-        bondedDeviceList.adapter = DeviceListAdapter(DeviceManagementView@ this.activity, devices.toList()) {
+        bondedDeviceList.adapter = DeviceListAdapter(DeviceManagementView@ this.activity!!, devices.toList()) {
             onDeviceSelected(it)
         }
     }
@@ -365,8 +365,11 @@ class DeviceManagementScreenStateReducer : Reducer<AppState> {
 
 private class DeviceListAdapter(val context: Context, val dongles: List<OBDDongle>, val itemClickListener: (OBDDongle) -> Unit) : RecyclerView.Adapter<BondedDeviceRowViewHolder>() {
 
-    override fun onCreateViewHolder(parent: ViewGroup?, viewType: Int): BondedDeviceRowViewHolder {
-        return BondedDeviceRowViewHolder(LayoutInflater.from(context).inflate(R.layout.view_available_devices_row, null) as TextView, itemClickListener)
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): BondedDeviceRowViewHolder {
+        return BondedDeviceRowViewHolder(LayoutInflater
+                .from(context)
+                .inflate(R.layout.view_available_devices_row, null)
+                as TextView, itemClickListener)
     }
 
     override fun getItemCount(): Int {

@@ -32,8 +32,8 @@ class DashboardView : Fragment(), BackInterceptor {
 
     override fun onAttach(context: Context?) {
         super.onAttach(context)
-        if (activity.resources.configuration.orientation != Configuration.ORIENTATION_LANDSCAPE) {
-            activity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
+        if (activity!!.resources.configuration.orientation != Configuration.ORIENTATION_LANDSCAPE) {
+            activity!!.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
             ignoreCreate = true
         }
     }
@@ -45,7 +45,7 @@ class DashboardView : Fragment(), BackInterceptor {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        if (activity.resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
+        if (view.resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
                 && !ignoreCreate) {
             initView(view)
             dashboardVM = ViewModelProviders.of(this).get(DashboardVM::class.java)

@@ -32,7 +32,7 @@ class SettingsView : Fragment() {
 
     override fun onAttach(context: Context?) {
         super.onAttach(context)
-        activity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_SENSOR
+        activity!!.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_SENSOR
     }
 
 

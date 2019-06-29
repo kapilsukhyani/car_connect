@@ -13,7 +13,6 @@ import android.transition.TransitionSet
 import android.view.View
 import com.exp.carconnect.app.CarConnectApp
 import com.exp.carconnect.app.R
-import com.exp.carconnect.report.fragment.ReportView
 import com.exp.carconnect.app.state.ReportScreen
 import com.exp.carconnect.base.*
 import com.exp.carconnect.base.fragment.DeviceConnectionView
@@ -25,6 +24,7 @@ import com.exp.carconnect.dashboard.fragment.DashboardView
 import com.exp.carconnect.dashboard.state.DashboardScreen
 import com.exp.carconnect.donation.fragment.DonationView
 import com.exp.carconnect.donation.state.DonationScreen
+import com.exp.carconnect.report.fragment.ReportView
 import com.kobakei.ratethisapp.RateThisApp
 import io.reactivex.disposables.Disposable
 import redux.api.Store
@@ -50,7 +50,9 @@ class CarConnectWindow : AppCompatActivity() {
                 .observe(this, Observer {
                     showView(it)
                 })
-        trySeekingRating()
+        if (savedInstanceState == null) {
+            trySeekingRating()
+        }
     }
 
     private fun trySeekingRating() {

@@ -14,6 +14,7 @@ import android.content.pm.ActivityInfo
 import android.net.Uri
 import android.os.Bundle
 import android.support.v4.app.Fragment
+import android.support.v4.content.FileProvider
 import android.text.Html.fromHtml
 import android.view.LayoutInflater
 import android.view.View
@@ -30,6 +31,7 @@ import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.subjects.BehaviorSubject
 import kotlinx.android.synthetic.main.report_view.*
 import redux.api.Reducer
+import java.io.File
 import java.util.*
 import java.util.concurrent.TimeUnit
 
@@ -45,7 +47,7 @@ class ReportView : Fragment() {
 
     override fun onAttach(context: Context?) {
         super.onAttach(context)
-        activity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_SENSOR
+        activity!!.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_SENSOR
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
@@ -53,7 +55,7 @@ class ReportView : Fragment() {
         return inflater.inflate(R.layout.report_view, null)
     }
 
-    override fun onViewCreated(view: View?, savedInstanceState: Bundle?) {
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         reportVM = ViewModelProviders.of(this).get(ReportViewModel::class.java)
         reportVM.getReportLiveData()
@@ -90,9 +92,14 @@ class ReportView : Fragment() {
     }
 
     private fun initReportShare(fileUrl: String) {
+        //sample url
+        //storage/emulated/0/Android/data/com.exp.carconnect/files/WP0AA2A79BL017244_SatJun2908:55:56PDT2019.pdf
+        val uri = FileProvider.getUriForFile(activity!!,
+                "com.exp.carconnect.report.file_provider",
+                File(fileUrl))
         val intentShareFile = Intent(Intent.ACTION_SEND)
         intentShareFile.type = "application/pdf"
-        intentShareFile.putExtra(Intent.EXTRA_STREAM, Uri.parse("file://$fileUrl"))
+        intentShareFile.putExtra(Intent.EXTRA_STREAM, uri)
         intentShareFile.putExtra(Intent.EXTRA_SUBJECT,
                 "OBD Report captured by CarConnect")
         intentShareFile.putExtra(Intent.EXTRA_TEXT, "OBD Report captured by CarConnect")

@@ -89,6 +89,7 @@
     <string name="foreground_notification_description">Connection to your vehicle is active in background.</string>
     <string name="stop">Drop Connection</string>
     <string name="usage_report_banner_text">This app collects usage report to improve experience. Goto Settings to turn this off anytime.</string>
+    <string name="app_icon">app icon</string>
 
 
     <string-array name="unit_systems">

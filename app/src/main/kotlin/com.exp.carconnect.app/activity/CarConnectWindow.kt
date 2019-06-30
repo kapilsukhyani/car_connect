@@ -154,7 +154,7 @@ class CarConnectWindow : AppCompatActivity() {
 
 class SharedElementTransition : TransitionSet() {
     init {
-        ordering = ORDERING_TOGETHER;
+        ordering = ORDERING_TOGETHER
         addTransition(ChangeBounds())
                 .addTransition(ChangeTransform())
     }

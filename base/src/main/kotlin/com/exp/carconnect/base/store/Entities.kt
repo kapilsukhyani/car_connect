@@ -74,10 +74,16 @@ data class VehicleEntity constructor(@PrimaryKey var vin: String,
                                      @ColumnInfo var modelYear: String,
                                      @ColumnInfo var obdStandard: Int) {
     fun toVehicle(): Vehicle {
-        val attributes = if (this.model.isEmpty() && this.make.isEmpty() && this.manufacturer.isEmpty() && this.modelYear.isEmpty()) {
+        val attributes = if (this.model.isEmpty() &&
+                this.make.isEmpty() &&
+                this.manufacturer.isEmpty() &&
+                this.modelYear.isEmpty()) {
             UnAvailableAvailableData.UnAvailable
         } else {
-            UnAvailableAvailableData.Available(VehicleAttributes(this.make, this.model, this.manufacturer, this.modelYear))
+            UnAvailableAvailableData.Available(VehicleAttributes(this.make,
+                    this.model,
+                    this.manufacturer,
+                    this.modelYear))
         }
         return Vehicle(vin, if (supportedPIDs.isEmpty()) {
             UnAvailableAvailableData.UnAvailable

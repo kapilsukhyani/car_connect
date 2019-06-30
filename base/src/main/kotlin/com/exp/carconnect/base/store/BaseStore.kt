@@ -63,10 +63,9 @@ class BaseStore(val context: Context, private val ioScheduler: Scheduler) {
                 .distinctUntilChanged()
                 .filter { it }
 
-        private val disposeBag: CompositeDisposable
+        private val disposeBag: CompositeDisposable = CompositeDisposable()
 
         init {
-            disposeBag = CompositeDisposable()
             startListening()
         }
 

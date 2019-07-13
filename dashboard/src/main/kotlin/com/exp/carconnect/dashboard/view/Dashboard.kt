@@ -618,6 +618,4 @@ class Dashboard @JvmOverloads constructor(context: Context,
     fun setOnFuelIconClickListener(listener: (Float) -> Unit) {
         fuelAndTemperatureGauge.onFuelIconCLickListener = listener
     }
-
-
 }

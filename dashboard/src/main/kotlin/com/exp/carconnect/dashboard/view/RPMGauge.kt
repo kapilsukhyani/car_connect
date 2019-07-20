@@ -74,6 +74,9 @@ internal class RPMGauge(dashboard: Dashboard,
 
     private var currentRPM = currentRPM
         set(value) {
+            if (field == value) {
+                return
+            }
             field = value
             dashboard.invalidateRPMGauge()
             rpmChangedListener?.invoke(field)
@@ -250,9 +253,7 @@ internal class RPMGauge(dashboard: Dashboard,
                 CRITICAL_ANGLE_SWEEP,
                 criticalZoneColor)
 
-
         drawIndicator(canvas, bounds)
-
     }
 
     private fun drawIndicator(canvas: Canvas, parentBounds: RectF) {
@@ -307,7 +308,10 @@ internal class RPMGauge(dashboard: Dashboard,
                     currentRPM)
             dribbleRPMAnimator?.repeatMode = ObjectAnimator.RESTART
             dribbleRPMAnimator?.repeatCount = ObjectAnimator.INFINITE
-            dribbleRPMAnimator?.start()
+            //disabling dribble temporarily
+//            dribbleRPMAnimator?.start()
+        } else {
+            cancelDribble()
         }
     }
 
@@ -319,7 +323,7 @@ internal class RPMGauge(dashboard: Dashboard,
     @SuppressLint("ObjectAnimatorBinding")
     internal fun updateRPM(rpm: Float) {
         rpmDribbleEnabled = false
-        currentRPMAnimator?.cancel()
+        currentRPMAnimator?.end()
         currentRPMAnimator = ObjectAnimator.ofFloat(this,
                 "currentRPM",
                 currentRPM,

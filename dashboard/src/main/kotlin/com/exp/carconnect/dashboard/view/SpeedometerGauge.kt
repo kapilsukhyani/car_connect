@@ -59,6 +59,9 @@ internal class SpeedometerGauge(dashboard: Dashboard,
 
     private var currentSpeed: Float = currentSpeed
         set(value) {
+            if (field == value) {
+                return
+            }
             field = value
             dashboard.invalidateSpeedometerGauge()
             speedChangedListener?.invoke(field)
@@ -322,7 +325,10 @@ internal class SpeedometerGauge(dashboard: Dashboard,
                     dashboard.currentSpeed, dashboard.currentSpeed - dribbleBy, currentSpeed)
             dribbleSpeedAnimator?.repeatMode = ObjectAnimator.RESTART
             dribbleSpeedAnimator?.repeatCount = ObjectAnimator.INFINITE
-            dribbleSpeedAnimator?.start()
+            //disabling dribble temporarily
+//            dribbleSpeedAnimator?.start()
+        } else {
+           cancelDribble()
         }
     }
 
@@ -334,7 +340,7 @@ internal class SpeedometerGauge(dashboard: Dashboard,
     @SuppressLint("ObjectAnimatorBinding")
     internal fun updateSpeed(speed: Float) {
         speedDribbleEnabled = false
-        currentSpeedAnimator?.cancel()
+        currentSpeedAnimator?.end()
         currentSpeedAnimator = ObjectAnimator.ofFloat(this, "currentSpeed", currentSpeed, speed)
         currentSpeedAnimator?.addListener(object : Animator.AnimatorListener {
             override fun onAnimationRepeat(animation: Animator?) {

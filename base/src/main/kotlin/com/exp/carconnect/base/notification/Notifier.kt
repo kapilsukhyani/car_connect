@@ -1,5 +1,6 @@
 package com.exp.carconnect.base.notification
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.media.AudioAttributes
 import android.media.SoundPool
@@ -151,7 +152,6 @@ class Notifier(private val context: Context,
             .startWith(ThresholdState.UNKNOWN)
             .filter { it == ThresholdState.MOVING_ABOVE_THRESHOLD }
 
-
     init {
         val attributes = AudioAttributes
                 .Builder()
@@ -165,6 +165,12 @@ class Notifier(private val context: Context,
                 .setMaxStreams(1)
                 .setAudioAttributes(attributes).build()
 
+
+        startSubscription()
+    }
+
+    @SuppressLint("CheckResult")
+    private fun startSubscription() {
         val speedNotificationSoundId = notificationSoundPool.load(context, R.raw.speed_limit_notification_sev2, 1)
         val fuelNotificationSoundId = notificationSoundPool.load(context, R.raw.fuel_limit_notification, 2)
         val fuelNotificationCriticalLevel1 = notificationSoundPool.load(context, R.raw.fuel_level_notification_critical_level1, 2)
@@ -188,7 +194,6 @@ class Notifier(private val context: Context,
         milStatusObservable.subscribe {
             playNotification(engineLightNotificationSoundId, ENGINE_LIGHT_NOTIFICATION_PRIORITY)
         }
-
     }
 
 

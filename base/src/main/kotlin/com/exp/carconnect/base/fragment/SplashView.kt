@@ -146,8 +146,6 @@ class SplashVM(app: Application) : AndroidViewModel(app) {
                     //todo log error
                 }
         ))
-
-
     }
 
     fun onAppStateLoaded(baseAppState: BaseAppState) {

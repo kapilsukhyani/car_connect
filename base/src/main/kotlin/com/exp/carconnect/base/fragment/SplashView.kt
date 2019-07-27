@@ -156,10 +156,11 @@ class SplashVM(app: Application) : AndroidViewModel(app) {
             app.enableReporting()
             app.logContentViewEvent("SplashView")
         }
-        if (baseAppState.activeSession is UnAvailableAvailableData.Available) {
+        if (baseAppState.activeSession is UnAvailableAvailableData.Available &&
+                baseAppState.activeSession.data.vehicle is LoadableState.Loaded) {
             //moving background session to foreground
             store.dispatch(BaseAppAction.MoveBackgroundSessionToForeground)
-            app.onDataLoadingStartedFor((baseAppState.activeSession.data.vehicle as LoadableState.Loaded).savedState)
+            app.onDataLoadingStartedFor((baseAppState.activeSession.data.vehicle).savedState)
         } else {
             store.dispatch(CommonAppAction.ReplaceViewOnBackStackTop(DeviceManagementScreen(DeviceManagementScreenState.LoadingDevices)))
         }

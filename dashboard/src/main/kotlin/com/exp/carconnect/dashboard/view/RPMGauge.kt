@@ -256,6 +256,7 @@ internal class RPMGauge(dashboard: Dashboard,
         drawIndicator(canvas, bounds)
     }
 
+    private val indicatorTextSize = Rect()
     private fun drawIndicator(canvas: Canvas, parentBounds: RectF) {
         val currentSpeedOverMaxSpeedRatio = currentRPM / MAX_RPM.toFloat()
         indicatorCenterPaint.color = ColorUtils.blendARGB(gaugePaint.color, Color.RED, currentSpeedOverMaxSpeedRatio)
@@ -269,14 +270,13 @@ internal class RPMGauge(dashboard: Dashboard,
         val rpmTextSize = parentBounds.width() * RPM_TEXT_SIZE_PERCENTAGE
         val rpmTextTopMargin = parentBounds.width() * RPM_TEXT_MARGIN
         rpmTextPaint.textSize = rpmTextSize
-        val textSize = Rect()
         rpmTextPaint.getTextBounds(RPM_TEXT,
                 0,
                 RPM_TEXT.length,
-                textSize)
+                indicatorTextSize)
         canvas.drawText(RPM_TEXT,
                 parentBounds.centerX(),
-                parentBounds.centerY() + indicatorCenterRadius + textSize.height() + rpmTextTopMargin,
+                parentBounds.centerY() + indicatorCenterRadius + indicatorTextSize.height() + rpmTextTopMargin,
                 rpmTextPaint)
 
         canvas.save()

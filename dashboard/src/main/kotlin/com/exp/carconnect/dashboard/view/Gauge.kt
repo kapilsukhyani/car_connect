@@ -48,6 +48,9 @@ internal abstract class Gauge(val dashboard: Dashboard,
 
     abstract fun drawGauge(canvas: Canvas, bounds: RectF)
 
+    private val textBounds = Rect()
+    private val textDrawingBounds = Rect()
+    private val lineBounds = RectF()
     internal fun drawTicks(canvas: Canvas,
                            bounds: RectF,
                            startDegree: Float,
@@ -76,9 +79,7 @@ internal abstract class Gauge(val dashboard: Dashboard,
         var tickMarkerText: String
         var totalRotationSoFar = startDegree
 
-        val textBounds = Rect()
-        val textDrawingBounds = Rect()
-        val lineBounds = RectF()
+
         var lineYBound = 0F
         canvas.rotate(startDegree, bounds.centerX(), bounds.centerY())
 

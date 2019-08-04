@@ -8,20 +8,15 @@ import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
 
-
-internal abstract class GaugeView(
-        context: Context,
-        attrs: AttributeSet? = null,
-        defStyleAttr: Int = 0,
-        defStyleRes: Int = -1,
-        var onlineColor: Int,
-        val offlineColor: Int,
-        val gaugeBackgroundDrawable: Drawable) : View(context,
+internal abstract class DashboardBasicView(context: Context,
+                                           attrs: AttributeSet? = null,
+                                           defStyleAttr: Int = 0,
+                                           defStyleRes: Int = -1,
+                                           var onlineColor: Int,
+                                           val offlineColor: Int) : View(context,
         attrs,
         defStyleAttr,
         defStyleRes) {
-
-
     companion object {
         const val GAUGE_STROKE_WIDTH = 20f
     }
@@ -45,14 +40,14 @@ internal abstract class GaugeView(
         gaugePaint.maskFilter = EmbossMaskFilter(floatArrayOf(1f, 5f, 1f), 0.8f, 6.0f, 20.0f)
     }
 
+    @CallSuper
     open fun onConnected() {
         gaugePaint.color = onlineColor
-
     }
 
+    @CallSuper
     open fun onDisconnected() {
         gaugePaint.color = offlineColor
-
     }
 
     internal fun setOnlineColor(onlineColor: Int) {
@@ -72,11 +67,33 @@ internal abstract class GaugeView(
 
     abstract fun onBoundChanged(bounds: RectF)
 
+    open fun onTap(event: MotionEvent): Boolean {
+        return false
+    }
+}
+
+
+internal abstract class GaugeView(
+        context: Context,
+        attrs: AttributeSet? = null,
+        defStyleAttr: Int = 0,
+        defStyleRes: Int = -1,
+        onlineColor: Int,
+        offlineColor: Int,
+        private val gaugeBackgroundDrawable: Drawable) : DashboardBasicView(context,
+        attrs,
+        defStyleAttr,
+        defStyleRes,
+        onlineColor,
+        offlineColor) {
+
+
     abstract fun drawGauge(canvas: Canvas, bounds: RectF)
 
     private val textBounds = Rect()
     private val textDrawingBounds = Rect()
     private val lineBounds = RectF()
+
     internal fun drawTicks(canvas: Canvas,
                            bounds: RectF,
                            startDegree: Float,
@@ -170,10 +187,6 @@ internal abstract class GaugeView(
         Color.colorToHSV(originalColor, hsv)
         hsv[2] *= 0.6f // value globalComponent
         return Color.HSVToColor(hsv)
-    }
-
-    open fun onTap(event: MotionEvent): Boolean {
-        return false
     }
 
     @CallSuper

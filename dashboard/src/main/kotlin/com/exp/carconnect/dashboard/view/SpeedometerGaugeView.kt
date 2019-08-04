@@ -21,10 +21,6 @@ internal class SpeedometerGaugeView(context: Context,
                                     defStyleRes: Int = -1,
                                     private val startAngle: Float,
                                     private val sweep: Float,
-                                    currentSpeed: Float,
-                                    showIgnitionIcon: Boolean,
-                                    showCheckEngineLight: Boolean,
-                                    speedDribbleEnabled: Boolean,
                                     onlineColor: Int,
                                     offlineColor: Int,
                                     gaugeBackgroundDrawable: Drawable) : MiddleGaugeView(context,
@@ -36,32 +32,119 @@ internal class SpeedometerGaugeView(context: Context,
         gaugeBackgroundDrawable) {
 
     companion object {
-        internal const val MAX_SPEED = 320
-        internal const val MIN_SPEED = 0
-
         private const val BIG_TICK_LENGTH_PERCENTAGE = .08f
         private const val BIG_TICK_WIDTH_PERCENTAGE = .009f
         private const val SMALL_TICK_LENGTH_PERCENTAGE = .06f
         private const val SMALL_TICK_WIDTH_PERCENTAGE = .007f
         private const val TICK_MARKER_TEXT_SIZE_PERCENTAGE = .05f
         private const val TICK_MARKER_MARGIN_PERCENTAGE = .025f
-        private const val INNER_CIRCLE_WIDTH_PERCENTAGE = .45f
-        private const val INDICATOR_DIMEN_PERCENTAGE = .1f
-        private const val CHECK_ENGINE_LIGHT_DIMEN_PERCENTAGE = .08f
-        private const val IGNITION_DIMEN_PERCENTAGE = .08f
 
-        private const val INNER_CIRCLE_STROKE_WIDTH = 10
         private const val TOTAL_NO_OF_TICKS = 33
         private const val BIG_TICK_MULTIPLE = 2
         private const val TICK_MARKER_START = 0
         private const val TICK_MARKER_DIFF = 20
+    }
+
+    private val tickPaint: Paint = Paint(Paint.ANTI_ALIAS_FLAG)
+    private val tickMarkerPaint: Paint = TextPaint(Paint.ANTI_ALIAS_FLAG)
+
+    private var bigTickLength: Float = 0.0f
+    private var bigTickWidth: Float = 0.0f
+
+    private var smallTickLength: Float = 0.0f
+    private var smallTickWidth: Float = 0.0f
+
+    private var textSize: Float = 0.0f
+    private var testSizeMargin: Float = 0.0f
+
+    init {
+        tickMarkerPaint.textLocale = Locale.US
+        tickMarkerPaint.typeface = Typeface.create(Typeface.DEFAULT, Typeface.BOLD)
+        tickMarkerPaint.textAlign = Paint.Align.CENTER
+        tickPaint.maskFilter = EmbossMaskFilter(floatArrayOf(1f, 5f, 1f), 0.8f, 6.0f, 20.0f)
+    }
+
+    override fun onDisconnected() {
+        super.onDisconnected()
+        tickPaint.color = offlineColor
+        tickMarkerPaint.color = offlineColor
+    }
+
+    override fun onConnected() {
+        super.onConnected()
+        tickPaint.color = onlineColor
+        tickMarkerPaint.color = onlineColor
+    }
+
+    override fun onDraw(canvas: Canvas) {
+        super.onDraw(canvas)
+        drawGauge(canvas, gaugeBounds)
+    }
+
+    override fun onBoundChanged(bounds: RectF) {
+        val gaugeCircumference = (2.0 * Math.PI * (bounds.width() / 2).toDouble()).toFloat()
+
+        //draw ticks
+        bigTickLength = bounds.width() * BIG_TICK_LENGTH_PERCENTAGE
+        bigTickWidth = gaugeCircumference * BIG_TICK_WIDTH_PERCENTAGE
+
+        smallTickLength = bounds.width() * SMALL_TICK_LENGTH_PERCENTAGE
+        smallTickWidth = gaugeCircumference * SMALL_TICK_WIDTH_PERCENTAGE
+
+        textSize = bounds.width() * TICK_MARKER_TEXT_SIZE_PERCENTAGE
+        testSizeMargin = bounds.width() * TICK_MARKER_MARGIN_PERCENTAGE
+
+    }
+
+
+    override fun drawGauge(canvas: Canvas, bounds: RectF) {
+        canvas.drawArc(bounds, startAngle, sweep, false, gaugePaint)
+
+        drawTicks(canvas, bounds, startAngle,
+                sweep / (TOTAL_NO_OF_TICKS - 1),
+                TOTAL_NO_OF_TICKS, BIG_TICK_MULTIPLE,
+                bigTickLength, bigTickWidth, smallTickLength, smallTickWidth,
+                TICK_MARKER_START, TICK_MARKER_DIFF,
+                textSize, testSizeMargin, tickMarkerPaint, tickPaint)
+    }
+
+
+}
+
+internal class SpeedIndicatorView(context: Context,
+                                  attrs: AttributeSet? = null,
+                                  defStyleAttr: Int = 0,
+                                  defStyleRes: Int = -1,
+                                  private val startAngle: Float,
+                                  private val sweep: Float,
+                                  currentSpeed: Float,
+                                  showIgnitionIcon: Boolean,
+                                  showCheckEngineLight: Boolean,
+                                  speedDribbleEnabled: Boolean,
+                                  onlineColor: Int,
+                                  offlineColor: Int) : DashboardBasicView(context,
+        attrs,
+        defStyleAttr,
+        defStyleRes,
+        onlineColor,
+        offlineColor) {
+
+
+    companion object {
+        internal const val MAX_SPEED = 320
+        internal const val MIN_SPEED = 0
+
+        private const val INNER_CIRCLE_WIDTH_PERCENTAGE = .45f
+        private const val INDICATOR_DIMEN_PERCENTAGE = .1f
+        private const val CHECK_ENGINE_LIGHT_DIMEN_PERCENTAGE = .08f
+        private const val IGNITION_DIMEN_PERCENTAGE = .08f
+        private const val INNER_CIRCLE_STROKE_WIDTH = 10
         private const val CURRENT_SPEED_TEXT_SIZE_PERCENTAGE = .05f
         private const val DEFAULT_SPEED_UNIT = "km/h"
 
         private const val DRIBBLE_RANGE = 5.0f
         private val DRIBBLE_RANDOM = Random()
     }
-
 
     internal var speedChangedListener: ((Float) -> Unit)? = null
     internal var ignitionIconChangedListener: ((Boolean) -> Unit)? = null
@@ -107,13 +190,9 @@ internal class SpeedometerGaugeView(context: Context,
     private var currentSpeedAnimator: ObjectAnimator? = null
     private var dribbleSpeedAnimator: ObjectAnimator? = null
 
-
     private val innerCirclePaint: Paint = Paint(Paint.ANTI_ALIAS_FLAG)
     private val speedTextPaint: Paint = TextPaint(Paint.ANTI_ALIAS_FLAG)
     private val speedStripPaint: Paint = Paint(Paint.ANTI_ALIAS_FLAG)
-    private val tickPaint: Paint = Paint(Paint.ANTI_ALIAS_FLAG)
-    private val tickMarkerPaint: Paint = TextPaint(Paint.ANTI_ALIAS_FLAG)
-
 
     private val indicatorIcon = VectorDrawableCompat.create(context.resources, R.drawable.ic_arrow_right_24dp, null)!!
     private val checkEngineLightIcon = VectorDrawableCompat.create(context.resources, R.drawable.ic_check_engine_light, null)!!
@@ -123,7 +202,6 @@ internal class SpeedometerGaugeView(context: Context,
     private val inActiveIconColor = context.getColor(android.R.color.darker_gray)
     private val speedTextColor = context.getColor(android.R.color.black)
 
-
     private lateinit var innerCircleBound: RectF
     private lateinit var speedTextStripPath: Path
     private var innerCircleRadius: Float = 0.0f
@@ -132,14 +210,7 @@ internal class SpeedometerGaugeView(context: Context,
     private lateinit var speedTextStripBounds: RectF
 
     private lateinit var indicatorBound: Rect
-    private var bigTickLength: Float = 0.0f
-    private var bigTickWidth: Float = 0.0f
 
-    private var smallTickLength: Float = 0.0f
-    private var smallTickWidth: Float = 0.0f
-
-    private var textSize: Float = 0.0f
-    private var testSizeMargin: Float = 0.0f
 
     init {
         innerCirclePaint.style = Paint.Style.STROKE
@@ -155,12 +226,6 @@ internal class SpeedometerGaugeView(context: Context,
         speedStripPaint.style = Paint.Style.FILL_AND_STROKE
         speedStripPaint.strokeWidth = 10f
 
-        tickMarkerPaint.textLocale = Locale.US
-        tickMarkerPaint.typeface = Typeface.create(Typeface.DEFAULT, Typeface.BOLD)
-        tickMarkerPaint.textAlign = Paint.Align.CENTER
-
-        tickPaint.maskFilter = EmbossMaskFilter(floatArrayOf(1f, 5f, 1f), 0.8f, 6.0f, 20.0f)
-
 
         checkEngineLightIcon.setTint(inActiveIconColor)
         ignitionIcon.setTint(inActiveIconColor)
@@ -171,8 +236,6 @@ internal class SpeedometerGaugeView(context: Context,
         speedStripPaint.color = offlineColor
         innerCirclePaint.color = offlineColor
         innerCirclePaint.setShadowLayer(20f, 0f, 0f, offlineColor)
-        tickPaint.color = offlineColor
-        tickMarkerPaint.color = offlineColor
 
         indicatorIcon.setTint(offlineColor)
 
@@ -184,34 +247,13 @@ internal class SpeedometerGaugeView(context: Context,
         speedStripPaint.color = onlineColor
         innerCirclePaint.color = onlineColor
         innerCirclePaint.setShadowLayer(20f, 0f, 0f, onlineColor)
-        tickPaint.color = onlineColor
-        tickMarkerPaint.color = onlineColor
 
         indicatorIcon.setTint(onlineColor)
 
         dribble()
     }
 
-    override fun onDraw(canvas: Canvas) {
-        super.onDraw(canvas)
-        drawGauge(canvas, gaugeBounds)
-    }
-
-
     override fun onBoundChanged(bounds: RectF) {
-        val gaugeCircumference = (2.0 * Math.PI * (bounds.width() / 2).toDouble()).toFloat()
-
-        //draw ticks
-        bigTickLength = bounds.width() * BIG_TICK_LENGTH_PERCENTAGE
-        bigTickWidth = gaugeCircumference * BIG_TICK_WIDTH_PERCENTAGE
-
-        smallTickLength = bounds.width() * SMALL_TICK_LENGTH_PERCENTAGE
-        smallTickWidth = gaugeCircumference * SMALL_TICK_WIDTH_PERCENTAGE
-
-        textSize = bounds.width() * TICK_MARKER_TEXT_SIZE_PERCENTAGE
-        testSizeMargin = bounds.width() * TICK_MARKER_MARGIN_PERCENTAGE
-
-
         val reduceWidthAndHeightBy = bounds.width() * (1 - INNER_CIRCLE_WIDTH_PERCENTAGE) / 2
         innerCircleBound = RectF(bounds)
         innerCircleBound.inset(reduceWidthAndHeightBy, reduceWidthAndHeightBy)
@@ -259,18 +301,8 @@ internal class SpeedometerGaugeView(context: Context,
     }
 
 
-    override fun drawGauge(canvas: Canvas, bounds: RectF) {
-        canvas.drawArc(bounds, startAngle, sweep, false, gaugePaint)
-
-        drawTicks(canvas, bounds, startAngle,
-                sweep / (TOTAL_NO_OF_TICKS - 1),
-                TOTAL_NO_OF_TICKS, BIG_TICK_MULTIPLE,
-                bigTickLength, bigTickWidth, smallTickLength, smallTickWidth,
-                TICK_MARKER_START, TICK_MARKER_DIFF,
-                textSize, testSizeMargin, tickMarkerPaint, tickPaint)
-
-
-        drawMiddleGaugeInnerCircle(canvas, bounds)
+    override fun onDraw(canvas: Canvas) {
+        drawMiddleGaugeInnerCircle(canvas, gaugeBounds)
     }
 
 
@@ -305,6 +337,7 @@ internal class SpeedometerGaugeView(context: Context,
         drawIndicator(canvas, indicatorBound)
         canvas.restore()
     }
+
 
     private fun drawIndicator(canvas: Canvas, indicatorBound: Rect) {
         indicatorIcon.bounds = indicatorBound
@@ -396,5 +429,4 @@ internal class SpeedometerGaugeView(context: Context,
             else -> super.onTap(event)
         }
     }
-
 }

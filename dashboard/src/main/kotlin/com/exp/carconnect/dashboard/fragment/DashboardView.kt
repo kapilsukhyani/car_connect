@@ -3,8 +3,6 @@ package com.exp.carconnect.dashboard.fragment
 import android.app.AlertDialog
 import android.app.Application
 import android.arch.lifecycle.*
-import android.content.Context
-import android.content.pm.ActivityInfo
 import android.content.res.Configuration
 import android.os.Bundle
 import android.support.v4.app.Fragment
@@ -25,18 +23,9 @@ import redux.api.Reducer
 
 
 class DashboardView : Fragment(), BackInterceptor {
-    lateinit var dashboard: DashboardViewGroup
-    lateinit var dashboardVM: DashboardVM
-    var setVehicleInfo = false
-    private var ignoreCreate = false
-
-    override fun onAttach(context: Context?) {
-        super.onAttach(context)
-        if (activity!!.resources.configuration.orientation != Configuration.ORIENTATION_LANDSCAPE) {
-            activity!!.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
-            ignoreCreate = true
-        }
-    }
+    private lateinit var dashboard: DashboardViewGroup
+    private lateinit var dashboardVM: DashboardVM
+    private var setVehicleInfo = false
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val view = inflater.inflate(R.layout.somefile, null)
@@ -45,21 +34,19 @@ class DashboardView : Fragment(), BackInterceptor {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        if (view.resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
-                && !ignoreCreate) {
-            initView(view)
-            dashboardVM = ViewModelProviders.of(this).get(DashboardVM::class.java)
-            dashboardVM.getScreenStateLiveData()
-                    .observe(this, Observer {
-                        onNewState(it!!)
-                    })
-            settings_icon.setOnClickListener {
-                dashboardVM.onSettingsIconClicked()
-            }
 
-            report_icon.setOnClickListener {
-                dashboardVM.onReportIconClicked()
-            }
+        initView(view)
+        dashboardVM = ViewModelProviders.of(this).get(DashboardVM::class.java)
+        dashboardVM.getScreenStateLiveData()
+                .observe(this, Observer {
+                    onNewState(it!!)
+                })
+        settings_icon.setOnClickListener {
+            dashboardVM.onSettingsIconClicked()
+        }
+
+        report_icon.setOnClickListener {
+            dashboardVM.onReportIconClicked()
         }
     }
 
@@ -97,16 +84,20 @@ class DashboardView : Fragment(), BackInterceptor {
             dashboard.theme = DashboardViewGroup.Theme.Dark
         }
         dashboard.currentSpeed = dashboardData.speed.getValueOrDefault(0.toFloat())
-        dashboard.currentRPM = dashboardData.rpm.getValueOrDefault(0.toFloat())
         dashboard.vin = vehicle.vin
         dashboard.showIgnitionIcon = dashboardData.ignition.getValueOrDefault(false)
         dashboard.showCheckEngineLight = dashboardData.milStatus
                 .getValueOrDefault(MILStatus.Off).let {
                     it != MILStatus.Off
                 }
-        dashboard.fuelPercentage = dashboardData.fuel.getValueOrDefault(0.toFloat())
-        dashboard.currentAirIntakeTemp = dashboardData.currentAirIntakeTemp.getValueOrDefault(0.toFloat())
-        dashboard.currentAmbientTemp = dashboardData.currentAmbientTemp.getValueOrDefault(0.toFloat())
+
+        //landscape only data
+        if (view?.resources?.configuration?.orientation == Configuration.ORIENTATION_LANDSCAPE) {
+            dashboard.currentRPM = dashboardData.rpm.getValueOrDefault(0.toFloat())
+            dashboard.fuelPercentage = dashboardData.fuel.getValueOrDefault(0.toFloat())
+            dashboard.currentAirIntakeTemp = dashboardData.currentAirIntakeTemp.getValueOrDefault(0.toFloat())
+            dashboard.currentAmbientTemp = dashboardData.currentAmbientTemp.getValueOrDefault(0.toFloat())
+        }
 
         if (!setVehicleInfo) {
             if (vehicle.attributes is UnAvailableAvailableData.Available) {
@@ -136,7 +127,9 @@ class DashboardView : Fragment(), BackInterceptor {
         dashboard.rpmDribbleEnabled = true
         dashboard.speedDribbleEnabled = true
         dashboard.showSideGauges = false
-        dashboard.postDelayed({ dashboard.showSideGauges = true }, 500)
+        if (view.resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) {
+            dashboard.postDelayed({ dashboard.showSideGauges = true }, 500)
+        }
     }
 
 

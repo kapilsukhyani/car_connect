@@ -69,8 +69,6 @@ class DashboardViewGroup @JvmOverloads constructor(context: Context,
     private var animatingSideGauges = false
     private var middleGaugeRadius: Float = 0.0f
     private var sideGaugeRadius: Float = 0.0f
-    private val transientRect = Rect()
-
 
     private var layedOut = false
     var onOnlineChangedListener: ((Boolean) -> Unit)? = null
@@ -97,7 +95,8 @@ class DashboardViewGroup @JvmOverloads constructor(context: Context,
     var fuelPercentage = 0.0f
         set(value) {
             if (value in 0.0..1.0 &&
-                    value != field) {
+                    value != field &&
+                    !animatingSideGauges) {
                 fuelAndTemperatureGauge.updateFuel(value)
                 field = value
             }
@@ -106,8 +105,9 @@ class DashboardViewGroup @JvmOverloads constructor(context: Context,
     var currentSpeed = 0f
         set(value) {
             if (value in MIN_SPEED..MAX_SPEED &&
-                    value != field) {
-                speedometerGauge.updateSpeed(value)
+                    value != field &&
+                    !animatingSideGauges) {
+                speedIndicatorView.updateSpeed(value)
                 field = value
             }
         }
@@ -115,7 +115,7 @@ class DashboardViewGroup @JvmOverloads constructor(context: Context,
     var showCheckEngineLight = false
         set(value) {
             if (value != field) {
-                speedometerGauge.showCheckEngineLight = value
+                speedIndicatorView.showCheckEngineLight = value
                 field = value
             }
         }
@@ -123,14 +123,16 @@ class DashboardViewGroup @JvmOverloads constructor(context: Context,
     var showIgnitionIcon = false
         set(value) {
             if (value != field) {
-                speedometerGauge.showIgnitionIcon = value
+                speedIndicatorView.showIgnitionIcon = value
                 field = value
             }
         }
 
     var currentRPM = 0.0f
         set(value) {
-            if (value in MIN_RPM..MAX_RPM && value != field) {
+            if (value in MIN_RPM..MAX_RPM &&
+                    value != field &&
+                    !animatingSideGauges) {
                 rpmGauge.updateRPM(value)
                 field = value
             }
@@ -166,7 +168,7 @@ class DashboardViewGroup @JvmOverloads constructor(context: Context,
     var speedDribbleEnabled = true
         set(value) {
             if (value != field) {
-                speedometerGauge.speedDribbleEnabled = value
+                speedIndicatorView.speedDribbleEnabled = value
                 field = value
             }
         }
@@ -221,13 +223,18 @@ class DashboardViewGroup @JvmOverloads constructor(context: Context,
     private val speedometerGauge = SpeedometerGaugeView(getContext(), null, 0, -1,
             MIDDLE_GAUGE_START_ANGLE.toFloat(),
             MIDDLE_GAUGE_SWEEP_ANGLE.toFloat(),
+            onlineColor,
+            offlineColor,
+            gaugeBackgroundDrawable)
+    private val speedIndicatorView = SpeedIndicatorView(getContext(), null, 0, -1,
+            MIDDLE_GAUGE_START_ANGLE.toFloat(),
+            MIDDLE_GAUGE_SWEEP_ANGLE.toFloat(),
             currentSpeed,
             showIgnitionIcon,
             showCheckEngineLight,
             speedDribbleEnabled,
             onlineColor,
-            offlineColor,
-            gaugeBackgroundDrawable)
+            offlineColor)
     private val rpmGauge = RPMGaugeView(getContext(), null, 0, -1,
             LEFT_GAUGE_START_ANGLE.toFloat(),
             LEFT_GAUGE_SWEEP_ANGLE.toFloat(),
@@ -252,7 +259,7 @@ class DashboardViewGroup @JvmOverloads constructor(context: Context,
         override fun onSingleTapUp(e: MotionEvent): Boolean {
             return when {
                 middleGaugeBounds.contains(e.x, e.y) -> {
-                    speedometerGauge.onTap(e)
+                    speedIndicatorView.onTap(e)
                     true
                 }
                 leftGaugeBounds.contains(e.x, e.y) -> {
@@ -263,6 +270,7 @@ class DashboardViewGroup @JvmOverloads constructor(context: Context,
                     fuelAndTemperatureGauge.onTap(e)
                     true
                 }
+
                 else -> super.onSingleTapUp(e)
             }
         }
@@ -312,9 +320,11 @@ class DashboardViewGroup @JvmOverloads constructor(context: Context,
             }
         })
 
+        //order in which the views are added here is important
         addView(rpmGauge)
         addView(fuelAndTemperatureGauge)
         addView(speedometerGauge)
+        addView(speedIndicatorView)
         addView(vinView)
     }
 
@@ -379,6 +389,14 @@ class DashboardViewGroup @JvmOverloads constructor(context: Context,
                             middleGaugeBounds.right.toInt(),
                             middleGaugeBounds.bottom.toInt())
                 }
+
+                is SpeedIndicatorView -> {
+                    child.layout(middleGaugeBounds.left.toInt(),
+                            middleGaugeBounds.top.toInt(),
+                            middleGaugeBounds.right.toInt(),
+                            middleGaugeBounds.bottom.toInt())
+                }
+
                 is RPMGaugeView -> {
                     child.layout(leftGaugeBounds.left.toInt(),
                             leftGaugeBounds.top.toInt(),
@@ -408,7 +426,6 @@ class DashboardViewGroup @JvmOverloads constructor(context: Context,
     }
 
 
-    //todo improve this and avoid allocation in onDraw
     @SuppressLint("DrawAllocation")
     override fun onDraw(canvas: Canvas) {
         drawLabel(canvas, labelBoundsOnCanvas)
@@ -427,11 +444,13 @@ class DashboardViewGroup @JvmOverloads constructor(context: Context,
     private fun adoptOnlineStatus() {
         if (online) {
             speedometerGauge.onConnected()
+            speedIndicatorView.onConnected()
             rpmGauge.onConnected()
             fuelAndTemperatureGauge.onConnected()
             vinView.onConnected()
         } else {
             speedometerGauge.onDisconnected()
+            speedIndicatorView.onDisconnected()
             rpmGauge.onDisconnected()
             fuelAndTemperatureGauge.onDisconnected()
             vinView.onDisconnected()
@@ -476,7 +495,7 @@ class DashboardViewGroup @JvmOverloads constructor(context: Context,
     }
 
     fun setOnSpeedChangedListener(listener: (Float) -> Unit) {
-        speedometerGauge.speedChangedListener = listener
+        speedIndicatorView.speedChangedListener = listener
     }
 
     fun setOnFuelPercentageChangedListener(listener: (Float) -> Unit) {
@@ -484,11 +503,11 @@ class DashboardViewGroup @JvmOverloads constructor(context: Context,
     }
 
     fun setOnCheckEngineLightChangedListener(listener: (Boolean) -> Unit) {
-        speedometerGauge.checkEngineLightChangedListener = listener
+        speedIndicatorView.checkEngineLightChangedListener = listener
     }
 
     fun setOnIgnitionChangedListener(listener: (Boolean) -> Unit) {
-        speedometerGauge.ignitionIconChangedListener = listener
+        speedIndicatorView.ignitionIconChangedListener = listener
     }
 
 
@@ -498,15 +517,15 @@ class DashboardViewGroup @JvmOverloads constructor(context: Context,
     }
 
     fun setOnIgnitionIconCLickListener(listener: (Boolean) -> Unit) {
-        speedometerGauge.onIgnitionIconClickListener = listener
+        speedIndicatorView.onIgnitionIconClickListener = listener
     }
 
     fun setOnCheckEngineLightIconCLickListener(listener: (Boolean) -> Unit) {
-        speedometerGauge.onCheckEngineLightIconClickListener = listener
+        speedIndicatorView.onCheckEngineLightIconClickListener = listener
     }
 
     fun setOnSpeedStripClickListener(listener: (Float) -> Unit) {
-        speedometerGauge.onSpeedStripClickListener = listener
+        speedIndicatorView.onSpeedStripClickListener = listener
     }
 
     fun setOnAirIntakeTempClickListener(listener: (Float) -> Unit) {

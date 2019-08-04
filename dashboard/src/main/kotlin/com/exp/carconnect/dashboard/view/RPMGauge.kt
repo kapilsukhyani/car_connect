@@ -20,8 +20,8 @@ internal class RPMGauge(dashboard: Dashboard,
 
     companion object {
 
-        internal const val MIN_RPM = 0
-        internal const val MAX_RPM = 8
+        internal const val MIN_RPM = 0f
+        internal const val MAX_RPM = 8f
 
         internal const val TOTAL_NO_OF_DATA_POINTS = MAX_RPM
 

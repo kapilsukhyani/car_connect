@@ -18,14 +18,14 @@ import com.exp.carconnect.dashboard.R
 import com.exp.carconnect.dashboard.state.DashboardAction
 import com.exp.carconnect.dashboard.state.DashboardScreen
 import com.exp.carconnect.dashboard.state.DashboardScreenState
-import com.exp.carconnect.dashboard.view.Dashboard
+import com.exp.carconnect.dashboard.view.DashboardViewGroup
 import io.reactivex.disposables.CompositeDisposable
 import kotlinx.android.synthetic.main.view_dashboard.*
 import redux.api.Reducer
 
 
 class DashboardView : Fragment(), BackInterceptor {
-    lateinit var dashboard: Dashboard
+    lateinit var dashboard: DashboardViewGroup
     lateinit var dashboardVM: DashboardVM
     var setVehicleInfo = false
     private var ignoreCreate = false
@@ -39,7 +39,7 @@ class DashboardView : Fragment(), BackInterceptor {
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        val view = inflater.inflate(R.layout.view_dashboard, null)
+        val view = inflater.inflate(R.layout.somefile, null)
         return view
     }
 
@@ -92,9 +92,9 @@ class DashboardView : Fragment(), BackInterceptor {
 
     private fun showNewSnapshot(vehicle: Vehicle, dashboardData: LiveVehicleData, theme: DashboardTheme) {
         if (theme == DashboardTheme.Light) {
-            dashboard.theme = Dashboard.Theme.Light
+            dashboard.theme = DashboardViewGroup.Theme.Light
         } else {
-            dashboard.theme = Dashboard.Theme.Dark
+            dashboard.theme = DashboardViewGroup.Theme.Dark
         }
         dashboard.currentSpeed = dashboardData.speed.getValueOrDefault(0.toFloat())
         dashboard.currentRPM = dashboardData.rpm.getValueOrDefault(0.toFloat())
@@ -136,7 +136,7 @@ class DashboardView : Fragment(), BackInterceptor {
         dashboard.rpmDribbleEnabled = true
         dashboard.speedDribbleEnabled = true
         dashboard.showSideGauges = false
-        dashboard.postDelayed(Runnable { dashboard.showSideGauges = true }, 500)
+        dashboard.postDelayed({ dashboard.showSideGauges = true }, 500)
     }
 
 

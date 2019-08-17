@@ -29,7 +29,6 @@ import com.exp.carconnect.base.*
 import com.exp.carconnect.base.R
 import com.exp.carconnect.base.state.*
 import io.reactivex.disposables.CompositeDisposable
-import kotlinx.android.synthetic.main.view_device_management.*
 import redux.api.Reducer
 import timber.log.Timber
 
@@ -81,9 +80,6 @@ class DeviceManagementView : Fragment() {
         when (it) {
             is DeviceManagementScreenState.ShowingDevices -> {
                 showDevices(it.devices)
-                if (it.showUsageReportBanner) {
-                    showUsageBanner()
-                }
             }
 
             is DeviceManagementScreenState.ShowingError -> {
@@ -92,17 +88,6 @@ class DeviceManagementView : Fragment() {
         }
     }
 
-    private val hideBannerRunnable = Runnable {
-        usage_report_banner
-                .animate()
-                .translationYBy(-usage_report_banner.height.toFloat())
-                .alpha(0.toFloat()).start()
-    }
-
-    private fun showUsageBanner() {
-        usage_report_banner.visibility = View.VISIBLE
-        usage_report_banner.postDelayed(hideBannerRunnable, 3500)
-    }
 
     private fun showError(title: String, message: String) {
         AlertDialog
@@ -118,11 +103,6 @@ class DeviceManagementView : Fragment() {
                 .show()
     }
 
-    override fun onStop() {
-        super.onStop()
-        usage_report_banner
-                .removeCallbacks(hideBannerRunnable)
-    }
 
     private fun showDevices(devices: Set<OBDDongle>) {
         animateDeviceContainer {
@@ -263,8 +243,7 @@ class DeviceManagementVM(app: Application) : AndroidViewModel(app) {
                         }
                     } else {
                         store.dispatch(DeviceManagementViewAction
-                                .ShowDonglesAndUsageReportBanner(dongleLoader.loadDevices(includeSimulator = true),
-                                        persistedState.appSettings.usageReportingEnabled))
+                                .ShowDongles(dongleLoader.loadDevices(includeSimulator = true)))
                     }
                 })
     }
@@ -306,7 +285,7 @@ class DeviceManagementVM(app: Application) : AndroidViewModel(app) {
 
 
 sealed class DeviceManagementViewAction {
-    data class ShowDonglesAndUsageReportBanner(val devices: Set<OBDDongle>, val showBanner: Boolean = false) : DeviceManagementViewAction()
+    data class ShowDongles(val devices: Set<OBDDongle>) : DeviceManagementViewAction()
     data class ShowError(val title: String,
                          val message: String) : DeviceManagementViewAction()
 }
@@ -315,14 +294,14 @@ sealed class DeviceManagementViewAction {
 class DeviceManagementScreenStateReducer : Reducer<AppState> {
     override fun reduce(state: AppState, action: Any): AppState {
         return when (action) {
-            is DeviceManagementViewAction.ShowDonglesAndUsageReportBanner -> {
+            is DeviceManagementViewAction.ShowDongles -> {
                 state.copy(uiState = state
                         .uiState
                         .copy(backStack = state
                                 .uiState
                                 .backStack
                                 .subList(0, state.uiState.backStack.size - 1) +
-                                DeviceManagementScreen(DeviceManagementScreenState.ShowingDevices(action.devices, action.showBanner))))
+                                DeviceManagementScreen(DeviceManagementScreenState.ShowingDevices(action.devices))))
             }
 
             is DeviceManagementViewAction.ShowError -> {

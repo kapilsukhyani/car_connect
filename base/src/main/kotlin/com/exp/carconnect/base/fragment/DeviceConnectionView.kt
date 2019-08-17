@@ -5,8 +5,6 @@ import android.app.AlertDialog
 import android.app.Application
 import android.arch.lifecycle.*
 import android.content.Context
-import android.content.pm.ActivityInfo
-import android.content.res.Configuration
 import android.os.Bundle
 import android.support.v4.app.Fragment
 import android.view.LayoutInflater
@@ -28,21 +26,6 @@ class DeviceConnectionView : Fragment(), BackInterceptor {
 
     private lateinit var deviceConnectionVM: DeviceConnectionVM
     private lateinit var trackAnimator: ObjectAnimator
-    private var ignoreCreate = false
-
-
-    override fun onAttach(context: Context?) {
-        super.onAttach(context)
-        if (activity!!.resources.configuration.orientation != Configuration.ORIENTATION_PORTRAIT) {
-            activity!!.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
-            ignoreCreate = true
-        }
-    }
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-
-    }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         return inflater.inflate(R.layout.view_device_connection, null)
@@ -50,15 +33,12 @@ class DeviceConnectionView : Fragment(), BackInterceptor {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        if (view.resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT
-                && !ignoreCreate) {
-            deviceConnectionVM = ViewModelProviders.of(this).get(DeviceConnectionVM::class.java)
-            deviceConnectionVM
-                    .getScreenStateLiveData()
-                    .observe(this, Observer {
-                        onNewState(it!!)
-                    })
-        }
+        deviceConnectionVM = ViewModelProviders.of(this).get(DeviceConnectionVM::class.java)
+        deviceConnectionVM
+                .getScreenStateLiveData()
+                .observe(this, Observer {
+                    onNewState(it!!)
+                })
     }
 
     override fun onStart() {

@@ -3,9 +3,6 @@ package com.exp.carconnect.base.fragment
 import android.app.AlertDialog
 import android.app.Application
 import android.arch.lifecycle.*
-import android.content.Context
-import android.content.pm.ActivityInfo
-import android.content.res.Configuration
 import android.os.Bundle
 import android.support.constraint.ConstraintLayout
 import android.support.constraint.ConstraintSet
@@ -32,22 +29,17 @@ class SplashView : Fragment() {
     private lateinit var appLogo: View
     private lateinit var containerLayout: ConstraintLayout
     private lateinit var splashVM: SplashVM
-    private var ignoreCreate = false
     private val constraintSet = ConstraintSet()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        if (activity!!.resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT
-                && !ignoreCreate) {
-            splashVM = ViewModelProviders
-                    .of(this)
-                    .get(SplashVM::class.java)
-            splashVM.getAppLoadingStateLiveData()
-                    .observe(this, Observer {
-                        showStatus(it!!)
-                    })
-
-        }
+        splashVM = ViewModelProviders
+                .of(this)
+                .get(SplashVM::class.java)
+        splashVM.getAppLoadingStateLiveData()
+                .observe(this, Observer {
+                    showStatus(it!!)
+                })
     }
 
     private fun showStatus(it: SplashScreenState) {
@@ -59,14 +51,6 @@ class SplashView : Fragment() {
             is SplashScreenState.AppStateLoaded -> {
                 splashVM.onAppStateLoaded(it.appState)
             }
-        }
-    }
-
-    override fun onAttach(context: Context?) {
-        super.onAttach(context)
-        if (activity!!.resources.configuration.orientation != Configuration.ORIENTATION_PORTRAIT) {
-            activity!!.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
-            ignoreCreate = true
         }
     }
 
@@ -102,7 +86,6 @@ class SplashView : Fragment() {
 }
 
 class SplashVM(app: Application) : AndroidViewModel(app) {
-
     private val splashScreenStateLiveData: MutableLiveData<SplashScreenState> = MutableLiveData()
     private val stateSubscription: CompositeDisposable = CompositeDisposable()
 

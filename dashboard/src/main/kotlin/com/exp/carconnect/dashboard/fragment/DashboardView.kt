@@ -3,8 +3,6 @@ package com.exp.carconnect.dashboard.fragment
 import android.app.AlertDialog
 import android.app.Application
 import android.arch.lifecycle.*
-import android.content.Context
-import android.content.pm.ActivityInfo
 import android.content.res.Configuration
 import android.os.Bundle
 import android.support.v4.app.Fragment
@@ -18,48 +16,37 @@ import com.exp.carconnect.dashboard.R
 import com.exp.carconnect.dashboard.state.DashboardAction
 import com.exp.carconnect.dashboard.state.DashboardScreen
 import com.exp.carconnect.dashboard.state.DashboardScreenState
-import com.exp.carconnect.dashboard.view.Dashboard
+import com.exp.carconnect.dashboard.view.DashboardViewGroup
 import io.reactivex.disposables.CompositeDisposable
 import kotlinx.android.synthetic.main.view_dashboard.*
 import redux.api.Reducer
 
 
 class DashboardView : Fragment(), BackInterceptor {
-    lateinit var dashboard: Dashboard
-    lateinit var dashboardVM: DashboardVM
-    var setVehicleInfo = false
-    private var ignoreCreate = false
-
-    override fun onAttach(context: Context?) {
-        super.onAttach(context)
-        if (activity!!.resources.configuration.orientation != Configuration.ORIENTATION_LANDSCAPE) {
-            activity!!.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
-            ignoreCreate = true
-        }
-    }
+    private lateinit var dashboard: DashboardViewGroup
+    private lateinit var dashboardVM: DashboardVM
+    private var setVehicleInfo = false
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        val view = inflater.inflate(R.layout.view_dashboard, null)
+        val view = inflater.inflate(R.layout.view_dashboard_v2, null)
         return view
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        if (view.resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
-                && !ignoreCreate) {
-            initView(view)
-            dashboardVM = ViewModelProviders.of(this).get(DashboardVM::class.java)
-            dashboardVM.getScreenStateLiveData()
-                    .observe(this, Observer {
-                        onNewState(it!!)
-                    })
-            settings_icon.setOnClickListener {
-                dashboardVM.onSettingsIconClicked()
-            }
 
-            report_icon.setOnClickListener {
-                dashboardVM.onReportIconClicked()
-            }
+        initView(view)
+        dashboardVM = ViewModelProviders.of(this).get(DashboardVM::class.java)
+        dashboardVM.getScreenStateLiveData()
+                .observe(this, Observer {
+                    onNewState(it!!)
+                })
+        settings_icon.setOnClickListener {
+            dashboardVM.onSettingsIconClicked()
+        }
+
+        report_icon.setOnClickListener {
+            dashboardVM.onReportIconClicked()
         }
     }
 
@@ -72,8 +59,6 @@ class DashboardView : Fragment(), BackInterceptor {
                 showError(it.error)
             }
         }
-
-
     }
 
     private fun showError(error: String) {
@@ -92,21 +77,25 @@ class DashboardView : Fragment(), BackInterceptor {
 
     private fun showNewSnapshot(vehicle: Vehicle, dashboardData: LiveVehicleData, theme: DashboardTheme) {
         if (theme == DashboardTheme.Light) {
-            dashboard.theme = Dashboard.Theme.Light
+            dashboard.theme = DashboardViewGroup.Theme.Light
         } else {
-            dashboard.theme = Dashboard.Theme.Dark
+            dashboard.theme = DashboardViewGroup.Theme.Dark
         }
         dashboard.currentSpeed = dashboardData.speed.getValueOrDefault(0.toFloat())
-        dashboard.currentRPM = dashboardData.rpm.getValueOrDefault(0.toFloat())
         dashboard.vin = vehicle.vin
         dashboard.showIgnitionIcon = dashboardData.ignition.getValueOrDefault(false)
         dashboard.showCheckEngineLight = dashboardData.milStatus
                 .getValueOrDefault(MILStatus.Off).let {
                     it != MILStatus.Off
                 }
-        dashboard.fuelPercentage = dashboardData.fuel.getValueOrDefault(0.toFloat())
-        dashboard.currentAirIntakeTemp = dashboardData.currentAirIntakeTemp.getValueOrDefault(0.toFloat())
-        dashboard.currentAmbientTemp = dashboardData.currentAmbientTemp.getValueOrDefault(0.toFloat())
+
+        //landscape only data
+        if (view?.resources?.configuration?.orientation == Configuration.ORIENTATION_LANDSCAPE) {
+            dashboard.currentRPM = dashboardData.rpm.getValueOrDefault(0.toFloat())
+            dashboard.fuelPercentage = dashboardData.fuel.getValueOrDefault(0.toFloat())
+            dashboard.currentAirIntakeTemp = dashboardData.currentAirIntakeTemp.getValueOrDefault(0.toFloat())
+            dashboard.currentAmbientTemp = dashboardData.currentAmbientTemp.getValueOrDefault(0.toFloat())
+        }
 
         if (!setVehicleInfo) {
             if (vehicle.attributes is UnAvailableAvailableData.Available) {
@@ -135,8 +124,10 @@ class DashboardView : Fragment(), BackInterceptor {
         dashboard.online = true
         dashboard.rpmDribbleEnabled = true
         dashboard.speedDribbleEnabled = true
-        dashboard.showSideGauges = false
-        dashboard.postDelayed(Runnable { dashboard.showSideGauges = true }, 500)
+        if (view.resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) {
+            dashboard.showSideGauges = false
+            dashboard.postDelayed({ dashboard.showSideGauges = true }, 500)
+        }
     }
 
 

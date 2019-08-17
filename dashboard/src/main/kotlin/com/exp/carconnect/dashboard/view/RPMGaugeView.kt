@@ -3,25 +3,38 @@ package com.exp.carconnect.dashboard.view
 import android.animation.Animator
 import android.animation.ObjectAnimator
 import android.annotation.SuppressLint
+import android.content.Context
 import android.graphics.*
+import android.graphics.drawable.Drawable
 import android.support.v4.graphics.ColorUtils
 import android.text.TextPaint
+import android.util.AttributeSet
 import android.view.MotionEvent
 import java.util.*
 
-
-internal class RPMGauge(dashboard: Dashboard,
-                        private val startAngle: Float,
-                        private val sweep: Float,
-                        rpmDribbleEnabled: Boolean,
-                        currentRPM: Float,
-                        onlineColor: Int,
-                        offlineColor: Int) : LeftGauge(dashboard, onlineColor, offlineColor) {
+@SuppressLint("ViewConstructor")
+internal class RPMGaugeView(context: Context,
+                            attrs: AttributeSet? = null,
+                            defStyleAttr: Int = 0,
+                            defStyleRes: Int = -1,
+                            private val startAngle: Float,
+                            private val sweep: Float,
+                            rpmDribbleEnabled: Boolean,
+                            currentRPM: Float,
+                            onlineColor: Int,
+                            offlineColor: Int,
+                            gaugeBackgroundDrawable: Drawable) : LeftGaugeView(context,
+        attrs,
+        defStyleAttr,
+        defStyleRes,
+        onlineColor,
+        offlineColor,
+        gaugeBackgroundDrawable) {
 
     companion object {
 
-        internal const val MIN_RPM = 0f
-        internal const val MAX_RPM = 8f
+        internal const val MIN_RPM = 0
+        internal const val MAX_RPM = 8
 
         internal const val TOTAL_NO_OF_DATA_POINTS = MAX_RPM
 
@@ -59,7 +72,7 @@ internal class RPMGauge(dashboard: Dashboard,
     private val rpmTextPaint: Paint = TextPaint(Paint.ANTI_ALIAS_FLAG)
     private val onlineGradientColor: Int = getDarkerColor(onlineColor)
     private val offlineGradientColor: Int = getDarkerColor(offlineColor)
-    private var criticalZoneColor = dashboard.context.getColor(android.R.color.holo_red_dark)
+    private var criticalZoneColor = context.getColor(android.R.color.holo_red_dark)
 
     internal var rpmDribbleEnabled: Boolean = rpmDribbleEnabled
         set(value) {
@@ -78,7 +91,7 @@ internal class RPMGauge(dashboard: Dashboard,
                 return
             }
             field = value
-            dashboard.invalidateRPMGauge()
+            invalidate()
             rpmChangedListener?.invoke(field)
         }
 
@@ -194,8 +207,12 @@ internal class RPMGauge(dashboard: Dashboard,
     }
 
 
-    override fun onBoundChanged(bounds: RectF) {
+    override fun onDraw(canvas: Canvas) {
+        super.onDraw(canvas)
+        drawGauge(canvas, gaugeBounds)
+    }
 
+    override fun onBoundChanged(bounds: RectF) {
         val gaugeCircumference = (2.0 * Math.PI * (bounds.width() / 2).toDouble()).toFloat()
 
         //draw ticks
@@ -298,13 +315,13 @@ internal class RPMGauge(dashboard: Dashboard,
 
 
     private fun dribble() {
-        if (rpmDribbleEnabled && dashboard.currentRPM > MIN_RPM && dashboard.online) {
+        if (rpmDribbleEnabled && currentRPM > MIN_RPM /*&& dashboard.online*/) {
             val dribbleBy = DRIBBLE_RANDOM.nextFloat() * (DRIBBLE_RANGE - 0.0f) + 0.0f
             dribbleRPMAnimator = ObjectAnimator.ofFloat(this,
                     "currentRPM", currentRPM,
-                    dashboard.currentRPM + dribbleBy,
-                    dashboard.currentRPM,
-                    dashboard.currentRPM - dribbleBy,
+                    currentRPM + dribbleBy,
+                    currentRPM,
+                    currentRPM - dribbleBy,
                     currentRPM)
             dribbleRPMAnimator?.repeatMode = ObjectAnimator.RESTART
             dribbleRPMAnimator?.repeatCount = ObjectAnimator.INFINITE
@@ -333,7 +350,7 @@ internal class RPMGauge(dashboard: Dashboard,
             }
 
             override fun onAnimationEnd(animation: Animator?) {
-                if (dashboard.rpmDribbleEnabled) {
+                if (rpmDribbleEnabled) {
                     rpmDribbleEnabled = true
                 }
             }
@@ -352,7 +369,7 @@ internal class RPMGauge(dashboard: Dashboard,
     }
 
     override fun onTap(event: MotionEvent): Boolean {
-        onRPMClickListener?.invoke(dashboard.currentRPM)
+        onRPMClickListener?.invoke(currentRPM)
         return true
     }
 

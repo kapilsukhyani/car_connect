@@ -1,8 +1,27 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/window_container"
+    android:id="@+id/window_container_with_banner"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical">
 
+    <FrameLayout
+        android:id="@+id/window_container"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+    </FrameLayout>
+
+    <TextView
+        android:id="@+id/usage_report_banner"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/primary"
+        android:padding="8dp"
+        android:text="@string/usage_report_banner_text"
+        android:textColor="@color/textColorOnPrimary"
+        android:textSize="16dp"
+        android:textStyle="bold"
+        android:visibility="gone" />
 </FrameLayout>

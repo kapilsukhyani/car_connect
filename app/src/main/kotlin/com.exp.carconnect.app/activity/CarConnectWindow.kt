@@ -1,5 +1,6 @@
 package com.exp.carconnect.app.activity
 
+import android.annotation.SuppressLint
 import android.app.Application
 import android.arch.lifecycle.*
 import android.os.Bundle
@@ -37,12 +38,13 @@ class CarConnectWindow : AppCompatActivity() {
 
     private lateinit var windowContainer: View
     private lateinit var windowVM: WindowVM
+    private lateinit var usageBanner: View
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.window)
-        clearAndroidManagedViewState()
         windowContainer = findViewById(R.id.window_container)
+        usageBanner = findViewById(R.id.usage_report_banner)
         windowVM = ViewModelProviders.of(this)
                 .get(WindowVM::class.java)
         windowVM.init(savedInstanceState)
@@ -50,14 +52,37 @@ class CarConnectWindow : AppCompatActivity() {
                 .observe(this, Observer {
                     showView(it)
                 })
+        windowVM.getUsageBannerLiveData().observe(this, Observer {
+            if (it == true) {
+                showUsageBanner()
+            }
+        })
         if (savedInstanceState == null) {
             trySeekingRating()
         }
     }
 
+    override fun onStop() {
+        super.onStop()
+        usageBanner
+                .removeCallbacks(hideBannerRunnable)
+    }
+
     private fun trySeekingRating() {
         RateThisApp.onCreate(this)
         RateThisApp.showRateDialogIfNeeded(this)
+    }
+
+    private val hideBannerRunnable = Runnable {
+        usageBanner
+                .animate()
+                .translationYBy(-usageBanner.height.toFloat())
+                .alpha(0.toFloat()).start()
+    }
+
+    private fun showUsageBanner() {
+        usageBanner.visibility = View.VISIBLE
+        usageBanner.postDelayed(hideBannerRunnable, 3500)
     }
 
     private fun showView(it: CarConnectView?) {
@@ -110,6 +135,10 @@ class CarConnectWindow : AppCompatActivity() {
                                 sharedElement: View? = null,
                                 sharedElementTransitionName: String? = null,
                                 viewTransition: Boolean = true) {
+
+        if (getCurrentFragment()?.javaClass == fragment.javaClass) {
+            return
+        }
         if (viewTransition) {
             fragment.enterTransition = Fade()
             fragment.exitTransition = Fade()
@@ -124,13 +153,6 @@ class CarConnectWindow : AppCompatActivity() {
                 .replace(R.id.window_container, fragment, CURRENT_FRAGMENT_TAG)
                 .commitNow()
     }
-
-    private fun clearAndroidManagedViewState() {
-        getCurrentFragment()?.let {
-            supportFragmentManager.beginTransaction().remove(it).commitNow()
-        }
-    }
-
 
     private fun getCurrentFragment(): Fragment? {
         return supportFragmentManager.findFragmentByTag(CURRENT_FRAGMENT_TAG)
@@ -161,8 +183,6 @@ class SharedElementTransition : TransitionSet() {
 }
 
 class WindowVM(app: Application) : AndroidViewModel(app) {
-
-
     companion object {
         const val TAG = "WindowVM"
     }
@@ -171,6 +191,8 @@ class WindowVM(app: Application) : AndroidViewModel(app) {
     private val stateSubscription: Disposable
     private val store: Store<AppState> = getApplication<CarConnectApp>()
             .store
+    private var donationBottomSheetAttempted = false
+    private var usageBannerShown = false
 
     init {
         stateSubscription = store
@@ -187,14 +209,27 @@ class WindowVM(app: Application) : AndroidViewModel(app) {
                 })
     }
 
-
     override fun onCleared() {
         stateSubscription.dispose()
     }
 
-
     fun getCurrentViewLiveData(): LiveData<CarConnectView> {
         return currentViewLiveData
+    }
+
+    @SuppressLint("CheckResult")
+    fun getUsageBannerLiveData(): LiveData<Boolean> {
+        val liveData = MutableLiveData<Boolean>()
+        store
+                .asCustomObservable()
+                .filter { it.isBaseStateLoaded() }
+                .take(1)
+                .map { it.getBaseAppState().baseAppPersistedState.appSettings.usageReportingEnabled }
+                .subscribe {
+                    liveData.value = it && !usageBannerShown
+                    usageBannerShown = true
+                }
+        return liveData
     }
 
     fun onBackPressed() {
@@ -202,7 +237,10 @@ class WindowVM(app: Application) : AndroidViewModel(app) {
     }
 
     fun showDonationBottomSheet(activity: AppCompatActivity) {
-        com.exp.carconnect.donation.showDonationBottomSheet(activity, store, getApplication())
+        if (!donationBottomSheetAttempted) {
+            com.exp.carconnect.donation.showDonationBottomSheet(activity, store, getApplication())
+            donationBottomSheetAttempted = true
+        }
     }
 
     fun init(savedInstanceState: Bundle?) {

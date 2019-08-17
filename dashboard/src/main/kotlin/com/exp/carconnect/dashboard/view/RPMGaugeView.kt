@@ -12,7 +12,7 @@ import android.util.AttributeSet
 import android.view.MotionEvent
 import java.util.*
 
-
+@SuppressLint("ViewConstructor")
 internal class RPMGaugeView(context: Context,
                             attrs: AttributeSet? = null,
                             defStyleAttr: Int = 0,

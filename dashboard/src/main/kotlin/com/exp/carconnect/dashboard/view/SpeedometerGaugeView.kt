@@ -14,7 +14,7 @@ import android.view.MotionEvent
 import com.exp.carconnect.base.R
 import java.util.*
 
-
+@SuppressLint("ViewConstructor")
 internal class SpeedometerGaugeView(context: Context,
                                     attrs: AttributeSet? = null,
                                     defStyleAttr: Int = 0,
@@ -96,7 +96,6 @@ internal class SpeedometerGaugeView(context: Context,
 
     }
 
-
     override fun drawGauge(canvas: Canvas, bounds: RectF) {
         canvas.drawArc(bounds, startAngle, sweep, false, gaugePaint)
 
@@ -111,6 +110,7 @@ internal class SpeedometerGaugeView(context: Context,
 
 }
 
+@SuppressLint("ViewConstructor")
 internal class SpeedIndicatorView(context: Context,
                                   attrs: AttributeSet? = null,
                                   defStyleAttr: Int = 0,
@@ -208,9 +208,7 @@ internal class SpeedIndicatorView(context: Context,
     private lateinit var ignitionIconBounds: Rect
     private lateinit var checkEngineLightBounds: Rect
     private lateinit var speedTextStripBounds: RectF
-
     private lateinit var indicatorBound: Rect
-
 
     init {
         innerCirclePaint.style = Paint.Style.STROKE

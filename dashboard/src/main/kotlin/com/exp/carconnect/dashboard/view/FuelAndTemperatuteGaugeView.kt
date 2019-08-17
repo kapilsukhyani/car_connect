@@ -13,7 +13,7 @@ import android.view.MotionEvent
 import com.exp.carconnect.base.R
 import java.util.*
 
-
+@SuppressLint("ViewConstructor")
 internal class FuelAndTemperatureGaugeView(context: Context,
                                            attrs: AttributeSet? = null,
                                            defStyleAttr: Int = 0,

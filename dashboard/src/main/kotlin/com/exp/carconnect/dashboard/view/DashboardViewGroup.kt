@@ -6,6 +6,7 @@ import android.animation.AnimatorSet
 import android.animation.ObjectAnimator
 import android.annotation.SuppressLint
 import android.content.Context
+import android.content.res.Configuration
 import android.graphics.*
 import android.graphics.drawable.BitmapDrawable
 import android.os.Build
@@ -46,7 +47,8 @@ class DashboardViewGroup @JvmOverloads constructor(context: Context,
         private const val RIGHT_GAUGE_START_ANGLE = 235
         private const val RIGHT_GAUGE_SWEEP_ANGLE = 250
 
-        private const val MIDDLE_GAUGE_WIDTH_PERCENTAGE = 0.4f
+        private const val MIDDLE_GAUGE_WIDTH_PERCENTAGE_LANDSCAPE = 0.4f
+        private const val MIDDLE_GAUGE_WIDTH_PERCENTAGE_PORTRAIT = 0.7f
         private const val LEFT_GAUGE_WIDTH_PERCENTAGE = 0.3f
         private const val DASHBOARD_LABEL_MARGIN_PERCENTAGE_OF_AVAILABLE_HEIGHT = 0.05f
         private const val RIGHT_GAUGE_WIDTH_PERCENTAGE = LEFT_GAUGE_WIDTH_PERCENTAGE
@@ -69,6 +71,7 @@ class DashboardViewGroup @JvmOverloads constructor(context: Context,
     private var animatingSideGauges = false
     private var middleGaugeRadius: Float = 0.0f
     private var sideGaugeRadius: Float = 0.0f
+    private var sideGaugesVisible = isOrientationLandscape()
 
     private var layedOut = false
     var onOnlineChangedListener: ((Boolean) -> Unit)? = null
@@ -96,7 +99,8 @@ class DashboardViewGroup @JvmOverloads constructor(context: Context,
         set(value) {
             if (value in 0.0..1.0 &&
                     value != field &&
-                    !animatingSideGauges) {
+                    !animatingSideGauges &&
+                    sideGaugesVisible) {
                 fuelAndTemperatureGauge.updateFuel(value)
                 field = value
             }
@@ -132,7 +136,8 @@ class DashboardViewGroup @JvmOverloads constructor(context: Context,
         set(value) {
             if (value in MIN_RPM..MAX_RPM &&
                     value != field &&
-                    !animatingSideGauges) {
+                    !animatingSideGauges &&
+                    sideGaugesVisible) {
                 rpmGauge.updateRPM(value)
                 field = value
             }
@@ -159,7 +164,8 @@ class DashboardViewGroup @JvmOverloads constructor(context: Context,
 
     var rpmDribbleEnabled = true
         set(value) {
-            if (value != field) {
+            if (value != field &&
+                    sideGaugesVisible) {
                 rpmGauge.rpmDribbleEnabled = value
                 field = value
             }
@@ -176,7 +182,8 @@ class DashboardViewGroup @JvmOverloads constructor(context: Context,
 
     var currentAirIntakeTemp = 0.0f
         set(value) {
-            if (value != field) {
+            if (value != field &&
+                    sideGaugesVisible) {
                 fuelAndTemperatureGauge.currentAirIntakeTemperature = value
                 field = value
             }
@@ -184,16 +191,22 @@ class DashboardViewGroup @JvmOverloads constructor(context: Context,
 
     var currentAmbientTemp = 0.0f
         set(value) {
-            if (value != field) {
+            if (value != field &&
+                    sideGaugesVisible) {
                 fuelAndTemperatureGauge.currentAmbientTemperature = value
                 field = value
             }
         }
 
 
-    var showSideGauges = true
+    /**
+     * Side gauges can only change visibility in landscape mode, otherwise they are hidden
+     */
+    var showSideGauges = isOrientationLandscape()
         set(value) {
-            if (value != field && !animatingSideGauges) {
+            if (value != field &&
+                    !animatingSideGauges &&
+                    isOrientationLandscape()) {
                 field = value
                 if (layedOut) {
                     if (field) {
@@ -262,11 +275,12 @@ class DashboardViewGroup @JvmOverloads constructor(context: Context,
                     speedIndicatorView.onTap(e)
                     true
                 }
-                leftGaugeBounds.contains(e.x, e.y) -> {
+
+                sideGaugesVisible && leftGaugeBounds.contains(e.x, e.y) -> {
                     rpmGauge.onTap(e)
                     true
                 }
-                rightGaugeBounds.contains(e.x, e.y) -> {
+                sideGaugesVisible && rightGaugeBounds.contains(e.x, e.y) -> {
                     fuelAndTemperatureGauge.onTap(e)
                     true
                 }
@@ -283,8 +297,6 @@ class DashboardViewGroup @JvmOverloads constructor(context: Context,
     }
 
     private fun init() {
-//        setLayerType(LAYER_TYPE_SOFTWARE, null)
-
         gaugeBackgroundDrawable.isCircular = true
         background = context.getDrawable(R.drawable.dashboard_bg)
 
@@ -321,13 +333,16 @@ class DashboardViewGroup @JvmOverloads constructor(context: Context,
         })
 
         //order in which the views are added here is important
-        addView(rpmGauge)
-        addView(fuelAndTemperatureGauge)
+        if (isOrientationLandscape()) {
+            addView(rpmGauge)
+            addView(fuelAndTemperatureGauge)
+        }
         addView(speedometerGauge)
         addView(speedIndicatorView)
         addView(vinView)
     }
 
+    private fun isOrientationLandscape(): Boolean = resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
 
     override fun onTouchEvent(event: MotionEvent?): Boolean {
         this.gestureDetector.onTouchEvent(event)
@@ -343,33 +358,35 @@ class DashboardViewGroup @JvmOverloads constructor(context: Context,
         viewCenter.x = width / 2
         viewCenter.y = height / 2
 
-        middleGaugeRadius = remainingWidthAfterPadding * MIDDLE_GAUGE_WIDTH_PERCENTAGE / 2
-        sideGaugeRadius = remainingWidthAfterPadding * LEFT_GAUGE_WIDTH_PERCENTAGE / 2
-
+        val middleGaugePercentage = if (isOrientationLandscape()) MIDDLE_GAUGE_WIDTH_PERCENTAGE_LANDSCAPE else MIDDLE_GAUGE_WIDTH_PERCENTAGE_PORTRAIT
+        middleGaugeRadius = remainingWidthAfterPadding * middleGaugePercentage / 2
         middleGaugeBounds.left = viewCenter.x - middleGaugeRadius
         middleGaugeBounds.top = viewCenter.y - middleGaugeRadius
         middleGaugeBounds.right = viewCenter.x + middleGaugeRadius
         middleGaugeBounds.bottom = viewCenter.y + middleGaugeRadius
 
-        val leftGaugeStartPoint = Math.ceil(middleGaugeBounds.left - sideGaugeRadius * Math.sqrt(2.0)).toInt()
-        leftGaugeBounds.left = leftGaugeStartPoint.toFloat()
-        leftGaugeBounds.top = viewCenter.y - sideGaugeRadius
-        leftGaugeBounds.right = leftGaugeStartPoint + 2 * sideGaugeRadius
-        leftGaugeBounds.bottom = viewCenter.y + sideGaugeRadius
+        if (isOrientationLandscape()) {
+            sideGaugeRadius = remainingWidthAfterPadding * LEFT_GAUGE_WIDTH_PERCENTAGE / 2
+            val leftGaugeStartPoint = Math.ceil(middleGaugeBounds.left - sideGaugeRadius * Math.sqrt(2.0)).toInt()
+            leftGaugeBounds.left = leftGaugeStartPoint.toFloat()
+            leftGaugeBounds.top = viewCenter.y - sideGaugeRadius
+            leftGaugeBounds.right = leftGaugeStartPoint + 2 * sideGaugeRadius
+            leftGaugeBounds.bottom = viewCenter.y + sideGaugeRadius
 
-        leftGaugeBoundsToBeShownCompletely.set(leftGaugeBounds)
+            leftGaugeBoundsToBeShownCompletely.set(leftGaugeBounds)
 
-        val rightGaugeEndpoint = Math.ceil(middleGaugeBounds.right + sideGaugeRadius * Math.sqrt(2.0)).toInt()
-        rightGaugeBounds.left = rightGaugeEndpoint - 2 * sideGaugeRadius
-        rightGaugeBounds.top = viewCenter.y - sideGaugeRadius
-        rightGaugeBounds.right = rightGaugeEndpoint.toFloat()
-        rightGaugeBounds.bottom = viewCenter.y + sideGaugeRadius
+            val rightGaugeEndpoint = Math.ceil(middleGaugeBounds.right + sideGaugeRadius * Math.sqrt(2.0)).toInt()
+            rightGaugeBounds.left = rightGaugeEndpoint - 2 * sideGaugeRadius
+            rightGaugeBounds.top = viewCenter.y - sideGaugeRadius
+            rightGaugeBounds.right = rightGaugeEndpoint.toFloat()
+            rightGaugeBounds.bottom = viewCenter.y + sideGaugeRadius
 
-        rightGaugeBoundsToBeShownCompletely.set(rightGaugeBounds)
+            rightGaugeBoundsToBeShownCompletely.set(rightGaugeBounds)
 
-        if (!showSideGauges) {
-            rightGaugeBounds.offset(-rightGaugeBounds.width(), 0f)
-            leftGaugeBounds.offset(leftGaugeBounds.width(), 0f)
+            if (!showSideGauges) {
+                rightGaugeBounds.offset(-rightGaugeBounds.width(), 0f)
+                leftGaugeBounds.offset(leftGaugeBounds.width(), 0f)
+            }
         }
 
 
@@ -421,7 +438,6 @@ class DashboardViewGroup @JvmOverloads constructor(context: Context,
                             middleGaugeBounds.bottom.toInt())
                 }
             }
-
         }
     }
 
@@ -445,15 +461,21 @@ class DashboardViewGroup @JvmOverloads constructor(context: Context,
         if (online) {
             speedometerGauge.onConnected()
             speedIndicatorView.onConnected()
-            rpmGauge.onConnected()
-            fuelAndTemperatureGauge.onConnected()
             vinView.onConnected()
+
+            if (sideGaugesVisible) {
+                rpmGauge.onConnected()
+                fuelAndTemperatureGauge.onConnected()
+            }
         } else {
             speedometerGauge.onDisconnected()
             speedIndicatorView.onDisconnected()
-            rpmGauge.onDisconnected()
-            fuelAndTemperatureGauge.onDisconnected()
             vinView.onDisconnected()
+
+            if (sideGaugesVisible) {
+                rpmGauge.onDisconnected()
+                fuelAndTemperatureGauge.onDisconnected()
+            }
         }
     }
 
@@ -485,6 +507,7 @@ class DashboardViewGroup @JvmOverloads constructor(context: Context,
 
             override fun onAnimationEnd(animation: Animator?) {
                 animatingSideGauges = false
+                sideGaugesVisible = show
             }
         })
         animatorSet.start()

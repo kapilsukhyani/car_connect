@@ -28,7 +28,7 @@ class DashboardView : Fragment(), BackInterceptor {
     private var setVehicleInfo = false
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        val view = inflater.inflate(R.layout.somefile, null)
+        val view = inflater.inflate(R.layout.view_dashboard_v2, null)
         return view
     }
 
@@ -59,8 +59,6 @@ class DashboardView : Fragment(), BackInterceptor {
                 showError(it.error)
             }
         }
-
-
     }
 
     private fun showError(error: String) {
@@ -126,8 +124,8 @@ class DashboardView : Fragment(), BackInterceptor {
         dashboard.online = true
         dashboard.rpmDribbleEnabled = true
         dashboard.speedDribbleEnabled = true
-        dashboard.showSideGauges = false
         if (view.resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) {
+            dashboard.showSideGauges = false
             dashboard.postDelayed({ dashboard.showSideGauges = true }, 500)
         }
     }
